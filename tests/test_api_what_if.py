@@ -189,3 +189,10 @@ def test_response_shows_replaced_real_weather_and_driver_changes(client):
     top = d["change"]["drivers"][0]
     assert top["label"].startswith("Rainfall") and top["effect_change"] > 0
     assert abs(sum(x["effect_change"] for x in d["change"]["drivers"]) - d["change"]["cases"]) < 0.05
+
+
+def test_warns_when_typed_weather_is_outside_training_range(client):
+    ok = post(client, {"ward_id": W, "as_of": A, "horizon": 3, "rainfall_mm": 200}).get_json()
+    assert ok["warnings"] == []
+    far = post(client, {"ward_id": W, "as_of": A, "horizon": 3, "rainfall_mm": 350, "relative_humidity_pct": 30}).get_json()
+    assert len(far["warnings"]) == 2 and all("outside the range seen in training data" in w for w in far["warnings"])

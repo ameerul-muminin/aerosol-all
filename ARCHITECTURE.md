@@ -89,9 +89,12 @@ were first seen on test, then confirmed on validation. Test rows are hash-locked
 
 - **No LLMs and no external APIs.** Inference runs locally from the serialized model, so there are no
   per-request fees, token costs or rate limits. `scripts/measure_efficiency.py` blocks outbound network
-  while it exercises every endpoint and records `external_network_calls` in `reports/efficiency.json`.
+  while it exercises every endpoint and records `external_api_calls` (0) and `llm_calls` (0) in `reports/efficiency.json`.
 - **Serialized model, loaded once.** `models/dengue_model.joblib` holds all three horizon models and is
   loaded at startup (`load_bundle()`, cached). Lag features for all wards are built once and reused.
+- **Weather what-if (`POST /api/what_if`).** Typed weekly rain / temperature / humidity replace the last 1–8 weeks
+  of the ward's recorded weather, then the same lag pipeline and model run (a test proves real values reproduce the
+  baseline). Baselines always use recorded weather; inputs outside the training range return a warning.
 - **Response caching.** Each API response depends only on its query, so `forecast` and `ranking` are
   memoised with bounded LRU caches. The responses carry `Cache-Control: max-age=3600`, so browsers and any
   CDN can reuse them.
@@ -101,22 +104,22 @@ were first seen on test, then confirmed on validation. Test rows are hash-locked
 - **Minimal dependencies.** Python only (scikit-learn, pandas, Flask). There's no Node build or GPU,
   and it runs on a basic office laptop.
 
-Measured with `python -m scripts.measure_efficiency --train` on a MacBook (Apple silicon, Python 3.9, 21 Nov 2026).
+Measured with `python scripts/measure_efficiency.py --train` on a MacBook (Apple silicon, Python 3.9.6, 21 Nov 2026); medians over 50 calls.
 Source: `reports/efficiency.json`.
 
 | Measure | Value |
 |---|---|
 | Model file size (3 horizon models, incl. 2-week ensemble) | 11.4 MB |
-| Model load at startup | 0.41 s |
-| Lag features for all 60 wards × 522 weeks (once at startup) | 7.7 s |
-| App startup, including pre-computing the default week | 2.6 s |
-| Forecast for a new week (3 horizons, with drivers), first request | 0.70 s |
-| Ranking of 60 wards / one-ward forecast, cached | 0.002 s / 0.0006 s |
-| What-if scenario (POST /api/what_if, 4 weeks replaced): new / repeated | 0.36 s / 0.013 s |
+| Model load at startup (once) | 0.42 s |
+| Lag features for all 60 wards × 522 weeks (once at startup) | 8.1 s |
+| App startup, including pre-computing the default week | 2.9 s |
+| One-ward forecast, uncached: median / 95th percentile of 50 calls | 0.85 s / 1.15 s |
+| Ranking of 60 wards / one-ward forecast, cached (median of 50) | 0.002 s / 0.0006 s |
+| What-if scenario (POST /api/what_if, 4 weeks replaced): new / repeated | 0.52 s / 0.015 s |
 | Ranking payload, raw → gzip | 31.7 KB → 3.3 KB |
-| Peak Python memory | 234 MB |
-| Full retrain, 3 horizons with time-ordered CV | 89 s |
-| External network calls / LLM calls during the run | 0 / 0 |
+| Peak Python memory | 235 MB |
+| Full retrain, 3 horizons with time-ordered CV | 129 s |
+| External API calls / LLM calls during the run | 0 / 0 |
 
 ## Path to a live system (Phase 2)
 
@@ -126,5 +129,5 @@ The split into model → `api/service.py` → `api/main.py` → `web/` keeps eac
   lag pipeline and API contract don't change.
 - **Scale out.** The API is stateless, so several workers can run behind a load balancer (for example
   gunicorn), with the static `web/` folder on a CDN.
-- **Retraining.** `python -m src.train` rebuilds every artifact in about 1.5 minutes (94 s measured). Metrics are versioned next to
+- **Retraining.** `python -m src.train` rebuilds every artifact in about 2 minutes (129 s measured). Metrics are versioned next to
   the model in `reports/`.

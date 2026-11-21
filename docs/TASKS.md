@@ -12,7 +12,7 @@ Nothing in `web/` is real yet. UI = 10 points + 5 bonus, and the video (20) show
 Order matters; each step is demo-able on its own.
 - [x] **F1 Shell (Alif):** `web/app/index.html`, `assets/css/base.css` + `components.css`, `assets/js/api.js`,
       `format.js`, `app.js` (hash router `#outlook #wards #accuracy`, URL state, inputs from `/api/meta`).
-- [ ] **F2 Ward outlook (Alif):** verdict card (cases, tier glyph+colour+word, likely range), rain-to-risk bars,
+- [x] **F2 Ward outlook (Alif):** verdict card (cases, tier glyph+colour+word, likely range), rain-to-risk bars,
       2/3/4 segmented control, drivers with "average week X → this ward Y", model inputs.
 - [ ] **F3 What-if panel (Alif, on the outlook view):** spec from Nazifa:
       three number inputs (rainfall "mm per week", average temperature °C, humidity %), weeks selector (1–8,

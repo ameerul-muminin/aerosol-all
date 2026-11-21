@@ -1,0 +1,302 @@
+{
+  "rules": "Part H: ensembles, evaluated without leakage; adopted only if clearly better.\n\nMembers (same features/folds as the deployed model): HistGradientBoosting with the deployed\nsettings, extra trees, random forest, Poisson GLM (imputer/scaler fitted on train folds only).\n\nH4  Diversity: correlation of out-of-fold (OOF) errors between members, on the 5 time folds.\nH1  Simple average of the top-2 and top-3 members by OOF CV deviance.\nH2  Weighted average: non-negative weights summing to 1, chosen to minimise Poisson deviance on\n    OOF predictions (training years only, never validation).\nH3  Stacking: Ridge (positive coefficients) on OOF member predictions.\nCV scores of H2/H3 are leave-one-fold-out: weights/meta are fitted on the other folds' OOF and\nscored on the held-out fold. Validation scores use members fitted on all of train, with\nweights/meta fitted on all OOF predictions.\n\nH5 rule (fixed BEFORE running): replace the deployed model at a horizon only if the best ensemble\nhas CV deviance > 2% lower AND validation deviance lower AND size < 20 MB AND scores 60 wards in\n< 0.5 s. Writes reports/ensemble.json; writes models/ensemble.json only if adopted.",
+  "horizons": {
+    "2": {
+      "members_ranked_by_cv": [
+        "hgb",
+        "random_forest",
+        "extra_trees",
+        "poisson_glm"
+      ],
+      "error_correlation": {
+        "hgb": {
+          "hgb": 1.0,
+          "extra_trees": 0.898,
+          "random_forest": 0.896,
+          "poisson_glm": 0.789
+        },
+        "extra_trees": {
+          "hgb": 0.898,
+          "extra_trees": 1.0,
+          "random_forest": 0.976,
+          "poisson_glm": 0.869
+        },
+        "random_forest": {
+          "hgb": 0.896,
+          "extra_trees": 0.976,
+          "random_forest": 1.0,
+          "poisson_glm": 0.85
+        },
+        "poisson_glm": {
+          "hgb": 0.789,
+          "extra_trees": 0.869,
+          "random_forest": 0.85,
+          "poisson_glm": 1.0
+        }
+      },
+      "results": {
+        "hgb": {
+          "cv": 0.9715936536176312,
+          "val": 0.9977081771006252
+        },
+        "extra_trees": {
+          "cv": 1.026164925345903,
+          "val": 0.9835870041848935
+        },
+        "random_forest": {
+          "cv": 1.0159168470914761,
+          "val": 1.0172008680319684
+        },
+        "poisson_glm": {
+          "cv": 1.1601894271056477,
+          "val": 1.1529421492193472
+        },
+        "deployed": {
+          "cv": 0.9715936536176312,
+          "val": 0.9977081771006252
+        },
+        "avg_top2": {
+          "members": [
+            "hgb",
+            "random_forest"
+          ],
+          "cv": 0.9507604895167292,
+          "val": 0.9681822376012812
+        },
+        "avg_top3": {
+          "members": [
+            "hgb",
+            "random_forest",
+            "extra_trees"
+          ],
+          "cv": 0.9636498570196272,
+          "val": 0.9623383236557932
+        },
+        "weighted_avg": {
+          "weights": {
+            "hgb": 0.647,
+            "extra_trees": 0.0,
+            "random_forest": 0.225,
+            "poisson_glm": 0.128
+          },
+          "cv": 0.9505893126690784,
+          "val": 0.9662558630266539
+        },
+        "stack_ridge": {
+          "coef": {
+            "hgb": 0.508,
+            "extra_trees": 0.006,
+            "random_forest": 0.115,
+            "poisson_glm": 0.435
+          },
+          "intercept": -0.16272716828651745,
+          "cv": 1.0008581574917377,
+          "val": 1.0124140024134105
+        }
+      },
+      "best_ensemble": "weighted_avg",
+      "all_members_size_mb": 8.06,
+      "all_members_latency_s": 0.086,
+      "adopted": true,
+      "decision": "adopt weighted_avg"
+    },
+    "3": {
+      "members_ranked_by_cv": [
+        "hgb",
+        "extra_trees",
+        "random_forest",
+        "poisson_glm"
+      ],
+      "error_correlation": {
+        "hgb": {
+          "hgb": 1.0,
+          "extra_trees": 0.865,
+          "random_forest": 0.891,
+          "poisson_glm": 0.779
+        },
+        "extra_trees": {
+          "hgb": 0.865,
+          "extra_trees": 1.0,
+          "random_forest": 0.94,
+          "poisson_glm": 0.823
+        },
+        "random_forest": {
+          "hgb": 0.891,
+          "extra_trees": 0.94,
+          "random_forest": 1.0,
+          "poisson_glm": 0.784
+        },
+        "poisson_glm": {
+          "hgb": 0.779,
+          "extra_trees": 0.823,
+          "random_forest": 0.784,
+          "poisson_glm": 1.0
+        }
+      },
+      "results": {
+        "hgb": {
+          "cv": 1.1355321377988372,
+          "val": 1.2048080041917537
+        },
+        "extra_trees": {
+          "cv": 1.156580508670707,
+          "val": 1.0969677382964553
+        },
+        "random_forest": {
+          "cv": 1.2564516844735445,
+          "val": 1.108449862626908
+        },
+        "poisson_glm": {
+          "cv": 1.3841131286328305,
+          "val": 1.310814197575164
+        },
+        "deployed": {
+          "cv": 1.0785035009613504,
+          "val": 1.101094069161959
+        },
+        "avg_top2": {
+          "members": [
+            "hgb",
+            "extra_trees"
+          ],
+          "cv": 1.0785035009613502,
+          "val": 1.1010940691619588
+        },
+        "avg_top3": {
+          "members": [
+            "hgb",
+            "extra_trees",
+            "random_forest"
+          ],
+          "cv": 1.1218604789133317,
+          "val": 1.0856671224421797
+        },
+        "weighted_avg": {
+          "weights": {
+            "hgb": 0.61,
+            "extra_trees": 0.382,
+            "random_forest": 0.0,
+            "poisson_glm": 0.007
+          },
+          "cv": 1.0864311333311754,
+          "val": 1.1140798336175761
+        },
+        "stack_ridge": {
+          "coef": {
+            "hgb": 0.309,
+            "extra_trees": 0.542,
+            "random_forest": 0.0,
+            "poisson_glm": 0.196
+          },
+          "intercept": -0.17234233206970373,
+          "cv": 1.1629060107332356,
+          "val": 1.1682122251367086
+        }
+      },
+      "best_ensemble": "avg_top2",
+      "all_members_size_mb": 8.1,
+      "all_members_latency_s": 0.0742,
+      "adopted": false,
+      "decision": "keep deployed model (rule not met)"
+    },
+    "4": {
+      "members_ranked_by_cv": [
+        "hgb",
+        "extra_trees",
+        "random_forest",
+        "poisson_glm"
+      ],
+      "error_correlation": {
+        "hgb": {
+          "hgb": 1.0,
+          "extra_trees": 0.908,
+          "random_forest": 0.938,
+          "poisson_glm": 0.797
+        },
+        "extra_trees": {
+          "hgb": 0.908,
+          "extra_trees": 1.0,
+          "random_forest": 0.942,
+          "poisson_glm": 0.859
+        },
+        "random_forest": {
+          "hgb": 0.938,
+          "extra_trees": 0.942,
+          "random_forest": 1.0,
+          "poisson_glm": 0.799
+        },
+        "poisson_glm": {
+          "hgb": 0.797,
+          "extra_trees": 0.859,
+          "random_forest": 0.799,
+          "poisson_glm": 1.0
+        }
+      },
+      "results": {
+        "hgb": {
+          "cv": 1.2754022792334934,
+          "val": 1.580267414658086
+        },
+        "extra_trees": {
+          "cv": 1.4427387409101669,
+          "val": 1.571948623282149
+        },
+        "random_forest": {
+          "cv": 1.4549272730360507,
+          "val": 1.534549202316632
+        },
+        "poisson_glm": {
+          "cv": 1.6942196701923748,
+          "val": 1.8765629594443343
+        },
+        "deployed": {
+          "cv": 1.2754022792334934,
+          "val": 1.580267414658086
+        },
+        "avg_top2": {
+          "members": [
+            "hgb",
+            "extra_trees"
+          ],
+          "cv": 1.317789688042505,
+          "val": 1.545918478082385
+        },
+        "avg_top3": {
+          "members": [
+            "hgb",
+            "extra_trees",
+            "random_forest"
+          ],
+          "cv": 1.3472333579151765,
+          "val": 1.5268394342454388
+        },
+        "weighted_avg": {
+          "weights": {
+            "hgb": 0.919,
+            "extra_trees": 0.081,
+            "random_forest": 0.0,
+            "poisson_glm": 0.0
+          },
+          "cv": 1.2808989866556741,
+          "val": 1.5699146886418784
+        },
+        "stack_ridge": {
+          "coef": {
+            "hgb": 0.479,
+            "extra_trees": 0.164,
+            "random_forest": 0.0,
+            "poisson_glm": 0.304
+          },
+          "intercept": -0.050252250650439034,
+          "cv": 1.389512064645432,
+          "val": 1.6661792226708076
+        }
+      },
+      "best_ensemble": "weighted_avg",
+      "all_members_size_mb": 8.14,
+      "all_members_latency_s": 0.0615,
+      "adopted": false,
+      "decision": "keep deployed model (rule not met)"
+    }
+  }
+}

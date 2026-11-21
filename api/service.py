@@ -20,6 +20,8 @@ DEFAULT_AS_OF = "2025-07-14"
 
 
 # ---------------------------------------------------------------- cached state
+# Every response is a pure function of its query, so results are memoised
+# (bounded LRU). Errors (ValueError) are not cached.
 @lru_cache(maxsize=1)
 def features() -> pd.DataFrame:
     return build_features()
@@ -78,6 +80,7 @@ def _row(r) -> dict:
     }
 
 
+@lru_cache(maxsize=512)
 def ranking(as_of: str, horizon: int, city: str | None = None) -> dict:
     df = _ranking_df(as_of, horizon)
     if city:
@@ -104,6 +107,7 @@ def ranking(as_of: str, horizon: int, city: str | None = None) -> dict:
 
 
 # ---------------------------------------------------------------- /api/forecast
+@lru_cache(maxsize=4096)
 def forecast(ward_id: str, as_of: str, horizon: int) -> dict:
     f = features()
     if ward_id not in set(f["ward_id"]):

@@ -34,8 +34,15 @@ web/assets/                       css, js, fonts, images (C) — no CDN, no buil
 
 ## Web API (the frontend talks ONLY to these; run `python -m api`)
 `GET /api/meta` · `/api/forecast?ward_id&as_of&horizon` · `/api/ranking?as_of&horizon[&city]` ·
-`/api/metrics` · `/api/history?ward_id&horizon` · `/api/health`. Errors: HTTP 400 `{"error": "<friendly message>"}`.
+`/api/metrics` · `/api/history?ward_id&horizon` · `/api/health` · `POST /api/what_if` (JSON: ward_id, as_of,
+horizon, weeks 1–8, any of rainfall_mm [mm per week], avg_temp_c, relative_humidity_pct → baseline vs scenario). Errors: HTTP 400 `{"error": "<friendly message>"}`.
 Dates are ISO `YYYY-MM-DD` Mondays; horizon 2|3|4. Shapes are documented in docs/frontend/ (guide PDF).
+
+## Working here
+- Remaining work, owners and checks: `docs/TASKS.md`. Tick tasks in the commit that finishes them.
+- Frontend: use the `build-ui` skill. Design = night direction (`web/assets/css/tokens.css`), which replaces the
+  light palette in the frontend brief PDF. The PDF's API reference and task order still apply.
+- Before every commit: `verify` skill, or delegate it to the `verifier` subagent to save context.
 
 ## Python interface (used by api/service.py)
 ```python
@@ -62,8 +69,10 @@ MAE/RMSE validation dashboard). Treat the code as Stage 1 of a production system
   Cities: Dhaka North 20, Dhaka South 20, Chattogram 10, Gazipur 5, Narayanganj 5. Cases 0–41, 58% zeros, peak Jul–Oct.
   There are no coordinates, so no geographic map. Use a ranked grid as the "heatmap".
 - Split, by **target week**: train ≤ 2021-12-31, validation 2022–2023, test 2024–2025 (used once).
-- Model: HistGradientBoostingRegressor (Poisson loss), one per horizon, chosen on validation Poisson deviance
-  over seasonal-naive and Poisson GLM baselines.
+- Model: one deployed model per horizon, chosen by time-ordered cross-validation over 12 candidates and two
+  baselines (seasonal average, Poisson GLM), with rules fixed before running: a weighted ensemble at 2 weeks,
+  a HistGradientBoosting + extra-trees blend at 3 weeks, HistGradientBoosting (Poisson) at 4 weeks.
+  Season-aware 80% ranges; test years locked by a SHA-256 fingerprint (src/test_lock.py).
 - scikit-learn is pinned to **1.6.1** because the committed model was saved with it.
 
 ## Rules
@@ -81,7 +90,7 @@ MAE/RMSE validation dashboard). Treat the code as Stage 1 of a production system
 ```
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python -m src.train          # retrain (~1.5 min, time-ordered CV)
+python -m src.train          # retrain (time-ordered CV + ensemble; re-measure, see docs/TASKS.md)
 pytest -q
 python -m api                # http://127.0.0.1:8000  (dashboard: /app/)
 python -m scripts.measure_efficiency --train   # -> reports/efficiency.json

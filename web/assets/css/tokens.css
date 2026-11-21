@@ -1,0 +1,54 @@
+/* Night direction design tokens (prototype: "Night B/C" artboards).
+   Every page imports this first. Change values here, never inline. */
+:root {
+  /* surfaces */
+  --bg: #0F1B24;            /* page */
+  --panel: #15232D;         /* solid panel */
+  --panel-glass: rgba(23, 38, 47, 0.62);  /* glass panel over the rain layer */
+  --line: #22343F;          /* panel border */
+  --line-soft: rgba(190, 221, 234, 0.14);
+  --fill-soft: rgba(231, 239, 243, 0.05);
+
+  /* text (all pass 4.5:1 on --bg and --panel) */
+  --text: #E7EFF3;
+  --text-2: #B7C7D1;
+  --text-3: #93A7B4;
+
+  /* accent: primary action, focus ring, breeding-window bars */
+  --accent: #6FD3C7;
+  --accent-hover: #8BE0D5;
+  --on-accent: #0F1B24;
+  --bar-other: #2C4250;
+
+  /* risk tiers: ALWAYS colour + glyph + word */
+  --tier-low: #4CC38A;      /* ▁ */
+  --tier-medium: #F2C14E;   /* ▃ */
+  --tier-high: #F08A5D;     /* ▅ */
+  --tier-critical: #F2545B; /* ▇ */
+
+  /* drivers */
+  --raises: #F08A5D;
+  --lowers: #6FB5E8;
+
+  /* heat ramp (expected cases, low -> high) */
+  --heat-1: #173A52; --heat-2: #1D4D6B; --heat-3: #246386; --heat-4: #2C7AA3;
+  --heat-5: #3891C0; --heat-6: #4FA8D6; --heat-7: #6FC0E6;
+
+  /* type: Outfit, vendored under web/assets/fonts/ (no CDN at runtime) */
+  --font: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-display: 96px; --fs-h1: 36px; --fs-h2: 19px; --fs-body: 16px; --fs-small: 13px;
+
+  /* shape and space (8px grid) */
+  --r-panel: 22px; --r-tile: 14px; --r-pill: 999px;
+  --s-1: 8px; --s-2: 16px; --s-3: 24px; --s-4: 32px;
+
+  /* motion (Emil Kowalski rules: transform/opacity only, ease-out, short) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --t-press: 160ms;
+  --t-move: 240ms;
+  --t-bars: 320ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --t-press: 0ms; --t-move: 0ms; --t-bars: 0ms; }
+}

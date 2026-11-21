@@ -52,14 +52,14 @@ See `ARCHITECTURE.md` and `reports/metrics.json`. Every number shown in the app 
 ## AI Assistants and External APIs
 | Tool | Used by | What for |
 |---|---|---|
-| Claude (claude.ai chat, Claude Opus) | B | Planning, dataset profiling, code review of the ML pipeline, interface layer (`predict_risk`/`predict_all`), tests, README/CLAUDE.md drafts |
-| Claude Code | A, B, C | Writing and refactoring code in the repo under each member's direction |
-| _add any other tool here (ChatGPT, Copilot, Gemini…)_ | | |
+| Claude (claude.ai chat) | Alif | Planning, dataset profiling, code review of the ML pipeline, API layer, tests, README/ARCHITECTURE drafts, frontend brief and UI prototype |
+| Claude Code | Alif, Nazifa | Writing, refactoring and testing code in the repo under each member's direction |
+| Antigravity | Srijita | Building the web frontend (`web/`) under her direction |
 
-**External APIs at runtime: none.** The app calls only its own local `/api` endpoints. All inference runs locally from the serialized model, so
-there are no API calls, tokens or usage costs.
+**External APIs at runtime: none.** The app calls only its own local `/api` endpoints. All inference runs
+locally from the serialized model, so there are no API calls, tokens or usage costs.
 
 ## Team
-- A: ML pipeline and model
-- B: repo, reproducibility, efficiency
-- C: dashboard, architecture doc, video
+- **Nazifa Jahan Neloy**: ML pipeline, model, validation and drivers
+- **Alif**: repository, API, reproducibility and efficiency
+- **Srijita Das**: frontend (dashboard and marketing page) and design

@@ -31,6 +31,9 @@ def warm_up() -> None:
     """Load model + features once at startup so the first request is fast."""
     load_bundle()
     features()
+    default = meta()["as_of"]["default"]
+    for h in HORIZONS:          # pre-compute the default week so the first page view is instant
+        _ranking_df(default, h)
 
 
 def _num(x, nd=2):

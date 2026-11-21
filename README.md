@@ -26,7 +26,8 @@ Try a weather scenario (typed weekly values replace the last 4 weeks, then the s
 
 ## Retrain (one command)
 ```bash
-python -m src.train      # rebuilds models/dengue_model.joblib and reports/metrics.json (about 1.5 min)
+python -m src.train      # rebuilds models/dengue_model.joblib and reports/metrics.json (about 2 min)
+python scripts/measure_efficiency.py   # re-measures speed, memory and model size -> reports/efficiency.json
 python -m pytest -q      # lag pipeline, leakage, model and API tests
 ```
 

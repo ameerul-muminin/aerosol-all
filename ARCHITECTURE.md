@@ -14,7 +14,7 @@ duplicated, any gap isn't exactly 7 days (so `shift(k)` = *k weeks*), or a ward'
 | Feature group | Columns |
 |---|---|
 | Rainfall | lags 0–8 weeks; sums over weeks 0–1, **2–4** (breeding window), 0–3, 0–8; rain anomaly (h=2 only, see below) |
-| Temperature, humidity | lags 0–4 weeks and 4-week means |
+| Temperature, humidity | lags 0–4 weeks; 4-week humidity mean (4-week temperature mean removed by feature selection) |
 | Season | week-of-year sin/cos |
 | Ward vulnerability | `water_logging_risk_index`, `population_density_sqkm`, `sanitation_score` |
 | Recent cases (optional mode only) | reported cases, lags 0–4 weeks and 4-week sum |
@@ -65,7 +65,7 @@ The target is a weekly count: 58% zeros, peaking Jul–Oct. Candidates were comp
 |---|---|---|---|
 | Seasonal naive (ward × week-of-year mean) | 1.98 (1.96) | 1.98 (1.96) | 1.98 (1.96) |
 | Poisson GLM (log features) | 1.11 (1.26) | 1.35 (1.51) | 1.72 (2.04) |
-| **HistGradientBoosting, Poisson loss** | **0.97 (1.04)** | **1.14 (1.22)** | **1.34 (1.71)** |
+| **HistGradientBoosting, Poisson loss** | **0.96 (1.03)** | **1.14 (1.20)** | **1.31 (1.70)** |
 
 Gradient boosting with Poisson loss was chosen because:
 
@@ -75,34 +75,44 @@ Gradient boosting with Poisson loss was chosen because:
 
 Cross-validation chose **7-leaf trees** (300 trees for h=2 and h=3, 150 for h=4). The **rain anomaly**
 was kept by the rule "keep only if cross-validation improves": it was used for h=2 (0.976 → 0.973,
-a marginal gain) and dropped for h=3 and h=4. The model that ships is refit on train + validation;
+a marginal gain) and dropped for h=3 and h=4.
+
+**Feature selection (D12, `src/feature_selection.py`).** The rules were fixed before running and use
+train data only. Remove any constant feature (there were none). For each pair correlated above 0.95,
+try removing the member less related to cases, and keep the removal only if CV deviance doesn't get
+worse. Result: `temp_mean_0_3` was removed at every horizon, and `temp_lag1` at h=4. Their twin was
+season (r ≈ 0.98), because temperature in this data mostly repeats the calendar. CV improved
+(0.973→0.962, 1.141→1.136, 1.338→1.314), and so did held-out validation (1.040→1.027, 1.216→1.205,
+1.711→1.696). Every trial is logged in `reports/feature_selection_log.json`. The exact final inputs
+and their order (D14) are in `reports/feature_list.json` (36 / 29 / 28 features), written by
+`train.py` from the saved model and checked by a test. The model that ships is refit on train + validation;
 test numbers come from the train-only model. Everything is serialized in `models/dengue_model.joblib`.
 
 **Test results (2024–2025):**
 
 | | h=2 | h=3 | h=4 |
 |---|---|---|---|
-| MAE (seasonal naive: 1.26) | 1.07 | 1.12 | 1.28 |
-| RMSE | 2.18 | 2.25 | 2.55 |
-| Truly Critical weeks flagged High or Critical | 85% | 81% | 66% |
+| MAE (seasonal naive: 1.26) | 1.07 | 1.11 | 1.28 |
+| RMSE | 2.20 | 2.23 | 2.55 |
+| Truly Critical weeks flagged High or Critical | 85% | 83% | 68% |
 | Tier within one level | 98% | 98% | 97% |
-| 80% interval coverage, all weeks / Jul–Oct | 0.79 / 0.77 | 0.79 / 0.74 | 0.79 / 0.70 |
+| 80% interval coverage, all weeks / Jul–Oct | 0.79 / 0.76 | 0.78 / 0.74 | 0.79 / 0.70 |
 
 **h=4 is no better than the seasonal baseline, and the physics explains why:** the strongest driver,
 rain 3 weeks before the target week, falls after the forecast origin. Permutation importance on
-validation agrees. At h=2, rainfall dominates (deviance +8.7 when shuffled, against +1.9 for season).
-At h=4, season dominates (+13.4, against +1.1 for rainfall). **2–3 weeks is the dependable warning window.**
+validation agrees. At h=2, rainfall dominates (deviance +8.8 when shuffled, against +1.9 for season).
+At h=4, season dominates (+13.7, against +1.2 for rainfall). **2–3 weeks is the dependable warning window.**
 Validation errors (2022–23) are higher than test errors because those were peak outbreak years
 (about 10,000 cases per year, against about 7,000 in 2024–25).
 
 **Optional weather + recent-cases mode** (`mode="weather_cases"`) uses the same settings plus
-reported cases up to the origin week. Cross-validation changes are negligible: 0.973→0.963, 1.141→1.143,
-1.337→1.323. In this dataset, cases follow weather and ward attributes with little week-to-week
+reported cases up to the origin week. It doesn't improve cross-validation: 0.962→0.973, 1.136→1.137,
+1.313→1.317. In this dataset, cases follow weather and ward attributes with little week-to-week
 carry-over, so the default stays **weather-only**, matching the brief.
 
 **City hold-out (C4, `src/region_holdout.py`):** train on 4 cities up to 2023, test on the 5th city
 in 2024–25, using the hyperparameters chosen by cross-validation. Mean MAE for an unseen city is
-1.00 / 1.03 / 1.21 for h = 2/3/4, against 1.00 / 1.03 / 1.21 for a model that has seen the city and
+1.00 / 1.02 / 1.20 for h = 2/3/4, against 1.00 / 1.03 / 1.20 for a model that has seen the city and
 1.33 for a regional week-of-year baseline. Truly Critical weeks flagged High or above: 75–100%.
 Because weather is shared across cities, this mainly shows that **ward attributes carry over to
 unseen wards**, not that the model handles a different climate.
@@ -127,9 +137,10 @@ unseen wards**, not that the model handles a different climate.
     Ward vulnerability, plus Recent cases in the optional mode.
   - Contributions are measured against an "average week" reference taken from the training period,
     and add up exactly to the prediction.
-  - Example: *Dhaka South Ward 04, 12.2 cases, Critical: Rainfall +4.2, Humidity +2.9, Ward
-    vulnerability +2.1, Season +1.0, Temperature +0.7, against an average week of 1.35*.
+  - Example: *Dhaka South Ward 04, 11.9 cases, Critical: Rainfall +4.2, Humidity +2.7, Ward
+    vulnerability +1.9, Season +1.1, Temperature +0.5, against an average week of 1.45*.
 - **Dashboard data:**
   - `reports/validation_errors.csv`: MAE and RMSE by source (each CV fold, validation, test) ×
     horizon × city × month, with sums so any slice can be re-aggregated.
-  - `reports/feature_importance.json`, `reports/region_holdout.json` and `reports/metrics.json`.
+  - `reports/feature_importance.json`, `reports/region_holdout.json`, `reports/metrics.json`,
+    `reports/feature_selection_log.json` and `reports/feature_list.json`.

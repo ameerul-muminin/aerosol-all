@@ -1,0 +1,37 @@
+/* PROTOTYPE ONLY: three Bangladesh/dengue palettes, switched with ?p=1|2|3 (sets <html data-p>).
+   Loaded after proto.css. Tier colours are shared by all three (one danger scale everywhere),
+   darkened so tier WORDS pass 4.5:1 on paper. */
+:root {
+  --tier-low: #2F7A4A; --tier-medium: #8A6200; --tier-high: #B4501C; --tier-critical: #A3162A;
+  --raises: #B4501C; --lowers: #2F6F9E;
+}
+
+/* 1 · Paddy & mustard: bottle-green ink (flag, paddy), mustard-field yellow accent, monsoon teal sky */
+:root, [data-p="1"] {
+  --bg: #F3F0E6; --paper: #FCFAF4; --sunk: #E3E1D3; --line: #D2D0BF;
+  --ink: #0D2B22; --ink-2: #33504A; --ink-3: #4B6159;
+  --accent: #F2C12E; --accent-ink: #0D2B22;
+  --river: #0D3B2E; --river-2: #0A2F25; --on-dark: #F3F0E6; --on-dark-2: #C9D6CF;
+  --il-sky: #B9CFCB; --il-cloud: #7F9C98; --il-rain: #3E6F6B; --il-far: #8FAEA8; --il-near: #2E5A4C;
+  --il-win: #F2C12E; --il-ground: #6E9B3A; --il-water: #3E8C8C; --il-clay: #B5562F; --il-mosq: #0D2B22;
+}
+/* 2 · Aedes alert: mosquito black and white, hazard-tape yellow accent, cool rain grey */
+[data-p="2"] {
+  --bg: #F1F0EC; --paper: #FFFFFF; --sunk: #E2E1DC; --line: #D0CFC8;
+  --ink: #161616; --ink-2: #404040; --ink-3: #575757;
+  --accent: #FFD400; --accent-ink: #161616;
+  --river: #161616; --river-2: #0E0E0E; --on-dark: #F1F0EC; --on-dark-2: #CFCFCB;
+  --il-sky: #C9D1D6; --il-cloud: #8E9AA2; --il-rain: #4D5B64; --il-far: #A3AEB5; --il-near: #2B3338;
+  --il-win: #FFD400; --il-ground: #5F6B57; --il-water: #3B7EA1; --il-clay: #C9472F; --il-mosq: #161616;
+}
+/* 3 · Rickshaw monsoon: indigo ink, marigold accent, teal + pink from rickshaw art */
+[data-p="3"] {
+  --bg: #F4EEE2; --paper: #FFFBF3; --sunk: #E6DFD0; --line: #D6CDBA;
+  --ink: #1B2250; --ink-2: #3D4470; --ink-3: #545A80;
+  --accent: #F4A51C; --accent-ink: #1B2250;
+  --river: #1B2250; --river-2: #141A40; --on-dark: #F4EEE2; --on-dark-2: #CDD0E3;
+  --il-sky: #A9C0DE; --il-cloud: #6F84B0; --il-rain: #3D4F86; --il-far: #8299C2; --il-near: #2A3470;
+  --il-win: #F4A51C; --il-ground: #12806E; --il-water: #4C8FD0; --il-clay: #D9407A; --il-mosq: #1B2250;
+}
+/* more air in stacked display lines (feedback: lines too close) */
+.display { line-height: 0.98; letter-spacing: 0; }

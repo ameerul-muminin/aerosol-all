@@ -2,17 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Proto · Outlook B · Field cards</title>
+<title>Proto · Outlook B · Ward outlook</title>
 <link rel="stylesheet" href="proto.css">
+<link rel="stylesheet" href="palettes.css">
+<script>document.documentElement.dataset.p = new URLSearchParams(location.search).get("p") || "1";</script>
 <style>
   .shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
   aside { background: var(--ink); color: var(--on-dark); padding: 22px 18px; display: flex; flex-direction: column; gap: 18px; }
   aside .brand { font: 400 30px/0.9 var(--display); text-transform: uppercase; color: var(--accent); }
   aside nav a { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-weight: 600; }
-  aside nav a[aria-current] { background: var(--accent); color: var(--ink); }
-  aside label { display: grid; gap: 6px; font-size: 13px; color: #D9D2C3; }
-  aside select { min-height: 44px; border-radius: 10px; border: 0; background: #3B271C; color: var(--on-dark); font: 600 15px var(--font); padding: 0 10px; }
-  .seg { display: grid; grid-template-columns: repeat(3, 1fr); background: #3B271C; border-radius: 10px; padding: 4px; position: relative; }
+  aside nav a[aria-current] { background: var(--accent); color: var(--accent-ink); }
+  aside label { display: grid; gap: 6px; font-size: 13px; color: var(--on-dark-2); }
+  aside select { min-height: 44px; border-radius: 10px; border: 0; background: color-mix(in srgb, var(--on-dark) 12%, var(--ink)); color: var(--on-dark); font: 600 15px var(--font); padding: 0 10px; }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); background: color-mix(in srgb, var(--on-dark) 12%, var(--ink)); border-radius: 10px; padding: 4px; position: relative; }
   .seg button { position: relative; z-index: 1; min-height: 40px; border: 0; background: none; color: var(--on-dark); font: 600 14px var(--font); cursor: pointer; }
   .seg .thumb { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 3); background: var(--accent); border-radius: 8px; transition: transform 240ms var(--ease-out); }
   .seg button[aria-pressed="true"] { color: var(--ink); }
@@ -23,17 +25,18 @@
   .head { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 12px; }
   .head h1 { font-size: clamp(48px, 6vw, 92px); }
   .head p { margin: 0; color: var(--ink-2); }
-  .verdict { grid-column: span 5; color: var(--on-dark); min-height: 320px; display: flex; flex-direction: column; }
+  .verdict { grid-column: span 5; min-height: 320px; display: flex; flex-direction: column; border-left: 14px solid var(--tc); }
+  .verdict .t { color: var(--tc); }
   .verdict .lbl { font-weight: 600; opacity: .9; }
   .verdict .n { font: 400 168px/0.85 var(--display); margin-top: auto; }
   .verdict .t { font: 400 40px/1 var(--display); text-transform: uppercase; display: flex; gap: 10px; align-items: center; }
-  .verdict .t span:first-child { background: var(--paper); color: var(--ink); border-radius: 8px; padding: 2px 8px; font-size: 30px; }
+  .verdict .t span:first-child { font-size: 30px; }
   .verdict .r { margin-top: 8px; }
-  .verdict svg.tex { position: absolute; right: -40px; top: -40px; width: 260px; opacity: .22; }
+  .verdict svg.tex { position: absolute; right: -40px; top: -40px; width: 260px; opacity: .12; color: var(--tc); }
   .hz { grid-column: span 7; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
   .hz button { text-align: left; border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 14px; font: inherit; color: inherit; cursor: pointer; transition: transform 160ms var(--ease-out); }
   .hz button:active { transform: scale(.97); }
-  .hz button[aria-pressed="true"] { border-color: var(--ink); background: var(--accent); }
+  .hz button[aria-pressed="true"] { border-color: var(--ink); background: var(--accent); color: var(--accent-ink); }
   .hz b { display: block; font: 400 56px/1 var(--display); margin: 6px 0; }
   .hz .card2 { grid-column: 1 / -1; }
   .mini { display: flex; align-items: end; gap: 4px; height: 70px; }
@@ -57,14 +60,40 @@
   .sum b { font: 400 34px/1 var(--display); }
   .sum .arr { flex: 1; height: 2px; background: var(--ink); position: relative; }
   .sum .arr:after { content: ""; position: absolute; right: -2px; top: -5px; border: 6px solid transparent; border-left: 9px solid var(--ink); }
+  .rainband { grid-column: 1 / -1; background: var(--river); color: var(--on-dark); border-radius: var(--r-card); padding: 22px 22px 18px; }
+  .rainband h2 { color: var(--accent); }
+  .rainband p { margin: 0 0 14px; color: var(--on-dark-2); max-width: 70ch; }
+  .rain { display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; align-items: end; height: 190px; }
+  .rain .c { display: flex; flex-direction: column; justify-content: flex-end; height: 100%; text-align: center; font-size: 12px; min-width: 0; }
+  .rain .c i { display: block; background: color-mix(in srgb, var(--on-dark) 28%, var(--river)); border-radius: 6px 6px 0 0; transform-origin: bottom; animation: gy 320ms var(--ease-out) both; }
+  @keyframes gy { from { transform: scaleY(0); } }
+  .rain .c.bw i { background: var(--accent); }
+  .rain .c.u i { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--on-dark) 35%, transparent) 0 2px, transparent 2px 7px); border: 1.5px dashed color-mix(in srgb, var(--on-dark) 45%, transparent); }
+  .rain .c.f i { background: var(--paper); }
+  .rain .c em { font-style: normal; color: var(--on-dark-2); margin-top: 6px; white-space: nowrap; overflow: hidden; }
+  .rain .c .mm { font-weight: 600; margin-bottom: 4px; white-space: nowrap; }
+  .wf { display: grid; grid-template-columns: minmax(120px, 210px) 1fr 52px; grid-auto-flow: row dense; gap: 8px 12px; align-items: center; }
+  .wf .lab { grid-column: 1; } .wf .track { grid-column: 2; } .wf .val { grid-column: 3; }
+  .wf .lab { font-weight: 600; font-size: 14px; line-height: 1.25; }
+  .wf .track { position: relative; height: 24px; }
+  .wf .s2 { position: absolute; top: 0; bottom: 0; border-radius: 5px; transform-origin: left; animation: g 320ms var(--ease-out) both; }
+  .wf .val { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
   .err { grid-column: 1 / -1; color: var(--tier-critical); font-weight: 600; }
-  @media (max-width: 960px) { .shell { grid-template-columns: 1fr; } .verdict, .hz, .why, .inp { grid-column: 1 / -1; } }
+  @media (max-width: 960px) {
+    .shell { grid-template-columns: 1fr; }
+    aside { position: sticky; top: 0; z-index: 5; flex-direction: row; flex-wrap: wrap; align-items: end; gap: 10px; padding: 12px 16px; }
+    aside .brand { font-size: 22px; width: 100%; } aside .brand br { display: none; }
+    aside nav { display: none; } aside label { flex: 1 1 140px; } aside > div { flex: 1 1 100%; } aside .lang { margin: 0; flex: 0 0 auto; }
+    .verdict, .hz, .why, .inp { grid-column: 1 / -1; } .verdict { min-height: 0; } .verdict .n { font-size: 120px; }
+    .rain { gap: 3px; height: 150px; } .rain .c { font-size: 10px; } .rain .c .mm { visibility: hidden; } .rain .c em { font-size: 9px; }
+    .wf { grid-template-columns: 1fr 52px; } .wf .val { grid-column: 2; } .wf .track { grid-column: 1 / -1; margin: -4px 0 6px; }
+  }
 </style>
 </head>
 <body>
 <div class="shell">
   <aside>
-    <div class="brand">Dengue<br>Outlook</div>
+    <div class="brand">Dengue <br>Outlook</div>
     <nav><a href="#" aria-current="page">Ward outlook</a><a href="#">All wards</a><a href="#">Model accuracy</a></nav>
     <label>Ward<select id="ward"></select></label>
     <label>Week of<select id="asof"></select></label>
@@ -74,20 +103,22 @@
   </aside>
   <main id="main">
     <div class="head"><h1 class="display" id="title"><span class="skel">Ward 00</span></h1><p id="sub"><span class="skel">Dhaka South · week of 00 Xxx 0000</span></p></div>
-    <article class="card verdict" id="verdict" style="background:var(--ink-3)">
-      <svg class="tex" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="2"><circle cx="50" cy="50" r="10"/><circle cx="50" cy="50" r="22"/><circle cx="50" cy="50" r="34"/><circle cx="50" cy="50" r="46"/></g></svg>
+    <article class="card verdict" id="verdict" >
+      <svg class="tex" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="3"><circle cx="50" cy="50" r="10"/><circle cx="50" cy="50" r="22"/><circle cx="50" cy="50" r="34"/><circle cx="50" cy="50" r="46"/></g></svg>
       <div class="lbl" id="v-l">Expected cases</div>
       <div class="n" id="v-n"><span class="skel">00</span></div>
       <div class="t" id="v-t"></div>
       <div class="r" id="v-r"></div>
     </article>
-    <section class="card hz"><div class="card2"><h2>Two, three, four weeks out</h2></div><div id="hz" style="display:contents"></div>
-      <div class="card2"><div style="font-size:13px;color:var(--ink-2);margin-bottom:6px">Rain before the forecast week (lime = breeding window, hatched = forecast week)</div><div class="mini" id="mini" role="img"></div></div></section>
-    <section class="card why"><h2>Why this forecast</h2><div class="sum" id="sum"></div><div class="rows" id="drv"></div></section>
+    <section class="card hz"><div class="card2"><h2>Two, three, four weeks out</h2></div><div id="hz" style="display:contents"></div></section>
+    <section class="rainband"><h2 class="display" style="font-size:clamp(30px,3.4vw,48px);margin-bottom:6px">Rain to risk</h2>
+      <p>Rain in the highlighted weeks (the breeding window) is what drives the forecast week. Striped weeks have not happened yet.</p>
+      <div class="rain" id="rain" role="img"></div></section>
+    <section class="card why"><h2>Why this forecast</h2><div class="sum" id="sum"></div><div class="wf" id="drv"></div></section>
     <section class="card inp" id="inp"><h2>What the model saw</h2></section>
   </main>
 </div>
-<div class="protobar">PROTOTYPE · Outlook B “Field cards + sidebar” · live data</div>
+<nav class="pals" aria-label="Palette" style="position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:99;display:flex;gap:6px;background:var(--paper);padding:6px;border-radius:999px;box-shadow:0 6px 20px -8px rgba(0,0,0,.3)"></nav>
 <script type="module">
 import { api, fmt1, fmt0, ward, date, GLYPH, TIERVAR, params } from "./proto.js";
 const st = params(), meta = await api("/api/meta");
@@ -99,12 +130,12 @@ wsel.value = st.ward; asel.value = st.as_of;
 const segBtns = [...document.querySelectorAll(".seg button")];
 async function load() {
   segBtns.forEach((b, i) => { const on = +b.dataset.h === st.h; b.setAttribute("aria-pressed", on); if (on) document.getElementById("thumb").style.transform = `translateX(${i * 100}%)`; });
-  history.replaceState(null, "", `?ward=${st.ward}&as_of=${st.as_of}&h=${st.h}`);
+  history.replaceState(null, "", `?ward=${st.ward}&as_of=${st.as_of}&h=${st.h}&p=${document.documentElement.dataset.p}`);
   let f; try { f = await api(`/api/forecast?ward_id=${st.ward}&as_of=${st.as_of}&horizon=${st.h}`); }
   catch (e) { document.getElementById("sub").innerHTML = `<span class="err">${e.message}</span>`; return; }
   document.getElementById("title").textContent = ward(f.ward_id);
   document.getElementById("sub").textContent = `${f.city} · forecast for the week of ${date(f.forecast_week)} (data up to ${date(f.as_of)})`;
-  document.getElementById("verdict").style.background = TIERVAR(f.risk_tier);
+  document.getElementById("verdict").style.setProperty("--tc", TIERVAR(f.risk_tier));
   document.getElementById("v-l").textContent = `Expected cases, ${f.horizon} weeks ahead`;
   document.getElementById("v-n").textContent = fmt1(f.predicted_cases);
   document.getElementById("v-t").innerHTML = `<span aria-hidden="true">${GLYPH[f.risk_tier]}</span><span>${f.risk_tier} risk</span>`;
@@ -113,12 +144,24 @@ async function load() {
     return `<button data-h="${h}" aria-pressed="${+h === st.h}"><span style="font-weight:600">+${h} weeks</span><b>${fmt1(b.predicted_cases)}</b><span class="tier" style="color:${TIERVAR(b.risk_tier)}"><span class="g">${GLYPH[b.risk_tier]}</span>${b.risk_tier}</span></button>`; }).join("");
   document.querySelectorAll("#hz button").forEach((b) => (b.onclick = () => { st.h = +b.dataset.h; load(); }));
   const tl = f.rain_timeline, mm = Math.max(...tl.map((d) => d.rain_mm || 0));
-  const mini = document.getElementById("mini");
-  mini.setAttribute("aria-label", `Weekly rainfall: ${tl.filter((d) => d.rain_mm != null).map((d) => `${date(d.week)} ${d.rain_mm} mm`).join(", ")}`);
-  mini.innerHTML = tl.map((d) => `<i class="${d.status === "forecast" ? "f" : d.in_breeding_window ? "bw" : ""}" title="${date(d.week)}: ${d.rain_mm ?? "not known yet"}" style="height:${d.rain_mm == null ? (d.status === "forecast" ? 100 : 4) : Math.max(4, (d.rain_mm / mm) * 100)}%"></i>`).join("");
+  const rain = document.getElementById("rain");
+  rain.setAttribute("aria-label", `Weekly rainfall before the forecast week: ${tl.filter((d) => d.rain_mm != null).map((d) => `${date(d.week)} ${d.rain_mm} mm`).join(", ")}`);
+  rain.innerHTML = tl.map((d, i) => {
+    const cls = d.status === "forecast" ? "f" : d.status === "unknown" ? "u" : d.in_breeding_window ? "bw" : "";
+    const lab = d.status === "forecast" ? "forecast" : d.status === "unknown" ? "not yet" : `${fmt0(d.rain_mm)} mm`;
+    return `<div class="c ${cls}"><span class="mm">${lab}</span><i style="height:${d.rain_mm == null ? 100 : Math.max(3, (d.rain_mm / mm) * 100)}%;animation-delay:${i * 18}ms"></i><em>${new Date(d.week).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</em></div>`;
+  }).join("");
   document.getElementById("sum").innerHTML = `<span>Average week</span><b>${fmt1(f.driver_reference_cases)}</b><span class="arr"></span><span>this ward</span><b>${fmt1(f.predicted_cases)}</b>`;
-  const mx = Math.max(...f.top_drivers.map((d) => Math.abs(d.effect)));
-  document.getElementById("drv").innerHTML = f.top_drivers.map((d, i) => `<div class="drv"><span class="l">${d.label}</span><span class="v" style="color:${d.effect >= 0 ? "var(--raises)" : "var(--lowers)"}">${d.effect >= 0 ? "+" : "−"}${fmt1(Math.abs(d.effect))}</span><span class="tr"><i style="left:0;width:${(Math.abs(d.effect) / mx) * 100}%;background:${d.effect >= 0 ? "var(--raises)" : "var(--lowers)"};animation-delay:${i * 40}ms"></i></span></div>`).join("");
+  const topv = Math.max(f.predicted_cases, f.driver_reference_cases, ...(() => { let r = f.driver_reference_cases; return f.top_drivers.map((d) => (r += d.effect)); })()) * 1.04;
+  const P = (v) => (Math.max(0, v) / topv) * 100;
+  let run = f.driver_reference_cases;
+  const rows = [`<div class="lab">Average week</div><div class="val">${fmt1(run)}</div><div class="track"><span class="s2" style="left:0;width:${P(run)}%;background:var(--ink-3)"></span></div>`];
+  const rest = f.predicted_cases - f.driver_reference_cases - f.top_drivers.reduce((a, d) => a + d.effect, 0);
+  const ds = [...f.top_drivers]; if (Math.abs(rest) >= 0.05) ds.push({ label: "Everything else", effect: rest });
+  ds.forEach((d, i) => { const a = run, b = run + d.effect; run = b; const col = d.effect >= 0 ? "var(--raises)" : "var(--lowers)";
+    rows.push(`<div class="lab">${d.label}</div><div class="val" style="color:${col}">${d.effect >= 0 ? "+" : "−"}${fmt1(Math.abs(d.effect))}</div><div class="track"><span class="s2" style="left:${P(Math.min(a, b))}%;width:${Math.max(0.6, Math.abs(P(b) - P(a)))}%;background:${col};animation-delay:${(i + 1) * 40}ms"></span></div>`); });
+  rows.push(`<div class="lab">This ward</div><div class="val">${fmt1(f.predicted_cases)}</div><div class="track"><span class="s2" style="left:0;width:${P(f.predicted_cases)}%;background:var(--ink)"></span></div>`);
+  document.getElementById("drv").innerHTML = rows.join("");
   const r = f.recent, wp = f.ward_profile;
   document.getElementById("inp").innerHTML = `<h2>What the model saw</h2>` + [
     [`${fmt0(r.rain_last_4_weeks_mm)} mm`, "rain, last 4 weeks"], [`${fmt0(r.humidity_pct)}%`, "humidity"], [`${fmt1(r.avg_temp_c)}°C`, "average temperature"],
@@ -128,6 +171,8 @@ async function load() {
 wsel.onchange = () => { st.ward = wsel.value; load(); };
 asel.onchange = () => { st.as_of = asel.value; load(); };
 segBtns.forEach((b) => (b.onclick = () => { st.h = +b.dataset.h; load(); }));
+const pn = document.querySelector(".pals"), cur = document.documentElement.dataset.p;
+pn.innerHTML = [["1", "Paddy & mustard"], ["2", "Aedes alert"], ["3", "Rickshaw monsoon"]].map(([k, n]) => `<a href="?ward=${st.ward}&as_of=${st.as_of}&h=${st.h}&p=${k}" style="font:600 12px var(--font);text-decoration:none;padding:4px 10px;border-radius:999px;${k === cur ? "background:var(--ink);color:var(--on-dark)" : ""}">${k} ${n}</a>`).join("");
 load();
 </script>
 </body>

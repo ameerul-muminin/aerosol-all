@@ -2,32 +2,40 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Proto · Hero A · Disk</title>
+<title>Proto · Hero A · Monsoon city</title>
 <link rel="stylesheet" href="proto.css">
+<link rel="stylesheet" href="palettes.css">
 <style>
   .hero { position: relative; overflow: hidden; padding: 0 clamp(16px, 3vw, 40px); }
   h1.display { font-size: clamp(56px, 10.2vw, 172px); color: var(--ink); white-space: nowrap; }
   @media (max-width: 760px) { h1.display { white-space: normal; } }
-  .sub { max-width: 34ch; font-size: 17px; margin: 14px 0 0; color: var(--ink-2); }
-  .stage { position: relative; height: clamp(380px, 44vw, 620px); margin-top: 8px; }
-  .disk { position: absolute; left: 50%; transform: translateX(-50%); top: 0; width: min(78vw, 1040px); aspect-ratio: 1; }
+  .sub { max-width: 36ch; font-size: 17px; margin: 18px 0 0; color: var(--ink-2); }
+  .asof { margin: 12px 0 0; display: inline-block; background: var(--paper); padding: 4px 12px; border-radius: 999px; font-size: 13px; color: var(--ink-2); }
+  .stage { position: relative; margin-top: 8px; }
+  .disk { display: block; margin: 0 auto; width: min(80vw, 1060px); height: auto; }
   .chip { z-index: 2; }
+  .chip .sw { display: grid; place-items: center; font: 400 22px/1 var(--display); color: var(--on-dark); }
   .cta { position: absolute; right: 0; bottom: 28px; z-index: 3; }
-  .asof { margin: 10px 0 0; display: inline-block; background: var(--paper); padding: 4px 12px; border-radius: 999px; font-size: 13px; color: var(--ink-3); z-index: 3; }
-  .band { position: relative; background: var(--river); color: var(--on-dark); padding: clamp(48px, 7vw, 104px) clamp(16px, 3vw, 40px); overflow: hidden; }
-  .band h2 { font-size: clamp(40px, 6vw, 92px); color: var(--accent); max-width: 11ch; position: relative; }
-  .band p { max-width: 46ch; position: relative; color: #E6E0D2; }
+  .btn.lime { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .band { position: relative; background: var(--river); color: var(--on-dark); padding: clamp(56px, 7vw, 104px) clamp(16px, 3vw, 40px); overflow: hidden; }
+  .band h2 { font-size: clamp(40px, 6vw, 92px); color: var(--accent); max-width: 12ch; position: relative; margin-bottom: 20px; }
+  .band p { max-width: 46ch; position: relative; color: var(--on-dark-2); }
   .band .facts { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; position: relative; }
-  .band .fact { border: 1.5px solid rgba(244,239,226,.35); border-radius: var(--r-card); padding: 14px 18px; min-width: 190px; }
-  .band .fact b { display: block; font: 400 40px/1 var(--display); color: var(--on-dark); }
-  .band small { display: block; margin-top: 18px; font-size: 12px; color: #CFC8B8; position: relative; }
-  .rain { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .5; }
+  .band .fact { border: 1.5px solid color-mix(in srgb, var(--on-dark) 35%, transparent); border-radius: var(--r-card); padding: 16px 18px; min-width: 190px; }
+  .band .fact b { display: block; font: 400 40px/1.05 var(--display); color: var(--on-dark); margin-bottom: 4px; }
+  .band small { display: block; margin-top: 18px; font-size: 12px; color: var(--on-dark-2); position: relative; }
+  .band .rain { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .35; }
+  .pals { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 99; display: flex; gap: 6px; background: var(--paper); padding: 6px; border-radius: 999px; box-shadow: 0 6px 20px -8px rgba(0,0,0,.3); }
+  .pals a { font: 600 12px var(--font); text-decoration: none; padding: 4px 10px; border-radius: 999px; }
+  .pals a[aria-current] { background: var(--ink); color: var(--on-dark); }
   @media (max-width: 760px) {
-    .chip { position: static; margin: 8px 0; box-shadow: none; }
-    .stage { height: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-bottom: 90px; }
-    .disk { display: none; }
+    .chip { position: static; margin: 0; box-shadow: none; min-width: 0; }
+    .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .cta { position: static; margin: 16px 0 24px; }
+    .pals { top: auto; bottom: 52px; }
   }
 </style>
+<script>{ const p = new URLSearchParams(location.search).get("p") || "1"; document.documentElement.dataset.p = p; }</script>
 </head>
 <body>
 <nav class="nav"><span class="brand">Dengue Outlook</span>
@@ -35,48 +43,72 @@
 
 <header class="hero">
   <h1 class="display">See the outbreak first</h1>
-  <p class="sub">Ward-level dengue forecasts 2, 3 and 4 weeks ahead, built from last weeks' rain, heat and humidity.</p>
+  <p class="sub">Ward-level dengue forecasts 2, 3 and 4 weeks ahead for Dhaka, Chattogram, Gazipur and Narayanganj, built from recent rain, heat and humidity.</p>
   <p class="asof" id="asof"><span class="skel">Forecast for week of 00 Xxx 0000</span></p>
 
   <div class="stage" id="stage">
-    <svg class="disk" viewBox="0 0 1000 1000" aria-hidden="true">
-      <defs>
-        <clipPath id="c"><circle cx="500" cy="500" r="490"/></clipPath>
-        <pattern id="hatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
-          <line x1="0" y1="0" x2="0" y2="14" stroke="#9CBCEB" stroke-width="2" opacity=".55"/></pattern>
-        <radialGradient id="sh" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></radialGradient>
-      </defs>
+    <svg class="disk" viewBox="0 0 1000 600" role="img" aria-label="Illustration: monsoon rain over a dense city, water collecting in tyres, pots and puddles, an Aedes mosquito">
+      <defs><clipPath id="c"><circle cx="500" cy="500" r="490"/></clipPath></defs>
       <g clip-path="url(#c)">
-        <rect width="1000" height="1000" fill="#2F4B5A"/>
-        <!-- delta land masses: layered contour blobs -->
-        <path d="M120 300 C 260 180 420 240 520 200 S 820 160 900 300 L 1000 1000 L 0 1000 Z" fill="#5D7A3B"/>
-        <path d="M150 380 C 300 290 430 360 560 300 S 800 280 880 400 L 1000 1000 L 0 1000 Z" fill="#7C8F45"/>
-        <path d="M180 470 C 320 400 460 470 580 420 S 820 410 900 520 L 1000 1000 L 0 1000 Z" fill="#B89A4C"/>
-        <path d="M120 560 C 300 500 440 580 600 520 S 860 540 960 620 L 1000 1000 L 0 1000 Z" fill="#C4673E" opacity=".9"/>
-        <!-- rivers -->
-        <path d="M430 120 C 470 300 380 420 470 560 S 560 800 520 1000" fill="none" stroke="#9CBCEB" stroke-width="16" stroke-linecap="round"/>
-        <path d="M470 560 C 560 600 640 640 720 760" fill="none" stroke="#9CBCEB" stroke-width="9" stroke-linecap="round"/>
-        <path d="M470 400 C 380 470 300 520 230 640" fill="none" stroke="#9CBCEB" stroke-width="7" stroke-linecap="round"/>
-        <!-- contour lines -->
-        <g fill="none" stroke="#F1ECDF" stroke-opacity=".22" stroke-width="2">
-          <path d="M140 340 C 300 250 440 310 560 260 S 820 230 900 350"/>
-          <path d="M160 430 C 320 350 450 420 570 370 S 810 350 890 460"/>
-          <path d="M160 520 C 320 460 450 530 590 470 S 840 480 930 570"/>
-          <path d="M130 610 C 320 560 460 630 610 580 S 870 600 970 680"/>
+        <rect width="1000" height="600" style="fill:var(--il-sky)"/>
+        <!-- monsoon clouds -->
+        <g style="fill:var(--il-cloud)">
+          <circle cx="250" cy="150" r="70"/><circle cx="330" cy="120" r="85"/><circle cx="420" cy="150" r="65"/><rect x="200" y="150" width="270" height="60" rx="30"/>
+          <circle cx="640" cy="110" r="60"/><circle cx="720" cy="90" r="80"/><circle cx="800" cy="120" r="58"/><rect x="590" y="110" width="260" height="56" rx="28"/>
         </g>
-        <!-- monsoon rain over the top -->
-        <rect width="1000" height="330" fill="url(#hatch)"/>
-        <rect width="1000" height="1000" fill="url(#sh)"/>
+        <!-- rain (well spaced) -->
+        <g id="rainD" style="stroke:var(--il-rain)" stroke-width="4" stroke-linecap="round"></g>
+        <!-- far skyline -->
+        <g style="fill:var(--il-far)">
+          <rect x="60" y="330" width="70" height="200"/><rect x="140" y="300" width="56" height="230"/><rect x="206" y="350" width="80" height="180"/>
+          <rect x="300" y="290" width="60" height="240"/><rect x="560" y="300" width="70" height="230"/><rect x="640" y="340" width="90" height="190"/>
+          <rect x="745" y="285" width="60" height="245"/><rect x="815" y="330" width="80" height="200"/><rect x="905" y="350" width="60" height="180"/>
+        </g>
+        <!-- near skyline: dense blocks, rooftop water tanks, one dome + minaret -->
+        <g style="fill:var(--il-near)">
+          <rect x="90" y="390" width="110" height="160"/><rect x="210" y="360" width="90" height="190"/><rect x="310" y="410" width="120" height="140"/>
+          <path d="M440 470 h120 v80 h-120z M460 470 a40 40 0 0 1 80 0z"/><rect x="566" y="396" width="14" height="154"/><path d="M563 396 l10 -22 l10 22z"/>
+          <rect x="590" y="380" width="100" height="170"/><rect x="700" y="420" width="120" height="130"/><rect x="830" y="370" width="90" height="180"/>
+          <!-- water tanks -->
+          <rect x="112" y="372" width="26" height="18" rx="3"/><rect x="236" y="342" width="26" height="18" rx="3"/><rect x="356" y="392" width="26" height="18" rx="3"/>
+          <rect x="626" y="362" width="26" height="18" rx="3"/><rect x="848" y="352" width="26" height="18" rx="3"/>
+        </g>
+        <g id="wins" style="fill:var(--il-win)"></g>
+        <!-- ground, puddles -->
+        <path d="M0 540 C 160 520 330 548 500 532 S 820 520 1000 540 V600 H0Z" style="fill:var(--il-ground)"/>
+        <g style="fill:var(--il-water)"><ellipse cx="300" cy="566" rx="90" ry="12"/><ellipse cx="640" cy="572" rx="70" ry="10"/></g>
+        <g fill="none" style="stroke:var(--il-sky)" stroke-width="2" opacity=".8"><ellipse cx="290" cy="566" rx="22" ry="4"/><ellipse cx="290" cy="566" rx="44" ry="7"/></g>
+        <!-- breeding sites: tyre, clay pot, bucket -->
+        <g>
+          <circle cx="430" cy="548" r="34" style="fill:var(--il-mosq)"/><circle cx="430" cy="548" r="16" style="fill:var(--il-water)"/>
+          <path d="M760 520 h60 l-10 50 h-40z" style="fill:var(--il-clay)"/><ellipse cx="790" cy="520" rx="30" ry="6" style="fill:var(--il-water)"/>
+          <path d="M180 528 h46 l-6 40 h-34z" style="fill:var(--accent)"/><ellipse cx="203" cy="528" rx="23" ry="5" style="fill:var(--il-water)"/>
+        </g>
+        <!-- Aedes mosquito: banded legs -->
+        <g transform="translate(700 250) rotate(-12)" style="stroke:var(--il-mosq)" stroke-linecap="round">
+          <g stroke-width="5" fill="none">
+            <path d="M-10 6 l-40 30 l-14 46"/><path d="M0 8 l-14 40 l-6 50"/><path d="M12 6 l30 34 l26 40"/>
+          </g>
+          <g stroke-width="5" fill="none" stroke="#fff" stroke-dasharray="4 10">
+            <path d="M-10 6 l-40 30 l-14 46"/><path d="M0 8 l-14 40 l-6 50"/><path d="M12 6 l30 34 l26 40"/>
+          </g>
+          <ellipse cx="-24" cy="-26" rx="44" ry="14" transform="rotate(-25)" fill="#fff" opacity=".7" stroke-width="2"/>
+          <ellipse cx="4" cy="-0" rx="40" ry="11" style="fill:var(--il-mosq)" stroke="none"/>
+          <path d="M-14 -6 v12 M-2 -9 v18 M10 -9 v18" stroke="#fff" stroke-width="3"/>
+          <circle cx="48" cy="-4" r="11" style="fill:var(--il-mosq)" stroke="none"/>
+          <path d="M56 -2 l46 10" stroke-width="3"/>
+        </g>
       </g>
     </svg>
+    <div class="chips" id="chips"></div>
     <a class="btn lime cta" href="/app/">Open the ward outlook →</a>
   </div>
 </header>
 
 <section class="band" id="how">
-  <svg class="rain" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 400 200"><g stroke="#9CBCEB" stroke-width=".6" id="drops"></g></svg>
+  <svg class="rain" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 400 200"><g style="stroke:var(--on-dark-2)" stroke-width=".8" stroke-linecap="round" id="drops"></g></svg>
   <h2 class="display">Rain today, cases in weeks</h2>
-  <p>Mosquitoes breed in standing water. The cases show up later. The model reads that delay for each of 60 wards and tells health officers where to send larvicide and cleanup teams before the peak.</p>
+  <p>Aedes mosquitoes breed in standing water: tyres, flower pots, rooftop tanks, construction pits. The cases show up weeks later. The model reads that delay for each of 60 wards, so health officers can send cleanup and larvicide teams before the peak.</p>
   <div class="facts">
     <div class="fact"><b>7–14 days</b>to breed in standing water</div>
     <div class="fact"><b>2–4 weeks</b>from rain to cases</div>
@@ -84,38 +116,41 @@
   </div>
   <small>Figures: EDU AI Hackathon 2026 brief.</small>
 </section>
-<div class="protobar">PROTOTYPE · Hero A “Delta disk” · live data</div>
+<nav class="pals" aria-label="Palette"><a href="?p=1">1 Paddy &amp; mustard</a><a href="?p=2">2 Aedes alert</a><a href="?p=3">3 Rickshaw monsoon</a></nav>
 
 <script type="module">
-import { api, fmt1, fmt0, ward, date, GLYPH, TIERVAR } from "./proto.js";
-// rain texture
+import { api, fmt1, fmt0, ward, date, GLYPH } from "./proto.js";
+const p = document.documentElement.dataset.p;
+document.querySelectorAll(".pals a").forEach((a) => a.getAttribute("href") === `?p=${p}` && a.setAttribute("aria-current", "true"));
+// rain: one drop per 46 x 52 cell, offset every other row
+const rd = document.getElementById("rainD");
+for (let y = 210, r = 0; y < 470; y += 52, r++) for (let x = (r % 2) * 23; x < 1000; x += 46)
+  rd.insertAdjacentHTML("beforeend", `<line x1="${x}" y1="${y}" x2="${x - 6}" y2="${y + 20}"/>`);
 const g = document.getElementById("drops");
-for (let i = 0; i < 140; i++) { const x = (i * 37) % 400, y = (i * 53) % 200;
-  g.insertAdjacentHTML("beforeend", `<line x1="${x}" y1="${y}" x2="${x - 3}" y2="${y + 9}"/>`); }
+for (let y = 0, r = 0; y < 200; y += 26, r++) for (let x = (r % 2) * 14; x < 400; x += 28)
+  g.insertAdjacentHTML("beforeend", `<line x1="${x}" y1="${y}" x2="${x - 2}" y2="${y + 8}"/>`);
+// lit windows (deterministic)
+const W = document.getElementById("wins");
+[[90, 390, 110, 160], [210, 360, 90, 190], [310, 410, 120, 140], [590, 380, 100, 170], [700, 420, 120, 130], [830, 370, 90, 180]].forEach(([x, y, w, h], b) => {
+  for (let yy = y + 16; yy < y + h - 20; yy += 26) for (let xx = x + 12; xx < x + w - 14; xx += 22)
+    if ((xx * 7 + yy * 3 + b) % 5 === 0) W.insertAdjacentHTML("beforeend", `<rect x="${xx}" y="${yy}" width="10" height="12"/>`);
+});
 
-const SW = {
-  clay: `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" fill="#C4673E"/><path d="M0 12 Q10 4 20 12 T40 12 M0 24 Q10 16 20 24 T40 24 M0 36 Q10 28 20 36 T40 36" stroke="#F1ECDF" stroke-width="2.5" fill="none"/></svg>`,
-  ochre: `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" fill="#D7A238"/><g stroke="#2A1810" stroke-width="2.5"><path d="M6 40 L14 0 M16 40 L22 0 M26 40 L30 0 M36 40 L38 0"/></g></svg>`,
-  moss: `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" fill="#5D7A3B"/><g stroke="#D6E04B" stroke-width="2"><path d="M8 40 V18 M14 40 V12 M20 40 V20 M26 40 V10 M32 40 V16"/></g></svg>`,
-  sky: `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" fill="#9CBCEB"/><path d="M4 10 h32 M8 18 h28 M2 26 h30 M10 34 h26" stroke="#2F4B5A" stroke-width="3" stroke-linecap="round"/></svg>`,
-  lime: `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" fill="#D6E04B"/><circle cx="20" cy="20" r="11" fill="none" stroke="#2A1810" stroke-width="3"/><circle cx="20" cy="20" r="4" fill="#2A1810"/></svg>`,
-  ink: `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" fill="#2A1810"/><path d="M6 30 L14 22 L20 26 L34 10" stroke="#D6E04B" stroke-width="3" fill="none"/></svg>`,
-};
-const chip = (sw, k, v, s, pos) =>
-  `<div class="chip" style="${pos}">${SW[sw]}<div><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div></div>`;
-
+const chip = (bg, mark, k, v, s, pos) =>
+  `<div class="chip" style="${pos}"><span class="sw" style="background:${bg}">${mark}</span><div><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div></div>`;
 const [meta, rank, met] = await Promise.all([api("/api/meta"), api(`/api/ranking?as_of=2025-07-14&horizon=3`), api("/api/metrics")]);
 const tc = rank.tier_counts, top = rank.wards[0], m3 = met.horizons.find((h) => h.horizon === 3);
 const better = Math.round((1 - m3.mae / m3.baseline_mae) * 100);
 document.getElementById("asof").textContent = `Live: forecast for the week of ${date(rank.forecast_week)}, 3 weeks ahead`;
-document.getElementById("stage").insertAdjacentHTML("beforeend", [
-  chip("clay", `${GLYPH.Critical} Critical wards`, tc.Critical, `of ${meta.ward_count}`, "left:21%;top:16%"),
-  chip("ochre", `${GLYPH.High} High wards`, tc.High, `of ${meta.ward_count}`, "left:6%;top:42%"),
-  chip("sky", "Highest ward", fmt1(top.predicted_cases), `${ward(top.ward_id)} · cases/wk`, "right:22%;top:10%"),
-  chip("moss", "Likely range", `${fmt0(top.range_low)}–${fmt0(top.range_high)}`, "80% of weeks land here", "right:6%;top:36%"),
-  chip("lime", "Error vs seasonal avg", `${better}% lower`, `MAE ${m3.mae} on 2024–25 test`, "left:40%;top:36%"),
-  chip("ink", "Ranges hit", `${Math.round(m3.interval80_coverage * 100)}%`, "of test weeks (target 80%)", "left:24%;top:64%"),
-].join(""));
+document.getElementById("chips").innerHTML = [
+  chip("var(--tier-critical)", GLYPH.Critical, "Critical wards", tc.Critical, `of ${meta.ward_count}`, "position:absolute;left:4%;top:8%"),
+  chip("var(--tier-high)", GLYPH.High, "High wards", tc.High, `of ${meta.ward_count}`, "position:absolute;left:1%;top:38%"),
+  chip("var(--ink)", "↑", "Highest ward", fmt1(top.predicted_cases), `${ward(top.ward_id)} · cases/wk`, "position:absolute;right:4%;top:6%"),
+  chip("var(--il-water)", "↔", "Likely range", `${fmt0(top.range_low)}–${fmt0(top.range_high)}`, "8 weeks in 10 land here", "position:absolute;right:1%;top:36%"),
+  chip("var(--il-ground)", "✓", "Error vs seasonal avg", `${better}% lower`, `MAE ${m3.mae}, 2024–25 test`, "position:absolute;left:12%;top:64%"),
+  chip("var(--il-near)", "%", "Ranges hit", `${Math.round(m3.interval80_coverage * 100)}%`, "of test weeks (target 80%)", "position:absolute;right:14%;top:64%"),
+].join("");
+if (matchMedia("(max-width: 760px)").matches) document.querySelectorAll(".chip").forEach((c) => c.removeAttribute("style"));
 </script>
 </body>
 </html>

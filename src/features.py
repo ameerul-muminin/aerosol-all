@@ -31,16 +31,22 @@ def load_raw(path: Path = DATA_XLSX) -> pd.DataFrame:
 
 
 def validate(df: pd.DataFrame) -> pd.DataFrame:
-    """Fail loudly if the data violates assumptions the lag logic depends on."""
+    """Fail loudly (ValueError, not assert: asserts vanish under `python -O`) if the data
+    violates assumptions the lag logic depends on."""
     need = {"date", "city", "ward_id", "dengue_cases", *STATIC, *WEATHER}
     missing = need - set(df.columns)
-    assert not missing, f"missing columns: {missing}"
-    assert not df[list(need)].isna().any().any(), "unexpected missing values"
-    assert not df.duplicated(["ward_id", "date"]).any(), "duplicate ward/date rows"
+    if missing:
+        raise ValueError(f"missing columns: {sorted(missing)}")
+    if df[list(need)].isna().any().any():
+        raise ValueError("unexpected missing values")
+    if df.duplicated(["ward_id", "date"]).any():
+        raise ValueError("duplicate ward/date rows")
     df = df.sort_values(["ward_id", "date"]).reset_index(drop=True)
     gaps = df.groupby("ward_id")["date"].diff().dropna()
-    assert (gaps == pd.Timedelta(days=7)).all(), "non-weekly spacing: shift(k) would not mean k weeks"
-    assert (df.groupby("ward_id")[STATIC].nunique() == 1).all().all(), "ward attributes not constant"
+    if not (gaps == pd.Timedelta(days=7)).all():
+        raise ValueError("non-weekly spacing: shift(k) would not mean k weeks")
+    if not (df.groupby("ward_id")[STATIC].nunique() == 1).all().all():
+        raise ValueError("ward attributes not constant")
     return df
 
 

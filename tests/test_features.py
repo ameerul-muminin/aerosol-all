@@ -1,7 +1,8 @@
 """Checks the lag pipeline: per-ward shifting, no cross-ward bleed, no future data in features."""
 import numpy as np
 import pandas as pd
-from src.features import load_raw, add_lag_features, add_target, feature_columns, build_dataset
+import pytest
+from src.features import load_raw, add_lag_features, add_target, feature_columns, build_dataset, validate
 
 
 def test_lags_are_per_ward_and_exact():
@@ -22,6 +23,18 @@ def test_features_do_not_depend_on_future():
     cols = feature_columns()
     common = trunc.index
     pd.testing.assert_frame_equal(full.loc[common, cols], trunc[cols])
+
+
+@pytest.mark.parametrize("break_it, msg", [
+    (lambda d: d.drop(columns="rainfall_mm"), "missing columns"),
+    (lambda d: d.assign(rainfall_mm=d["rainfall_mm"].where(d.index != 5)), "missing values"),
+    (lambda d: pd.concat([d, d.iloc[[0]]]), "duplicate"),
+    (lambda d: d.drop(index=10), "non-weekly"),
+    (lambda d: d.assign(sanitation_score=d["sanitation_score"].where(d.index != 3, 0.01)), "not constant"),
+])
+def test_validate_rejects_bad_data(break_it, msg):
+    with pytest.raises(ValueError, match=msg):
+        validate(break_it(load_raw()))
 
 
 def test_target_is_future_cases_same_ward():

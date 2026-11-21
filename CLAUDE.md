@@ -37,6 +37,12 @@ web/assets/                       css, js, fonts, images (C) — no CDN, no buil
 `/api/metrics` · `/api/history?ward_id&horizon` · `/api/health`. Errors: HTTP 400 `{"error": "<friendly message>"}`.
 Dates are ISO `YYYY-MM-DD` Mondays; horizon 2|3|4. Shapes are documented in docs/frontend/ (guide PDF).
 
+## Working here
+- Remaining work, owners and checks: `docs/TASKS.md`. Tick tasks in the commit that finishes them.
+- Frontend: use the `build-ui` skill. Design = night direction (`web/assets/css/tokens.css`), which replaces the
+  light palette in the frontend brief PDF. The PDF's API reference and task order still apply.
+- Before every commit: `verify` skill, or delegate it to the `verifier` subagent to save context.
+
 ## Python interface (used by api/service.py)
 ```python
 from src.predict import build_features, predict_risk, predict_all
@@ -81,7 +87,7 @@ MAE/RMSE validation dashboard). Treat the code as Stage 1 of a production system
 ```
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python -m src.train          # retrain (~1.5 min, time-ordered CV)
+python -m src.train          # retrain (time-ordered CV + ensemble; re-measure, see docs/TASKS.md)
 pytest -q
 python -m api                # http://127.0.0.1:8000  (dashboard: /app/)
 python -m scripts.measure_efficiency --train   # -> reports/efficiency.json

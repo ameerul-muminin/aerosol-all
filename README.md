@@ -20,10 +20,19 @@ python -m api                      # open http://127.0.0.1:8000
 Tested with Python 3.11, 3.12 and 3.13. **Python 3.14 is not supported** (no scikit-learn 1.6.1 build for it yet).
 The trained model is committed, so no training is needed to launch.
 One process serves the marketing page (`/`), the dashboard (`/app/`) and the JSON API (`/api/...`). No Node.js needed.
+Try a weather scenario (typed weekly values replace the last 4 weeks, then the same lag pipeline runs):
+`curl -X POST http://127.0.0.1:8000/api/what_if -H "Content-Type: application/json" -d '{"ward_id": "DSCC_Ward_04", "as_of": "2025-07-21", "horizon": 3, "rainfall_mm": 200}'`
+→ baseline vs scenario forecast, tier change and drivers.
+Inputs: `ward_id` (required), `as_of` (YYYY-MM-DD Monday), `horizon` (2/3/4), and at least one of `rainfall_mm` (0–400 per week),
+`avg_temp_c` (10–45), `relative_humidity_pct` (0–100); `weeks` (1–8, default 4) = how many recent weeks the typed values replace.
+The **baseline** uses the dataset's recorded weather; the **scenario** uses your typed weather. Values outside the
+training range (rain above 268.8 mm, temperature outside 17.2–37.5 °C, humidity below 41.8 %) return a warning, because the
+model cannot extrapolate beyond what it has seen.
 
 ## Retrain (one command)
 ```bash
-python -m src.train      # rebuilds models/dengue_model.joblib and reports/metrics.json (about 1.5 min)
+python -m src.train      # rebuilds models/dengue_model.joblib and reports/metrics.json (about 2 min)
+python scripts/measure_efficiency.py --train --train-repeats 3   # re-measures speed, memory, model size and retrain time -> reports/efficiency.json (the model is restored afterwards)
 python -m pytest -q      # lag pipeline, leakage, model and API tests
 ```
 

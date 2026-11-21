@@ -1,0 +1,23 @@
+{
+  "what": "held-out test rows (ward, origin week, target week, cases) per horizon",
+  "horizons": {
+    "2": {
+      "sha256": "6ce7ab87fd10d7b6d7da364c98986d0fca4bd7dc5a9d5c1af70663c76566c53b",
+      "rows": 6300,
+      "first_target_week": "2024-01-01",
+      "last_target_week": "2025-12-29"
+    },
+    "3": {
+      "sha256": "5e42de4527f5543af4625a0847cc6363ed9214b7610121befe21430c8db2ffd7",
+      "rows": 6300,
+      "first_target_week": "2024-01-01",
+      "last_target_week": "2025-12-29"
+    },
+    "4": {
+      "sha256": "f300513ef8de56c1fb96c39bc5d49519353fc15ebd479a97d0400d6f7e096728",
+      "rows": 6300,
+      "first_target_week": "2024-01-01",
+      "last_target_week": "2025-12-29"
+    }
+  }
+}

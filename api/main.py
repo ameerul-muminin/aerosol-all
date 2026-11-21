@@ -37,7 +37,7 @@ def create_app() -> Flask:
             raise ValueError("Horizon must be one of (2, 3, 4) weeks.")
 
     def _as_of() -> str:
-        return request.args.get("as_of") or service.meta()["as_of"]["default"]
+        return service.parse_as_of(request.args.get("as_of") or service.meta()["as_of"]["default"])
 
     @app.errorhandler(ValueError)
     def bad_request(err):  # friendly, user-facing message, never a traceback
@@ -50,7 +50,8 @@ def create_app() -> Flask:
     @app.after_request
     def compress_and_cache(resp):
         if request.path.startswith("/api/") and resp.status_code == 200 and request.path != "/api/health":
-            resp.headers["Cache-Control"] = f"public, max-age={CACHE_SECONDS}"
+            if request.method == "GET":   # scenario POSTs are not cacheable by browsers/CDNs
+                resp.headers["Cache-Control"] = f"public, max-age={CACHE_SECONDS}"
             if "gzip" in request.headers.get("Accept-Encoding", "") and resp.content_length and resp.content_length > 1000:
                 resp.set_data(gzip.compress(resp.get_data(), compresslevel=6))
                 resp.headers["Content-Encoding"] = "gzip"
@@ -70,6 +71,15 @@ def create_app() -> Flask:
     def forecast():
         return jsonify(service.forecast(request.args.get("ward_id", ""), _as_of(), _horizon()))
 
+    @app.post("/api/what_if")
+    def what_if():
+        """Weather scenario: JSON body {ward_id, as_of?, horizon?, rainfall_mm?, avg_temp_c?,
+        relative_humidity_pct?, weeks? (1-8, default 4)}. Returns baseline vs scenario forecast."""
+        body = request.get_json(silent=True)
+        if not isinstance(body, dict):
+            raise ValueError("Send a JSON body, e.g. {\"ward_id\": \"DSCC_Ward_04\", \"rainfall_mm\": 200}.")
+        return jsonify(service.what_if(body))
+
     @app.get("/api/ranking")
     def ranking():
         return jsonify(service.ranking(_as_of(), _horizon(), request.args.get("city") or None))
@@ -86,6 +96,11 @@ def create_app() -> Flask:
     @app.get("/")
     @app.get("/<path:path>")
     def web(path: str = ""):
+        if path.startswith("api/"):                      # API typos get JSON, not the web fallback
+            if path.rstrip("/") == "api/what_if":
+                return jsonify(error="Use POST with a JSON body, e.g. "
+                                     '{"ward_id": "DSCC_Ward_04", "rainfall_mm": 200}.'), 405
+            return jsonify(error=f"Unknown API endpoint: /{path}"), 404
         target = WEB_DIR / path
         if path == "" or target.is_dir():
             path = (path.rstrip("/") + "/index.html").lstrip("/")

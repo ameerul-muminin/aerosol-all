@@ -229,7 +229,7 @@
             "mean_fold_gap_val_minus_train": 0.31303203615843694
           },
           "size_mb": 0.002,
-          "latency_60_wards_s": 0.0011
+          "latency_60_wards_s": 0.0009
         },
         "lasso": {
           "kind": "model",
@@ -288,7 +288,7 @@
             "mean_fold_gap_val_minus_train": 0.17360439136197298
           },
           "size_mb": 0.002,
-          "latency_60_wards_s": 0.0014
+          "latency_60_wards_s": 0.0012
         },
         "elastic_net": {
           "kind": "model",
@@ -347,7 +347,7 @@
             "mean_fold_gap_val_minus_train": 0.19693370116641823
           },
           "size_mb": 0.002,
-          "latency_60_wards_s": 0.0014
+          "latency_60_wards_s": 0.0013
         },
         "poisson_glm": {
           "kind": "model",
@@ -406,7 +406,7 @@
             "mean_fold_gap_val_minus_train": 0.06230099195203866
           },
           "size_mb": 0.003,
-          "latency_60_wards_s": 0.0014
+          "latency_60_wards_s": 0.0018
         },
         "decision_tree": {
           "kind": "model",
@@ -465,7 +465,7 @@
             "mean_fold_gap_val_minus_train": 0.4370898961637022
           },
           "size_mb": 0.008,
-          "latency_60_wards_s": 0.0013
+          "latency_60_wards_s": 0.0009
         },
         "random_forest": {
           "kind": "model",
@@ -494,7 +494,7 @@
               "val_year": 2019,
               "MAE": 1.2212792926990605,
               "RMSE": 2.4963590181396533,
-              "PoissonDev": 0.9684438098431405,
+              "PoissonDev": 0.9684438098431404,
               "R2": 0.801532552515453
             },
             {
@@ -524,7 +524,7 @@
             "mean_fold_gap_val_minus_train": 0.3915669462248088
           },
           "size_mb": 3.113,
-          "latency_60_wards_s": 0.0291
+          "latency_60_wards_s": 0.0278
         },
         "extra_trees": {
           "kind": "model",
@@ -552,16 +552,16 @@
             {
               "val_year": 2019,
               "MAE": 1.2775045230720887,
-              "RMSE": 2.604631079600052,
+              "RMSE": 2.6046310796000522,
               "PoissonDev": 1.045182209145452,
-              "R2": 0.7839433527341527
+              "R2": 0.7839433527341526
             },
             {
               "val_year": 2020,
               "MAE": 1.1824610602274472,
               "RMSE": 2.2332505451902303,
-              "PoissonDev": 1.0300956161223132,
-              "R2": 0.6906203602308586
+              "PoissonDev": 1.0300956161223134,
+              "R2": 0.6906203602308587
             },
             {
               "val_year": 2021,
@@ -578,12 +578,12 @@
             "R2": 0.7810063838062902
           },
           "overfit": {
-            "train_poisdev": 0.6364273825129544,
+            "train_poisdev": 0.6364273825129543,
             "cv_poisdev": 1.026164925345903,
-            "mean_fold_gap_val_minus_train": 0.3273777872114995
+            "mean_fold_gap_val_minus_train": 0.32737778721149957
           },
           "size_mb": 4.827,
-          "latency_60_wards_s": 0.0283
+          "latency_60_wards_s": 0.0263
         },
         "gradient_boosting": {
           "kind": "model",
@@ -642,7 +642,7 @@
             "mean_fold_gap_val_minus_train": 0.3983124717776918
           },
           "size_mb": 0.084,
-          "latency_60_wards_s": 0.0013
+          "latency_60_wards_s": 0.0011
         },
         "hist_gradient_boosting": {
           "kind": "model",
@@ -701,7 +701,7 @@
             "mean_fold_gap_val_minus_train": 0.3524227241034402
           },
           "size_mb": 0.115,
-          "latency_60_wards_s": 0.0124
+          "latency_60_wards_s": 0.0104
         },
         "deployed": {
           "kind": "deployed",
@@ -716,7 +716,7 @@
               "val_year": 2017,
               "MAE": 1.1144019801055574,
               "RMSE": 2.177078144990551,
-              "PoissonDev": 0.9315461772954888,
+              "PoissonDev": 0.9315461772954887,
               "R2": 0.7922288853890579
             },
             {
@@ -755,12 +755,12 @@
             "R2": 0.7950797182024907
           },
           "overfit": {
-            "train_poisdev": 0.6884951507746052,
+            "train_poisdev": 0.6884951507746051,
             "cv_poisdev": 0.9404165465950574,
             "mean_fold_gap_val_minus_train": 0.2735936871760919
           },
           "size_mb": 3.237,
-          "latency_60_wards_s": 0.0408
+          "latency_60_wards_s": 0.0374
         }
       },
       "ranking_by_cv_poisdev": [
@@ -956,7 +956,7 @@
             "mean_fold_gap_val_minus_train": 1.3390882857532278
           },
           "size_mb": 0.01,
-          "latency_60_wards_s": 0.001
+          "latency_60_wards_s": 0.0009
         },
         "ridge": {
           "kind": "baseline",
@@ -1133,7 +1133,7 @@
             "mean_fold_gap_val_minus_train": 0.10390562125051295
           },
           "size_mb": 0.002,
-          "latency_60_wards_s": 0.0013
+          "latency_60_wards_s": 0.0025
         },
         "poisson_glm": {
           "kind": "model",
@@ -1192,7 +1192,7 @@
             "mean_fold_gap_val_minus_train": 0.05897721438752401
           },
           "size_mb": 0.002,
-          "latency_60_wards_s": 0.0013
+          "latency_60_wards_s": 0.0012
         },
         "decision_tree": {
           "kind": "model",
@@ -1264,14 +1264,14 @@
           "cv_folds": [
             {
               "val_year": 2017,
-              "MAE": 1.7120570020697725,
+              "MAE": 1.712057002069773,
               "RMSE": 3.2718284643941957,
               "PoissonDev": 1.688751979707378,
               "R2": 0.5307349756564315
             },
             {
               "val_year": 2018,
-              "MAE": 1.1698225113713128,
+              "MAE": 1.169822511371313,
               "RMSE": 2.2361263931902156,
               "PoissonDev": 1.2070620805405101,
               "R2": 0.6236274029796058
@@ -1293,7 +1293,7 @@
             {
               "val_year": 2021,
               "MAE": 1.040745018526208,
-              "RMSE": 1.9446071240389489,
+              "RMSE": 1.9446071240389486,
               "PoissonDev": 0.9740829795165561,
               "R2": 0.6993691748052506
             }
@@ -1310,21 +1310,21 @@
             "mean_fold_gap_val_minus_train": 0.6049366855113713
           },
           "size_mb": 3.15,
-          "latency_60_wards_s": 0.026
+          "latency_60_wards_s": 0.0161
         },
         "extra_trees": {
           "kind": "model",
           "cv_mean": {
             "MAE": 1.2294891678091224,
             "RMSE": 2.3107258558325596,
-            "PoissonDev": 1.1565805086707068,
+            "PoissonDev": 1.156580508670707,
             "R2": 0.7089131408117105
           },
           "cv_folds": [
             {
               "val_year": 2017,
               "MAE": 1.4137994666642515,
-              "RMSE": 2.6530011216918883,
+              "RMSE": 2.6530011216918887,
               "PoissonDev": 1.3521887252449274,
               "R2": 0.6914596266827662
             },
@@ -1346,12 +1346,12 @@
               "val_year": 2020,
               "MAE": 1.1529009715632113,
               "RMSE": 2.136144519544175,
-              "PoissonDev": 1.0163487337291246,
+              "PoissonDev": 1.0163487337291248,
               "R2": 0.7169402657269284
             },
             {
               "val_year": 2021,
-              "MAE": 1.0545121353081555,
+              "MAE": 1.0545121353081557,
               "RMSE": 1.9266763869585244,
               "PoissonDev": 0.9865955116092069,
               "R2": 0.7048876981531502
@@ -1365,11 +1365,11 @@
           },
           "overfit": {
             "train_poisdev": 0.6694340057906297,
-            "cv_poisdev": 1.1565805086707068,
-            "mean_fold_gap_val_minus_train": 0.4226706156481881
+            "cv_poisdev": 1.156580508670707,
+            "mean_fold_gap_val_minus_train": 0.4226706156481882
           },
           "size_mb": 4.845,
-          "latency_60_wards_s": 0.0276
+          "latency_60_wards_s": 0.0287
         },
         "gradient_boosting": {
           "kind": "model",
@@ -1428,7 +1428,7 @@
             "mean_fold_gap_val_minus_train": 0.5746088406962768
           },
           "size_mb": 0.082,
-          "latency_60_wards_s": 0.0014
+          "latency_60_wards_s": 0.0015
         },
         "hist_gradient_boosting": {
           "kind": "model",
@@ -1487,66 +1487,66 @@
             "mean_fold_gap_val_minus_train": 0.4910116154631317
           },
           "size_mb": 0.105,
-          "latency_60_wards_s": 0.0091
+          "latency_60_wards_s": 0.0088
         },
         "deployed": {
           "kind": "deployed",
           "cv_mean": {
-            "MAE": 1.1822268926919215,
-            "RMSE": 2.2645898734523215,
-            "PoissonDev": 1.0785035009613502,
-            "R2": 0.7219396588484448
+            "MAE": 1.2003460321563786,
+            "RMSE": 2.270229327904873,
+            "PoissonDev": 1.087137439175443,
+            "R2": 0.7163019715349079
           },
           "cv_folds": [
             {
               "val_year": 2017,
-              "MAE": 1.384873778597481,
-              "RMSE": 2.6995840785501417,
-              "PoissonDev": 1.3000894564713095,
-              "R2": 0.6805294350976243
+              "MAE": 1.3711179104146123,
+              "RMSE": 2.64461686717792,
+              "PoissonDev": 1.2656799921143995,
+              "R2": 0.6934066996400472
             },
             {
               "val_year": 2018,
-              "MAE": 1.0818157231017667,
-              "RMSE": 2.013847880814616,
-              "PoissonDev": 1.066602813171929,
-              "R2": 0.6947338670941132
+              "MAE": 1.1472504922934448,
+              "RMSE": 2.113896346001038,
+              "PoissonDev": 1.132660514686623,
+              "R2": 0.6636490361538765
             },
             {
               "val_year": 2019,
-              "MAE": 1.3643931168604386,
-              "RMSE": 2.740951139507571,
-              "PoissonDev": 1.2126998488656422,
-              "R2": 0.7607357662476117
+              "MAE": 1.3279945074914457,
+              "RMSE": 2.6375461956225585,
+              "PoissonDev": 1.1679959454284523,
+              "R2": 0.7784481680957588
             },
             {
               "val_year": 2020,
-              "MAE": 1.0646330019570724,
-              "RMSE": 1.98828691720926,
-              "PoissonDev": 0.8846763248482824,
-              "R2": 0.7547692412423613
+              "MAE": 1.0697742203076053,
+              "RMSE": 1.9703350000410567,
+              "PoissonDev": 0.8805471636813479,
+              "R2": 0.759177546830625
             },
             {
               "val_year": 2021,
-              "MAE": 1.0154188429428488,
-              "RMSE": 1.8802793511800178,
-              "PoissonDev": 0.9284490614495885,
-              "R2": 0.7189299845605136
+              "MAE": 1.0855930302747845,
+              "RMSE": 1.984752230681793,
+              "PoissonDev": 0.9888035799663925,
+              "R2": 0.6868284069542325
             }
           ],
           "validation": {
-            "MAE": 1.2742528209307318,
-            "RMSE": 2.573347758911062,
-            "PoissonDev": 1.101094069161959,
-            "R2": 0.7697172954644231
+            "MAE": 1.287295043237772,
+            "RMSE": 2.5764541141524595,
+            "PoissonDev": 1.1116317039746146,
+            "R2": 0.76916099938164
           },
           "overfit": {
-            "train_poisdev": 0.6654642814807871,
-            "cv_poisdev": 1.0785035009613502,
-            "mean_fold_gap_val_minus_train": 0.410484502456414
+            "train_poisdev": 0.6859233068329187,
+            "cv_poisdev": 1.087137439175443,
+            "mean_fold_gap_val_minus_train": 0.3968814548747477
           },
-          "size_mb": 4.959,
-          "latency_60_wards_s": 0.0376
+          "size_mb": 5.179,
+          "latency_60_wards_s": 0.038
         }
       },
       "ranking_by_cv_poisdev": [
@@ -1683,7 +1683,7 @@
           },
           "overfit": null,
           "size_mb": 0.048,
-          "latency_60_wards_s": 0.0006
+          "latency_60_wards_s": 0.0005
         },
         "seasonal_naive_mean": {
           "kind": "baseline",
@@ -1860,7 +1860,7 @@
             "mean_fold_gap_val_minus_train": 0.06921815693835982
           },
           "size_mb": 0.002,
-          "latency_60_wards_s": 0.0012
+          "latency_60_wards_s": 0.001
         },
         "elastic_net": {
           "kind": "model",
@@ -1919,7 +1919,7 @@
             "mean_fold_gap_val_minus_train": 0.07792623164214438
           },
           "size_mb": 0.002,
-          "latency_60_wards_s": 0.002
+          "latency_60_wards_s": 0.003
         },
         "poisson_glm": {
           "kind": "model",
@@ -2051,9 +2051,9 @@
             {
               "val_year": 2017,
               "MAE": 1.7394420675993578,
-              "RMSE": 3.40301181116895,
+              "RMSE": 3.4030118111689505,
               "PoissonDev": 1.8091386026799234,
-              "R2": 0.49235040230396265
+              "R2": 0.49235040230396254
             },
             {
               "val_year": 2018,
@@ -2078,10 +2078,10 @@
             },
             {
               "val_year": 2021,
-              "MAE": 1.281298565397753,
-              "RMSE": 2.3440775125941675,
+              "MAE": 1.2812985653977536,
+              "RMSE": 2.344077512594168,
               "PoissonDev": 1.2931238462449572,
-              "R2": 0.5631687481219871
+              "R2": 0.563168748121987
             }
           ],
           "validation": {
@@ -2109,7 +2109,7 @@
           "cv_folds": [
             {
               "val_year": 2017,
-              "MAE": 1.7511360090650867,
+              "MAE": 1.7511360090650865,
               "RMSE": 3.1981035095740866,
               "PoissonDev": 1.8043096935838292,
               "R2": 0.5516448471119069
@@ -2123,7 +2123,7 @@
             },
             {
               "val_year": 2019,
-              "MAE": 1.5938951634605185,
+              "MAE": 1.5938951634605183,
               "RMSE": 3.1303941153281656,
               "PoissonDev": 1.5913030067081577,
               "R2": 0.6879147576447864
@@ -2155,7 +2155,7 @@
             "mean_fold_gap_val_minus_train": 0.6744013195718072
           },
           "size_mb": 4.898,
-          "latency_60_wards_s": 0.027
+          "latency_60_wards_s": 0.042
         },
         "gradient_boosting": {
           "kind": "model",
@@ -2273,7 +2273,7 @@
             "mean_fold_gap_val_minus_train": 0.4716044732524477
           },
           "size_mb": 0.06,
-          "latency_60_wards_s": 0.0057
+          "latency_60_wards_s": 0.0047
         },
         "deployed": {
           "kind": "deployed",
@@ -2332,7 +2332,7 @@
             "mean_fold_gap_val_minus_train": 0.4716044732524477
           },
           "size_mb": 0.06,
-          "latency_60_wards_s": 0.0049
+          "latency_60_wards_s": 0.004
         }
       },
       "ranking_by_cv_poisdev": [

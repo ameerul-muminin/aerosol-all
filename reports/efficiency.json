@@ -1,23 +1,41 @@
 {
-  "python": "3.12.10",
-  "platform": "Windows-11-10.0.26300-SP0",
+  "python": "3.9.6",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
   "seconds": {
-    "model_load_joblib": 0.3725,
-    "lag_features_build_all_wards": 4.5466,
-    "app_startup_warm": 10.024,
-    "ranking_60_wards_first_request": 0.0377,
-    "ranking_60_wards_cached_median": 0.004,
-    "forecast_one_ward_cached_median": 0.0009,
-    "forecast_new_week_all_horizons_first_request": 0.8774,
-    "full_retrain_3_horizons": 94.0361
+    "model_load_joblib": 0.4338,
+    "lag_features_build_all_wards": 0.9536,
+    "app_startup_warm": 2.7367,
+    "ranking_60_wards_first_request": 0.0211,
+    "ranking_60_wards_cached_median": 0.0023,
+    "forecast_one_ward_cached_median": 0.0006,
+    "forecast_one_ward_uncached_median": 0.7596,
+    "forecast_one_ward_uncached_p95": 0.8767,
+    "what_if_new_scenario": 0.5304,
+    "what_if_repeat_scenario_median": 0.0163,
+    "forecast_new_week_all_horizons_first_request": 0.8093,
+    "full_retrain_3_horizons": 99.8779,
+    "full_retrain_3_horizons_min": 97.1075,
+    "full_retrain_3_horizons_max": 105.6492
   },
   "bytes": {
-    "model_file": 556844,
-    "ranking_response_raw": 31745,
-    "ranking_response_gzip": 3395,
-    "python_heap_peak": 213586500
+    "model_file": 11401189,
+    "ranking_response_raw": 31732,
+    "ranking_response_gzip": 3318,
+    "python_heap_peak": 229403191
   },
+  "machine_at_start": {
+    "load_avg_1m": 5.12,
+    "cpu_count": 8
+  },
+  "model_file_mb": 11.4,
+  "calls_per_median": 50,
+  "train_repeats": 3,
+  "external_api_calls": 0,
   "external_network_calls": 0,
   "llm_calls": 0,
-  "measured_at": "2026-11-21 16:47:36"
+  "machine_at_end": {
+    "load_avg_1m": 15.25,
+    "cpu_count": 8
+  },
+  "measured_at": "2026-11-21 23:05:17"
 }

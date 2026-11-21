@@ -1,0 +1,132 @@
+{
+  "what": "Ward-ranking accuracy: does the model put the right wards at the top? (report only)\n\nPublic health officers act on the RANKING of wards, not exact counts. For every target week in the\noutbreak season (Jul-Oct), compare the 60-ward ranking from the train-only deployed model with the\nactual case counts:\n  precision_at_10   share of the predicted top-10 that are in the actual top-10\n                    (actual top-10 = wards with cases >= the 10th-highest count, so ties are kept)\n  top5_captured     share of the actual top-5 wards that appear in the predicted top-10\n  spearman          rank correlation across all 60 wards\nReference rankings: seasonal average (ward x week-of-year mean over training years), static\nvulnerability (water-logging index), and random (expected precision@10 = 10/60).\nReported for validation (2022-23) and test (2024-25); nothing is chosen from these numbers.",
+  "random_precision_at_10": 0.16666666666666666,
+  "horizons": {
+    "2": {
+      "validation": {
+        "model": {
+          "weeks": 35,
+          "precision_at_10": 0.4971428571428571,
+          "top5_captured": 0.4302564102564102,
+          "spearman": 0.5166285902120998
+        },
+        "seasonal": {
+          "weeks": 35,
+          "precision_at_10": 0.42,
+          "top5_captured": 0.3682025117739403,
+          "spearman": 0.43754653591887926
+        },
+        "vulnerability": {
+          "weeks": 35,
+          "precision_at_10": 0.40285714285714286,
+          "top5_captured": 0.3573669980812837,
+          "spearman": 0.4217082404069885
+        }
+      },
+      "test": {
+        "model": {
+          "weeks": 34,
+          "precision_at_10": 0.5117647058823529,
+          "top5_captured": 0.4544080919080919,
+          "spearman": 0.4714143128604315
+        },
+        "seasonal": {
+          "weeks": 34,
+          "precision_at_10": 0.46470588235294114,
+          "top5_captured": 0.3978980170156641,
+          "spearman": 0.4003991312653705
+        },
+        "vulnerability": {
+          "weeks": 34,
+          "precision_at_10": 0.42058823529411765,
+          "top5_captured": 0.2952500930442107,
+          "spearman": 0.3697177595029027
+        }
+      }
+    },
+    "3": {
+      "validation": {
+        "model": {
+          "weeks": 35,
+          "precision_at_10": 0.4971428571428571,
+          "top5_captured": 0.4501412872841444,
+          "spearman": 0.5031224211312523
+        },
+        "seasonal": {
+          "weeks": 35,
+          "precision_at_10": 0.42,
+          "top5_captured": 0.3682025117739403,
+          "spearman": 0.43754653591887926
+        },
+        "vulnerability": {
+          "weeks": 35,
+          "precision_at_10": 0.40285714285714286,
+          "top5_captured": 0.3573669980812837,
+          "spearman": 0.4217082404069885
+        }
+      },
+      "test": {
+        "model": {
+          "weeks": 34,
+          "precision_at_10": 0.4852941176470588,
+          "top5_captured": 0.41291829085946735,
+          "spearman": 0.45134341307753684
+        },
+        "seasonal": {
+          "weeks": 34,
+          "precision_at_10": 0.46470588235294114,
+          "top5_captured": 0.3978980170156641,
+          "spearman": 0.4003991312653705
+        },
+        "vulnerability": {
+          "weeks": 34,
+          "precision_at_10": 0.42058823529411765,
+          "top5_captured": 0.2952500930442107,
+          "spearman": 0.3697177595029027
+        }
+      }
+    },
+    "4": {
+      "validation": {
+        "model": {
+          "weeks": 35,
+          "precision_at_10": 0.4685714285714285,
+          "top5_captured": 0.3933856619570905,
+          "spearman": 0.49684139942376654
+        },
+        "seasonal": {
+          "weeks": 35,
+          "precision_at_10": 0.42,
+          "top5_captured": 0.3682025117739403,
+          "spearman": 0.43754653591887926
+        },
+        "vulnerability": {
+          "weeks": 35,
+          "precision_at_10": 0.40285714285714286,
+          "top5_captured": 0.3573669980812837,
+          "spearman": 0.4217082404069885
+        }
+      },
+      "test": {
+        "model": {
+          "weeks": 34,
+          "precision_at_10": 0.48235294117647054,
+          "top5_captured": 0.39032470797176677,
+          "spearman": 0.44939487109716636
+        },
+        "seasonal": {
+          "weeks": 34,
+          "precision_at_10": 0.46470588235294114,
+          "top5_captured": 0.3978980170156641,
+          "spearman": 0.4003991312653705
+        },
+        "vulnerability": {
+          "weeks": 34,
+          "precision_at_10": 0.42058823529411765,
+          "top5_captured": 0.2952500930442107,
+          "spearman": 0.3697177595029027
+        }
+      }
+    }
+  }
+}

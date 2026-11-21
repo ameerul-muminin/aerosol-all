@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import ExtraTreesRegressor, HistGradientBoostingRegressor, RandomForestRegressor
 from sklearn.impute import SimpleImputer
+from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import PoissonRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -31,6 +32,7 @@ METRICS = ROOT / "reports" / "metrics.json"
 SELECTED = ROOT / "models" / "selected_features.json"   # written by src/feature_selection.py (CV-based)
 ENSEMBLE = ROOT / "models" / "ensemble.json"            # written by src/ensemble.py, if adopted
 HYPERPARAMS = ROOT / "models" / "hyperparameters.json"  # written by src/tuning.py (CV-based), if adopted
+POSTPROCESS = ROOT / "models" / "postprocess.json"      # written by src/improvements.py, if adopted
 FEATURE_LIST = ROOT / "reports" / "feature_list.json"   # final ordered inputs per mode/horizon
 
 
@@ -73,6 +75,25 @@ def time_folds(tr):
         yield y, tr[yr < y], tr[yr == y]
 
 
+WEIGHT_KEYS = ("outbreak_weight", "outbreak_threshold", "recency_weight")
+
+
+def split_weight_params(params, d):
+    """Separate the sample-weight options from model settings and build the weights (or None).
+      outbreak_weight w, outbreak_threshold t: rows with target >= t count w times (G5).
+      recency_weight r: linear ramp by target year within this training set, oldest 1, newest 1 + r."""
+    params = dict(params)
+    w, thr, r = (params.pop(k, None) for k in WEIGHT_KEYS)
+    sw = np.ones(len(d))
+    if w and thr is not None:
+        sw = sw * np.where(d["target"].to_numpy() >= thr, w, 1.0)
+    if r:
+        yr = d["target_date"].dt.year.to_numpy()
+        span = max(yr.max() - yr.min(), 1)
+        sw = sw * (1.0 + r * (yr - yr.min()) / span)
+    return params, (sw if (w and thr is not None) or r else None)
+
+
 class HGB:
     def __init__(self, feats, **params):
         self.feats, self.params = feats, params
@@ -84,10 +105,7 @@ class HGB:
         # scikit-learn 1.6 tolerates them but newer versions raise, so they are skipped at fit and
         # at predict. Results are unchanged on 1.6.1 (verified fold by fold).
         self.used_ = [f for f in self.feats if X[f].notna().any()]
-        params = dict(self.params)
-        w, thr = params.pop("outbreak_weight", None), params.pop("outbreak_threshold", None)
-        # optional (G5): weight outbreak weeks (target >= threshold, a training percentile) more
-        sw = np.where(d["target"].to_numpy() >= thr, w, 1.0) if w and thr is not None else None
+        params, sw = split_weight_params(self.params, d)
         self.m = hgb(**params).fit(X[self.used_], d["target"], sample_weight=sw)
         return self
 
@@ -105,8 +123,10 @@ class Blend:
         self.hgb = HGB(self.feats, **self.params).fit(d)
         self.used_ = self.hgb.used_
         self.imp = SimpleImputer(strategy="median").fit(d[self.used_])
+        _, sw = split_weight_params(self.params, d)     # same sample weights for both halves
         self.et = ExtraTreesRegressor(n_estimators=200, min_samples_leaf=20, max_features=0.5,
-                                      n_jobs=-1, random_state=SEED).fit(self.imp.transform(d[self.used_]), d["target"])
+                                      n_jobs=-1, random_state=SEED).fit(self.imp.transform(d[self.used_]),
+                                                                        d["target"], sample_weight=sw)
         return self
 
     def predict(self, d):
@@ -157,13 +177,43 @@ class Ensemble:
         return sum(self.weights[n] * np.clip(m.predict(d), 0, None) for n, m in self.members_.items())
 
 
+class Calibrated:
+    """Optional outbreak fix: isotonic recalibration of a base model's predictions. The mapping is
+    fitted on OUT-OF-FOLD predictions from the time-ordered folds inside the training data, so the
+    validation years stay untouched for calibrating tiers/intervals and for checking the change."""
+    def __init__(self, base_cls, feats, **params):
+        self.base_cls, self.feats, self.params = base_cls, feats, params
+
+    def fit(self, d):
+        self.base = self.base_cls(self.feats, **self.params).fit(d)
+        self.used_ = self.base.used_
+        ps, ys = [], []
+        for _, a, b in time_folds(d):
+            if len(a) and len(b):
+                ps.append(self.base_cls(self.feats, **self.params).fit(a).predict(b))
+                ys.append(b["target"].to_numpy())
+        self.iso = (IsotonicRegression(y_min=0, increasing=True, out_of_bounds="clip")
+                    .fit(np.concatenate(ps), np.concatenate(ys)) if ps else None)
+        return self
+
+    def predict(self, d):
+        p = np.clip(self.base.predict(d), 0, None)
+        return self.iso.predict(p) if self.iso is not None else p
+
+
 def deployed_model(m):
     """Fresh, unfitted model of the same kind, features and settings as a saved bundle entry
-    (plain HistGradientBoosting, possibly outbreak-weighted, or the HGB + extra-trees blend)."""
-    if m.get("kind") == "weighted_ensemble":
-        return Ensemble(list(m["features"]), m["ensemble_weights"], **m["hyperparameters"])
-    cls = Blend if m.get("kind") == "blend_hgb_extra_trees" else HGB
-    return cls(list(m["features"]), **m["hyperparameters"])
+    (plain HistGradientBoosting, possibly weighted, the HGB + extra-trees blend, the weighted
+    ensemble, optionally wrapped in isotonic recalibration)."""
+    kind = m.get("base_kind") or m.get("kind", "")
+    params = dict(m["hyperparameters"])
+    if kind == "weighted_ensemble":
+        cls, params = Ensemble, {**params, "weights": m["ensemble_weights"]}
+    else:
+        cls = Blend if kind == "blend_hgb_extra_trees" else HGB
+    if m.get("calibrated"):
+        return Calibrated(cls, list(m["features"]), **params)
+    return cls(list(m["features"]), **params)
 
 
 class GLM:
@@ -227,22 +277,44 @@ def _conf_q(p, y, coverage):
     return float(np.quantile((p - y) / scale, lvl)), float(np.quantile((y - p) / scale, lvl))
 
 
-def conformal_fit(val_pred, val_actual, coverage=0.80):
+def _season(months):
+    return np.where(np.isin(np.asarray(months), (7, 8, 9, 10)), "peak", "off")
+
+
+def conformal_fit(val_pred, val_actual, coverage=0.80, months=None):
     """Split-conformal intervals, asymmetric and variance-scaled (count noise ~ sqrt(mean)),
     calibrated SEPARATELY per predicted-value bin (Mondrian). A single global calibration is
     dominated by off-season near-zero weeks and under-covers the outbreak season.
     Uses VALIDATION residuals of a train-only model. Returns {bin_index: (q_lo, q_hi)}."""
     p, y = np.asarray(val_pred), np.asarray(val_actual)
     b = np.digitize(p, CONF_BINS)
-    return {int(k): _conf_q(p[b == k], y[b == k], coverage) for k in np.unique(b)}
+    q = {int(k): _conf_q(p[b == k], y[b == k], coverage) for k in np.unique(b)}
+    if months is not None:   # season-aware: also calibrate per (prediction bin, Jul-Oct vs rest)
+        s = _season(months)
+        for k in np.unique(b):
+            for sea in ("peak", "off"):
+                sel = (b == k) & (s == sea)
+                if sel.sum() >= 30:          # enough points for a stable 80% quantile
+                    q[f"{int(k)}|{sea}"] = _conf_q(p[sel], y[sel], coverage)
+    return q
 
 
-def conformal_interval(pred, q):
+def conformal_interval(pred, q, months=None):
+    """80% range. With season-aware quantiles and the target months, use the (bin, season)
+    calibration where available; otherwise the prediction-bin calibration."""
     pred = np.clip(np.asarray(pred, dtype=float), 0, None)
     b = np.digitize(pred, CONF_BINS)
-    fallback = q[max(q)]
-    qlo = np.array([q.get(int(k), fallback)[0] for k in b])
-    qhi = np.array([q.get(int(k), fallback)[1] for k in b])
+    q = {(int(k) if isinstance(k, str) and k.isdigit() else k): v for k, v in q.items()}   # JSON keys
+    int_keys = [k for k in q if isinstance(k, int)]
+    fallback = q[max(int_keys)]
+    if months is not None and any(isinstance(k, str) for k in q):
+        s = np.broadcast_to(_season(months), b.shape)
+        keys = [f"{int(k)}|{sea}" for k, sea in zip(b, s)]
+        qq = [q.get(key, q.get(int(k), fallback)) for key, k in zip(keys, b)]
+    else:
+        qq = [q.get(int(k), fallback) for k in b]
+    qlo = np.array([v[0] for v in qq])
+    qhi = np.array([v[1] for v in qq])
     scale = np.sqrt(pred + 1.0)
     return np.clip(pred - qlo * scale, 0, None), pred + qhi * scale
 
@@ -258,7 +330,7 @@ def test_metrics(te, p_te, conf_q, actual_cuts, cuts, baseline=None):
     """Final held-out numbers. Called once per mode/horizon; nothing downstream reads them to
     make a choice."""
     yte = te["target"].to_numpy()
-    lo, hi = conformal_interval(p_te, conf_q)
+    lo, hi = conformal_interval(p_te, conf_q, months=te["target_date"].dt.month.to_numpy())
     tier_true, tier_pred = to_tier(yte, actual_cuts), to_tier(p_te, cuts)
     ins = te["target_date"].dt.month.between(7, 10).to_numpy()
     out = scores(yte, p_te)
@@ -284,6 +356,14 @@ def load_hyperparameters():
     return None
 
 
+def load_postprocess():
+    """Post-processing adopted by src/improvements.py: {"season_intervals": bool,
+    "isotonic": {"2": bool, ...}}. Defaults to off."""
+    if POSTPROCESS.exists():
+        return json.loads(POSTPROCESS.read_text())
+    return {"season_intervals": False, "isotonic": {}}
+
+
 def load_selected():
     """Per-horizon feature lists chosen by time-ordered CV (src/feature_selection.py), if present."""
     if SELECTED.exists():
@@ -303,6 +383,7 @@ def main():
     selected = load_selected()
     tuned = load_hyperparameters()
     ens_cfg = {int(h): v for h, v in json.loads(ENSEMBLE.read_text()).items()} if ENSEMBLE.exists() else {}
+    post = load_postprocess()
     bundle = {"tier_names": TIER_NAMES, "modes": {m: {} for m in MODES}}
     report = {"split": {"train": "target<=2021-12-31", "val": "2022-01..2023-12", "test": "2024-01..2025-12",
                         "cv": f"expanding window inside train, validation years {list(CV_YEARS)}"},
@@ -352,12 +433,22 @@ def main():
         best = min(cv, key=lambda n: cv[n]["mean"]["PoissonDev"])
 
         # --- held-out VALIDATION: confirm choice, calibrate tiers + intervals (train-only models) ---
+        base_kind = ("weighted_ensemble" if ens_w and best == "hgb_poisson" else
+                     "blend_hgb_extra_trees" if use_blend and best == "hgb_poisson" else best)
+        use_iso = bool(post.get("isotonic", {}).get(str(h))) and best == "hgb_poisson"
+        if use_iso:   # isotonic recalibration on out-of-fold training predictions (outbreak fix)
+            if ens_w:
+                makers["hgb_poisson"] = lambda: Calibrated(Ensemble, feats_h, weights=ens_w, **best_cfg)
+            else:
+                base_cls = Blend if use_blend else HGB
+                makers["hgb_poisson"] = lambda: Calibrated(base_cls, feats_h, **best_cfg)
         cands = {n: makers[n]().fit(tr) for n in makers}
         val = {n: scores(yva, cands[n].predict(va)) for n in cands}
         p_va = cands[best].predict(va)
         actual_cuts = tier_thresholds(tr["target"])
         cuts = calibrate_pred_cuts(p_va, yva, actual_cuts)
-        conf_q = conformal_fit(p_va, yva, 0.80)
+        months_va = va["target_date"].dt.month.to_numpy() if post.get("season_intervals") else None
+        conf_q = conformal_fit(p_va, yva, 0.80, months=months_va)
 
         # --- deployment model: same family + hyperparameters, refit on train+val ---
         final = makers[best]().fit(trva)
@@ -372,9 +463,10 @@ def main():
         feats_final = feats_h if best == "hgb_poisson" else feats
         bundle["modes"]["weather"][h] = {"model": final, "conformal_q": conf_q, "tier_cuts": cuts,
                                          "tier_actual_cuts": actual_cuts,
-                                         "kind": ("weighted_ensemble" if ens_w and best == "hgb_poisson" else
-                                                  "blend_hgb_extra_trees" if use_blend and best == "hgb_poisson" else best),
+                                         "kind": ("calibrated_" if use_iso else "") + base_kind,
+                                         "base_kind": base_kind, "calibrated": use_iso,
                                          "ensemble_weights": ens_w if (ens_w and best == "hgb_poisson") else None,
+                                         "season_intervals": bool(post.get("season_intervals")),
                                          "hyperparameters": best_cfg, "features": feats_final}
         report["horizons"][h] = {"selected": best, "hyperparameters": best_cfg, "cv": cv,
                                  "feature_source": "models/selected_features.json (CV selection)" if selected
@@ -395,7 +487,7 @@ def main():
         m_c = make_c().fit(tr)
         p_va_c = m_c.predict(va)
         cuts_c = calibrate_pred_cuts(p_va_c, yva, actual_cuts)
-        conf_c = conformal_fit(p_va_c, yva, 0.80)
+        conf_c = conformal_fit(p_va_c, yva, 0.80, months=months_va)
         test_c, _, _ = test_metrics(te, m_c.predict(te), conf_c, actual_cuts, cuts_c)
         bundle["modes"]["weather_cases"][h] = {"model": make_c().fit(trva), "conformal_q": conf_c,
                                                "tier_cuts": cuts_c, "tier_actual_cuts": actual_cuts,

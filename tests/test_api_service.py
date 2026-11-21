@@ -90,3 +90,15 @@ def test_warnings_follow_the_rule_and_match_the_ranking():
     assert all(x["city"] == "Gazipur" for x in service.warnings("2025-08-18", "Gazipur")["wards"])
     with pytest.raises(ValueError):
         service.warnings("2025-08-18", "Atlantis")
+
+
+def test_efficiency_counts_cache_hits_live():
+    measured = json.loads(service.EFFICIENCY_PATH.read_text())
+    week = service.meta()["as_of"]["default"]
+    service.ranking(week, 3)                       # make sure the answer is cached
+    before = service.efficiency()
+    assert before["measured"] == measured          # served exactly as measured, nothing typed in
+    service.ranking(week, 3)                       # same question again -> from cache
+    after = service.efficiency()["live"]
+    assert after["by_endpoint"]["ranking"]["from_cache"] == before["live"]["by_endpoint"]["ranking"]["from_cache"] + 1
+    assert after["answers_computed"] == before["live"]["answers_computed"]

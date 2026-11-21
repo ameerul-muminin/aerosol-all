@@ -42,3 +42,12 @@ def test_static_pages_served(client):
     assert client.get("/").status_code == 200
     assert client.get("/app/").status_code == 200
     assert client.get("/nope.html").status_code == 404
+
+
+def test_new_endpoints_over_http(client):
+    assert client.get("/api/lag_profile?city=Gazipur").json["peak_weeks"] in (2, 3, 4)
+    assert client.get("/api/warnings?as_of=2025-08-18").status_code == 200
+    assert client.get("/api/warnings?as_of=2025-08-18&city=Atlantis").status_code == 400
+    r = client.get("/api/efficiency")
+    assert r.status_code == 200 and r.headers["Cache-Control"] == "no-store"   # live counters
+    assert r.json["measured"]["external_api_calls"] == 0

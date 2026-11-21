@@ -139,6 +139,13 @@ def measure(calls: int = N_CALLS, train: bool = False, train_repeats: int = 1) -
         _, res["seconds"]["what_if_new_scenario"] = timed(lambda: post_what_if(150.0))
         _, res["seconds"]["what_if_repeat_scenario_median"] = timed(lambda: post_what_if(150.0), repeat=calls)
 
+        # early warnings reuse the per-horizon forecasts above; breeding clock is computed once from raw data
+        warn = f"/api/warnings?as_of={week}"
+        _, res["seconds"]["warnings_60_wards_first_request"] = timed(lambda: get(warn))
+        _, res["seconds"]["warnings_60_wards_cached_median"] = timed(lambda: get(warn), repeat=calls)
+        _, res["seconds"]["lag_profile_first_request"] = timed(lambda: get("/api/lag_profile"))
+        _, res["seconds"]["lag_profile_cached_median"] = timed(lambda: get("/api/lag_profile"), repeat=calls)
+
         other = "2024-08-05"
         _, res["seconds"]["forecast_new_week_all_horizons_first_request"] = timed(
             lambda: get(f"/api/forecast?ward_id=DNCC_Ward_05&as_of={other}&horizon=4"))

@@ -20,6 +20,7 @@ from api import service
 
 WEB_DIR = Path(__file__).resolve().parents[1] / "web"
 CACHE_SECONDS = 3600  # forecasts for a given (ward, week, horizon) never change
+LIVE_PATHS = {"/api/health", "/api/efficiency"}   # answers change over time: never cached by browsers
 
 
 def create_app() -> Flask:
@@ -49,7 +50,7 @@ def create_app() -> Flask:
 
     @app.after_request
     def compress_and_cache(resp):
-        if request.path.startswith("/api/") and resp.status_code == 200 and request.path != "/api/health":
+        if request.path.startswith("/api/") and resp.status_code == 200 and request.path not in LIVE_PATHS:
             if request.method == "GET":   # scenario POSTs are not cacheable by browsers/CDNs
                 resp.headers["Cache-Control"] = f"public, max-age={CACHE_SECONDS}"
             if "gzip" in request.headers.get("Accept-Encoding", "") and resp.content_length and resp.content_length > 1000:
@@ -87,6 +88,12 @@ def create_app() -> Flask:
     @app.get("/api/warnings")
     def warnings():
         return jsonify(service.warnings(_as_of(), request.args.get("city") or None))
+
+    @app.get("/api/efficiency")
+    def efficiency():
+        resp = jsonify(service.efficiency())
+        resp.headers["Cache-Control"] = "no-store"     # live counters
+        return resp
 
     @app.get("/api/metrics")
     def metrics():

@@ -202,3 +202,27 @@ table.cerr { table-layout: fixed; }
 .warn .act { font-size: 14px; font-weight: 500; }
 #warn-more { margin-top: 12px; }
 @media (max-width: 900px) { .warn li { grid-template-columns: 1fr; } .warn .st { min-width: 0; } }
+
+/* cost & speed */
+.live-big { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 16px; }
+.live-big b { font: 400 56px/1 var(--display); font-variant-numeric: tabular-nums; }
+:root[lang="bn"] .live-big b { font: 700 44px/1.1 var(--font); }
+.live-big span { color: var(--ink-2); max-width: 36ch; }
+.gz { display: grid; gap: 14px; }
+.gz > div { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 12px; align-items: center; font-size: 14px; }
+.gz i { display: block; height: 14px; border-radius: 2px; background: var(--bar); transform-origin: left; }
+.gz i.z { background: var(--ink); }
+.gz b { text-align: right; white-space: nowrap; min-width: 4ch; }
+.gz b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.anim .gz i { animation: grow-x var(--t-bars) var(--ease-out) both; }
+.dl.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; }
+.dl.cols div:nth-child(2) { border-top: 0; padding-top: 0; }
+@media (max-width: 900px) { .dl.cols { grid-template-columns: 1fr; } .dl.cols div:nth-child(2) { border-top: 1px solid var(--line); padding-top: 11px; } }
+.layers { display: grid; gap: 14px; }
+.layer .top { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; margin-bottom: 6px; }
+.layer .top b { font-weight: 500; font-size: var(--fs-small); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.split { display: flex; height: 12px; border-radius: 3px; overflow: hidden; gap: 2px; background: var(--sunk); }
+.split i { display: block; transform-origin: left; }
+.split .hit { background: var(--tier-low); } .split .miss { background: var(--bar); }
+.anim .split i { animation: grow-x var(--t-bars) var(--ease-out) both; }
+@media (max-width: 600px) { .layer .top { flex-direction: column; gap: 2px; } }

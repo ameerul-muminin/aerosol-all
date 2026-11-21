@@ -34,7 +34,7 @@ web/assets/                       css, js, fonts, images (C) — no CDN, no buil
 
 ## Web API (the frontend talks ONLY to these; run `python -m api`)
 `GET /api/meta` · `/api/forecast?ward_id&as_of&horizon` · `/api/ranking?as_of&horizon[&city]` ·
-`/api/metrics` · `/api/history?ward_id&horizon` · `/api/lag_profile[?city]` · `/api/warnings?as_of[&city]` · `/api/health` · `POST /api/what_if` (JSON: ward_id, as_of,
+`/api/metrics` · `/api/history?ward_id&horizon` · `/api/lag_profile[?city]` · `/api/warnings?as_of[&city]` · `/api/efficiency` · `/api/health` · `POST /api/what_if` (JSON: ward_id, as_of,
 horizon, weeks 1–8, any of rainfall_mm [mm per week], avg_temp_c, relative_humidity_pct → baseline vs scenario). Errors: HTTP 400 `{"error": "<friendly message>"}`.
 Dates are ISO `YYYY-MM-DD` Mondays; horizon 2|3|4. Shapes are documented in docs/frontend/ (guide PDF).
 

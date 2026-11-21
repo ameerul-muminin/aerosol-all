@@ -453,3 +453,34 @@ def what_if(body: dict) -> dict:
         "units": {k: WHAT_IF_UNITS[k] for k in (*overrides, "weeks")},
         "warnings": warnings,
     }
+
+
+# ---------------------------------------------------------------- /api/efficiency
+EFFICIENCY_PATH = ROOT / "reports" / "efficiency.json"
+# request-level caches: one entry per distinct question (endpoint + inputs)
+_ANSWER_CACHES = {"forecast": "forecast", "ranking": "ranking", "warnings": "warnings",
+                  "what_if": "_scenario", "metrics": "metrics", "lag_profile": "lag_profile"}
+# where the model actually runs: all wards for one week/horizon, or one typed-weather scenario
+_MODEL_CACHES = ("_ranking_df", "_scenario")
+
+
+def efficiency() -> dict:
+    """Measured costs (reports/efficiency.json, from scripts/measure_efficiency.py) plus live cache
+    counters of this server process since it started. Not cached: the counters change per request."""
+    measured = json.loads(EFFICIENCY_PATH.read_text()) if EFFICIENCY_PATH.exists() else None
+    per = {}
+    for name, fn in _ANSWER_CACHES.items():
+        ci = globals()[fn].cache_info()
+        per[name] = {"from_cache": ci.hits, "computed": ci.misses}
+    hits = sum(v["from_cache"] for v in per.values())
+    misses = sum(v["computed"] for v in per.values())
+    model_runs = sum(globals()[fn].cache_info().misses for fn in _MODEL_CACHES)
+    return {"measured": measured,
+            "live": {"answers_from_cache": hits, "answers_computed": misses,
+                     "share_from_cache": _num(hits / (hits + misses), 3) if hits + misses else None,
+                     "model_runs": model_runs,
+                     # all-ward results reused by other questions (a ward's forecast, warnings, other horizons)
+                     "model_results_reused": _ranking_df.cache_info().hits,
+                     "model_results_needed": _ranking_df.cache_info().hits + _ranking_df.cache_info().misses,
+                     "by_endpoint": per}}
+

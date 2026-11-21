@@ -8,7 +8,7 @@ from lagged weather and ward attributes, so public health officers can target hi
 
 ## Team (each person runs their own Claude Code session, on their own branch)
 - **A (Nazifa): ML.** Owns `src/features.py`, `src/train.py`, models, metrics, and the ARCHITECTURE.md ML sections.
-- **B (Azman): repo and efficiency.** Owns requirements, README, AI disclosure, tests, timings, the git audit and the clean-clone test.
+- **B (Alif): repo and efficiency.** Owns requirements, README, AI disclosure, tests, timings, the git audit and the clean-clone test.
 - **C (Srijita): frontend engineer.** Owns `web/` (marketing page `web/index.html`, dashboard `web/app/`), the design, screenshots and the UI part of the video.
   B and A share `api/`, ARCHITECTURE.md and the rest of the video.
 

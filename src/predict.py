@@ -1,9 +1,12 @@
 """Inference: load serialized models, compute lag features from raw weather, return risk.
 
-Two entry points:
-  * predict(origin_date, horizon, wards=None)      -> DataFrame (all wards, vectorised)
-  * predict_risk(feat_df, ward_id, as_of_date, horizon) -> dict   (team interface for the UI)
-  * predict_all(feat_df, as_of_date, horizon)      -> DataFrame (ranking table, with drivers)
+Team interface (used by the Streamlit app; keys/columns are a contract, see CLAUDE.md):
+  * build_features()                                    -> featurized DataFrame (cache it)
+  * predict_risk(feat_df, ward_id, as_of_date, horizon) -> dict   (one ward, with top_drivers)
+  * predict_all(feat_df, as_of_date, horizon)           -> DataFrame (ranking table, with drivers)
+
+Analysis function:
+  * predict(origin_date, horizon, wards=None)           -> DataFrame for weeks in the dataset
 """
 from __future__ import annotations
 from functools import lru_cache
@@ -11,17 +14,21 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from src.features import add_lag_features, load_raw, feature_columns, HORIZONS
+from src.features import HORIZONS, add_lag_features, feature_columns, required_columns, load_raw
 from src.train import BUNDLE, TIER_NAMES, TRAIN_END, to_tier, conformal_interval
 
-# Plain-language driver groups. Each group's contribution is measured by "what-if" occlusion:
-# replace the group's features with their training-period average and see how much the
-# prediction moves. Positive = raises predicted cases, negative = lowers them.
+# Plain-language driver groups for the team interface. Each group's contribution is measured by
+# "what-if" occlusion: replace the group's features with their training-period average and see
+# how much the prediction moves. Positive = raises predicted cases, negative = lowers them.
+# Columns a horizon's model does not use are skipped (e.g. rain anomaly is used only where CV kept it).
 DRIVER_GROUPS = {
-    "Rain this week and last week": ["rain_lag0", "rain_lag1", "rain_sum_0_1"],
-    "Rain 2-4 weeks ago (mosquito breeding window)": ["rain_lag2", "rain_lag3", "rain_lag4", "rain_sum_2_4"],
+    "Rain this week and last week": ["rain_lag0", "rain_lag1", "rain_sum_0_1",
+                                     "rain_anom_lag0", "rain_anom_lag1"],
+    "Rain 2-4 weeks ago (mosquito breeding window)": ["rain_lag2", "rain_lag3", "rain_lag4", "rain_sum_2_4",
+                                                      "rain_anom_lag2", "rain_anom_lag3", "rain_anom_lag4",
+                                                      "rain_anom_sum_2_4"],
     "Rain 5-8 weeks ago": ["rain_lag5", "rain_lag6", "rain_lag7", "rain_lag8"],
-    "Total rain over the last 1-2 months": ["rain_sum_0_3", "rain_sum_0_8"],
+    "Total rain over the last 1-2 months": ["rain_sum_0_3", "rain_sum_0_8", "rain_anom_sum_0_3"],
     "Temperature (last 4 weeks)": [f"temp_lag{k}" for k in range(5)] + ["temp_mean_0_3"],
     "Humidity (last 4 weeks)": [f"hum_lag{k}" for k in range(5)] + ["hum_mean_0_3"],
     "Time of year (season)": ["week_sin", "week_cos"],
@@ -31,11 +38,10 @@ DRIVER_GROUPS = {
 }
 MIN_HISTORY_WEEKS = 8  # rain_lag8 needs 8 earlier weeks
 
-
 @lru_cache(maxsize=1)
 def load_bundle():
     """Load the model once. If it can't be unpickled (e.g. a different scikit-learn version),
-    retrain from the raw data (takes seconds) instead of crashing on a fresh machine."""
+    retrain from the raw data instead of crashing on a fresh machine."""
     try:
         return joblib.load(BUNDLE)
     except Exception as exc:  # version mismatch or missing file
@@ -51,6 +57,11 @@ def build_features() -> pd.DataFrame:
 
 
 @lru_cache(maxsize=1)
+def _raw():
+    return load_raw()
+
+
+@lru_cache(maxsize=1)
 def _featurized():
     return build_features()
 
@@ -59,26 +70,53 @@ def _featurized():
 def _reference_values() -> pd.Series:
     """Training-period average of each feature: the 'typical conditions' baseline for drivers."""
     d = _featurized()
-    return d.loc[d["date"] <= TRAIN_END, feature_columns()].mean()
+    return d.loc[d["date"] <= TRAIN_END, feature_columns(anomaly=True)].mean()
+
+
+def _check_horizon(horizon):
+    hs = load_bundle()["horizons"]
+    if horizon not in hs:
+        raise ValueError(f"Horizon must be one of {tuple(sorted(hs))} weeks, got {horizon!r}.")
+    return hs[horizon]
+
+
+def _features_of(m) -> list[str]:
+    return m.get("features") or load_bundle()["features"]   # per-horizon list (older bundles: global)
+
+
+def _model_predict(m, d: pd.DataFrame) -> np.ndarray:
+    """Model wrappers select their own feature columns; plain estimators get them explicitly."""
+    model = m["model"]
+    X = d if hasattr(model, "feats") else d[_features_of(m)]
+    return np.clip(model.predict(X), 0, None)
+
+
+# ---------------------------------------------------------------- analysis functions
+
+def _score(rows: pd.DataFrame, horizon: int) -> pd.DataFrame:
+    """Run the horizon's model on featurized rows (one row per ward at its origin week)."""
+    m = _check_horizon(horizon)
+    rows = rows.dropna(subset=required_columns())
+    rows = rows.assign(target_date=rows["date"] + pd.Timedelta(weeks=horizon))
+    p = _model_predict(m, rows)
+    lo, hi = conformal_interval(p, m["conformal_q"])
+    out = rows[["ward_id", "city", "date", "target_date"]].assign(
+        horizon_weeks=horizon, predicted_cases=p, lower_80=lo, upper_80=hi,
+        risk_tier=[TIER_NAMES[i] for i in to_tier(p, m["tier_cuts"])])
+    return out.sort_values("predicted_cases", ascending=False).reset_index(drop=True)
 
 
 def predict(origin_date, horizon: int, wards=None) -> pd.DataFrame:
-    """Forecast cases `horizon` weeks after `origin_date` using weather up to that date."""
-    b = load_bundle()
-    m = b["horizons"][horizon]
+    """Forecast cases `horizon` weeks after `origin_date` using dataset weather up to that date."""
+    _check_horizon(horizon)
     d = _featurized()
     d = d[d["date"] == pd.Timestamp(origin_date)]
+    if d.empty:
+        lo, hi = _raw()["date"].min().date(), _raw()["date"].max().date()
+        raise ValueError(f"no data for {origin_date}; dataset weeks are Mondays {lo} to {hi}.")
     if wards is not None:
         d = d[d["ward_id"].isin(wards)]
-    d = d.dropna(subset=feature_columns())
-    X = d[b["features"]]
-    p = np.clip(m["model"].predict(X), 0, None)
-    lo, hi = conformal_interval(p, m["conformal_q"])
-    out = d[["ward_id", "city", "date"]].assign(
-        target_date=d["date"] + pd.Timedelta(weeks=horizon), horizon_weeks=horizon,
-        predicted_cases=p, lower_80=lo, upper_80=hi,
-        risk_tier=[TIER_NAMES[i] for i in to_tier(p, m["tier_cuts"])])
-    return out.sort_values("predicted_cases", ascending=False).reset_index(drop=True)
+    return _score(d, horizon)
 
 
 # ---------------------------------------------------------------- team interface
@@ -97,14 +135,18 @@ def _check_inputs(feat_df: pd.DataFrame, as_of_date, horizon: int) -> pd.Timesta
     return as_of
 
 
-def _drivers(model, X: pd.DataFrame, base_pred: np.ndarray, top_k: int = 5) -> list[list[tuple[str, float]]]:
+def _drivers(m, X: pd.DataFrame, base_pred: np.ndarray, top_k: int = 5) -> list[list[tuple[str, float]]]:
     """Occlusion attribution per row, vectorised across rows (one model call per group)."""
     ref = _reference_values()
+    used = set(X.columns)
     contrib = {}
     for label, cols in DRIVER_GROUPS.items():
+        cols = [c for c in cols if c in used]
+        if not cols:
+            continue
         Xo = X.copy()
         Xo[cols] = ref[cols].values
-        contrib[label] = base_pred - np.clip(model.predict(Xo), 0, None)
+        contrib[label] = base_pred - _model_predict(m, Xo)
     c = pd.DataFrame(contrib, index=X.index)
     out = []
     for _, row in c.iterrows():
@@ -116,11 +158,11 @@ def _drivers(model, X: pd.DataFrame, base_pred: np.ndarray, top_k: int = 5) -> l
 def predict_all(feat_df: pd.DataFrame, as_of_date, horizon: int, with_drivers: bool = True) -> pd.DataFrame:
     """All wards for one as-of date and horizon, sorted by predicted cases (one row per ward)."""
     as_of = _check_inputs(feat_df, as_of_date, horizon)
-    b = load_bundle()
-    m = b["horizons"][horizon]
-    d = feat_df[feat_df["date"] == as_of].dropna(subset=b["features"])
-    X = d[b["features"]]
-    p = np.clip(m["model"].predict(X), 0, None)
+    m = _check_horizon(horizon)
+    feats = _features_of(m)
+    d = feat_df[feat_df["date"] == as_of].dropna(subset=required_columns())
+    X = d[feats]
+    p = _model_predict(m, X)
     lo, hi = conformal_interval(p, m["conformal_q"])
     out = pd.DataFrame({
         "ward_id": d["ward_id"].values,
@@ -132,7 +174,7 @@ def predict_all(feat_df: pd.DataFrame, as_of_date, horizon: int, with_drivers: b
         "risk_tier": [TIER_NAMES[i] for i in to_tier(p, m["tier_cuts"])],
     })
     if with_drivers:
-        out["top_drivers"] = _drivers(m["model"], X, p)
+        out["top_drivers"] = _drivers(m, X, p)
     return out.sort_values("predicted_cases", ascending=False).reset_index(drop=True)
 
 

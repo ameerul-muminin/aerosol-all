@@ -1,9 +1,12 @@
 """Train per-horizon dengue models with a chronological split; save a joblib bundle + metrics.
 
 Split (by TARGET week, never random):
-  train: 2016-2021   fit models
-  val:   2022-2023   model selection, early stopping, risk-tier thresholds
-  test:  2024-2025   touched once, for the reported final numbers
+  train: 2016-2021   fit models; time-ordered CV inside it picks hyperparameters + model family
+  val:   2022-2023   held-out confirmation, risk-tier calibration, conformal intervals
+  test:  2024-2025   touched once, for the reported final numbers; never used to choose anything
+
+Everything learned from data (tier definitions, scaler, model parameters) is fitted on train
+only; calibration uses validation. Lags and week-of-year are fixed transforms, not learned.
 """
 from __future__ import annotations
 import json
@@ -17,7 +20,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_poisson_deviance
 
-from src.features import ROOT, HORIZONS, build_dataset, feature_columns
+from src.features import ROOT, HORIZONS, build_dataset, feature_columns, add_lag_features, load_raw
 
 TRAIN_END, VAL_END = pd.Timestamp("2021-12-31"), pd.Timestamp("2023-12-31")
 TIER_NAMES = ["Low", "Medium", "High", "Critical"]
@@ -40,13 +43,68 @@ def scores(y, p):
             "PoissonDev": float(mean_poisson_deviance(y, np.clip(p, 1e-3, None)))}
 
 
-def hgb(loss="poisson", **kw):
-    return HistGradientBoostingRegressor(loss=loss, max_iter=300, learning_rate=0.05, max_leaf_nodes=15,
-                                         min_samples_leaf=40, l2_regularization=1.0, random_state=SEED, **kw)
+CV_YEARS = (2017, 2018, 2019, 2020, 2021)   # validation year of each expanding-window fold
+# Grid trimmed after a wider CV search (150/300/600 trees x 7/15/31 leaves) never chose
+# 600 trees or 31 leaves: keeps training fast without changing what CV can select.
+HGB_GRID = [{"max_iter": n, "max_leaf_nodes": l} for n in (150, 300) for l in (7, 15)]
+
+
+def hgb(max_iter=300, max_leaf_nodes=15, loss="poisson", **kw):
+    # early_stopping=False: sklearn's default early stopping holds out a RANDOM 10% of rows,
+    # which would shuffle time inside training. Tree count is chosen by time-ordered CV instead.
+    return HistGradientBoostingRegressor(loss=loss, max_iter=max_iter, learning_rate=0.05,
+                                         max_leaf_nodes=max_leaf_nodes, min_samples_leaf=40,
+                                         l2_regularization=1.0, early_stopping=False,
+                                         random_state=SEED, **kw)
+
+
+def time_folds(tr):
+    """Expanding-window folds by TARGET year inside the training period:
+    fit on years < Y, validate on year Y, for Y in CV_YEARS. Equivalent to TimeSeriesSplit,
+    but cut on dates: rows are stacked ward by ward, so row-count splits would cut mid-history."""
+    yr = tr["target_date"].dt.year
+    for y in CV_YEARS:
+        yield y, tr[yr < y], tr[yr == y]
+
+
+class HGB:
+    def __init__(self, feats, **params):
+        self.feats, self.params = feats, params
+
+    def fit(self, d):
+        self.m = hgb(**self.params).fit(d[self.feats], d["target"])
+        return self
+
+    def predict(self, d):
+        return self.m.predict(d[self.feats])
+
+
+class GLM:
+    """Poisson regression on log1p features; scaler is inside the pipeline, so it is fitted
+    on the training fold only."""
+    def __init__(self, feats):
+        self.feats = feats
+
+    def fit(self, d):
+        self.m = make_pipeline(StandardScaler(), PoissonRegressor(alpha=1.0, max_iter=500)).fit(
+            np.log1p(d[self.feats].clip(lower=0)), d["target"])
+        return self
+
+    def predict(self, d):
+        return self.m.predict(np.log1p(d[self.feats].clip(lower=0)))
+
+
+def cross_validate(make_model, tr):
+    folds = []
+    for y, a, b in time_folds(tr):
+        p = make_model().fit(a).predict(b)
+        folds.append({"val_year": y, "n_train": len(a), "n_val": len(b), **scores(b["target"], p)})
+    mean = {k: float(np.mean([f[k] for f in folds])) for k in ("MAE", "RMSE", "PoissonDev")}
+    return {"folds": folds, "mean": mean}
 
 
 class SeasonalNaive:
-    """Baseline: mean cases for that ward and ISO week-of-year over the training years."""
+    """Baseline: mean cases for that ward and ISO week-of-year over the years it is fitted on."""
     def fit(self, d):
         w = d["target_date"].dt.isocalendar().week.astype(int)
         self.m = d.assign(w=w).groupby(["ward_id", "w"])["target"].mean()
@@ -109,40 +167,49 @@ def to_tier(pred, cuts):
 def main():
     feats = feature_columns()
     bundle = {"features": feats, "horizons": {}, "tier_names": TIER_NAMES}
-    report = {"split": {"train": "target<=2021-12-31", "val": "2022-01..2023-12", "test": "2024-01..2025-12"},
+    report = {"split": {"train": "target<=2021-12-31", "val": "2022-01..2023-12", "test": "2024-01..2025-12",
+                        "cv": f"expanding window inside train, validation years {list(CV_YEARS)}"},
               "horizons": {}}
     t0 = time.time()
+    featurized = add_lag_features(load_raw())     # lags computed once, reused for every horizon
     for h in HORIZONS:
-        d = build_dataset(h)
+        d = build_dataset(h, featurized, featurized=True)
         tr, va, te = split(d)
-        Xtr, Xva, Xte = tr[feats], va[feats], te[feats]
-        ytr, yva, yte = tr["target"], va["target"], te["target"]
+        yva, yte = va["target"], te["target"]
 
-        # --- model selection on VALIDATION only ---
-        cands = {
-            "seasonal_naive": SeasonalNaive().fit(tr),
-            "poisson_glm": make_pipeline(StandardScaler(), PoissonRegressor(alpha=1.0, max_iter=500)).fit(
-                np.log1p(Xtr.clip(lower=0)), ytr),
-            "hgb_poisson": hgb().fit(Xtr, ytr),
-        }
-        def pred(name, X, d_):
-            m = cands[name]
-            if name == "seasonal_naive": return m.predict(d_)
-            if name == "poisson_glm": return m.predict(np.log1p(X.clip(lower=0)))
-            return m.predict(X)
-        val = {n: scores(yva, pred(n, Xva, va)) for n in cands}
-        best = min(val, key=lambda n: val[n]["PoissonDev"])
+        # --- C3: time-ordered CV inside TRAIN: tune HGB, then pick the model family ---
+        hgb_cv = {f"{c['max_iter']}x{c['max_leaf_nodes']}": cross_validate(lambda c=c: HGB(feats, **c), tr)
+                  for c in HGB_GRID}
+        best_cfg_key = min(hgb_cv, key=lambda k: hgb_cv[k]["mean"]["PoissonDev"])
+        best_cfg = next(c for c in HGB_GRID if f"{c['max_iter']}x{c['max_leaf_nodes']}" == best_cfg_key)
+        makers = {"seasonal_naive": SeasonalNaive, "poisson_glm": lambda: GLM(feats),
+                  "hgb_poisson": lambda: HGB(feats, **best_cfg)}
+        cv = {"seasonal_naive": cross_validate(makers["seasonal_naive"], tr),
+              "poisson_glm": cross_validate(makers["poisson_glm"], tr),
+              "hgb_poisson": hgb_cv[best_cfg_key]}
+        # rain-anomaly features: kept only if they improve CV deviance at the chosen config
+        feats_anom = feature_columns(anomaly=True)
+        cv_anom = cross_validate(lambda: HGB(feats_anom, **best_cfg), tr)
+        use_anomaly = cv_anom["mean"]["PoissonDev"] < cv["hgb_poisson"]["mean"]["PoissonDev"]
+        if use_anomaly:
+            cv["hgb_poisson"] = cv_anom
+        feats_h = feats_anom if use_anomaly else feats
+        makers["hgb_poisson"] = lambda: HGB(feats_h, **best_cfg)
+        best = min(cv, key=lambda n: cv[n]["mean"]["PoissonDev"])
 
-        # --- refit chosen family on train+val for deployment; quantile models for 80% interval ---
-        trva = pd.concat([tr, va])
-        final = hgb().fit(trva[feats], trva["target"]) if best == "hgb_poisson" else cands[best]
-        actual_cuts = tier_thresholds(ytr)
-        p_va = pred(best, Xva, va)
+        # --- held-out VALIDATION: confirm choice, calibrate tiers + intervals (train-only models) ---
+        cands = {n: makers[n]().fit(tr) for n in makers}
+        val = {n: scores(yva, cands[n].predict(va)) for n in cands}
+        p_va = cands[best].predict(va)
+        actual_cuts = tier_thresholds(tr["target"])
         cuts = calibrate_pred_cuts(p_va, yva, actual_cuts)
         conf_q = conformal_fit(p_va, yva, 0.80)
 
+        # --- deployment model: same family + hyperparameters, refit on train+val ---
+        final = makers[best]().fit(pd.concat([tr, va]))
+
         # --- final test numbers (train-only models for an honest estimate) ---
-        p_te = pred(best, Xte, te)
+        p_te = cands[best].predict(te)
         lo, hi = conformal_interval(p_te, conf_q)
         tier_true, tier_pred = to_tier(yte, actual_cuts), to_tier(p_te, cuts)
         test = scores(yte, p_te)
@@ -158,11 +225,19 @@ def main():
         te_out = te[["ward_id", "city", "target_date"]].assign(actual=yte.values, pred=p_te, lo=lo, hi=hi)
         te_out.to_csv(ROOT / "reports" / f"test_predictions_h{h}.csv", index=False)
 
-        bundle["horizons"][h] = {"model": final, "conformal_q": conf_q, "tier_cuts": cuts, "tier_actual_cuts": actual_cuts, "kind": best}
-        report["horizons"][h] = {"selected": best, "validation": val, "test": test, "tier_cuts_on_prediction": cuts, "tier_definition_actual_cases": actual_cuts, "conformal_q": conf_q,
+        bundle["horizons"][h] = {"model": final, "conformal_q": conf_q, "tier_cuts": cuts, "tier_actual_cuts": actual_cuts, "kind": best, "hyperparameters": best_cfg,
+                                 "features": feats_h if best == "hgb_poisson" else feats}
+        report["horizons"][h] = {"selected": best, "hyperparameters": best_cfg, "cv": cv,
+                                 "rain_anomaly": {"used": bool(use_anomaly),
+                                                  "cv_poisdev_without": hgb_cv[best_cfg_key]["mean"]["PoissonDev"],
+                                                  "cv_poisdev_with": cv_anom["mean"]["PoissonDev"]},
+                                 "hgb_grid_cv_mean": {k: v["mean"] for k, v in hgb_cv.items()},
+                                 "validation": val, "test": test, "tier_cuts_on_prediction": cuts, "tier_definition_actual_cases": actual_cuts, "conformal_q": conf_q,
                                  "n": {"train": len(tr), "val": len(va), "test": len(te)}}
-        print(f"h={h}w selected={best}  val PoisDev: " +
-              ", ".join(f"{n}={v['PoissonDev']:.3f}" for n, v in val.items()))
+        print(f"h={h}w selected={best} {best_cfg} rain_anomaly={use_anomaly} "
+              f"(CV {hgb_cv[best_cfg_key]['mean']['PoissonDev']:.3f} -> {cv_anom['mean']['PoissonDev']:.3f})\n   CV PoisDev: " +
+              ", ".join(f"{n}={v['mean']['PoissonDev']:.3f}" for n, v in cv.items()) +
+              " | val PoisDev: " + ", ".join(f"{n}={v['PoissonDev']:.3f}" for n, v in val.items()))
         print(f"   test MAE={test['MAE']:.3f} RMSE={test['RMSE']:.3f} (naive MAE={test['baseline_seasonal_naive']['MAE']:.3f}) "
               f"cov80={test['interval80_coverage']:.2f}/JulOct={test['interval80_coverage_jul_oct']:.2f} tier_acc={test['tier_exact_acc']:.2f} "
               f"within1={test['tier_within_one']:.2f} crit_recall={test['critical_recall']}")
@@ -173,4 +248,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Import main from the package module so pickled wrapper classes are recorded as
+    # src.train.HGB (loadable anywhere), not __main__.HGB.
+    from src.train import main as _main
+    _main()

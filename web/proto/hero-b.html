@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proto · Hero B · Poster</title>
+<link rel="stylesheet" href="proto.css">
+<style>
+  .hero { display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(16px, 3vw, 48px); padding: 12px clamp(16px, 3vw, 40px) 40px; align-items: end; }
+  h1.display { font-size: clamp(64px, 10vw, 168px); }
+  h1 .hl { display: inline-block; background: var(--accent); padding: 0 .12em; margin-left: -.06em; transform: rotate(-1.5deg); }
+  .sub { font-size: 17px; color: var(--ink-2); max-width: 40ch; margin: 22px 0 22px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .ticket { background: var(--paper); border-radius: 22px; padding: 22px; box-shadow: 0 30px 60px -30px rgba(42,24,16,.45); position: relative; transform: rotate(1.2deg); }
+  .ticket .top { padding-right: 70px; display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-3); font-weight: 600; }
+  .ticket .wd { font: 400 34px/1 var(--display); text-transform: uppercase; margin: 10px 0 2px; }
+  .ticket .big { display: flex; align-items: baseline; gap: 12px; margin: 14px 0 4px; }
+  .ticket .big b { font: 400 104px/0.9 var(--display); }
+  .ticket .big span { color: var(--ink-2); font-size: 14px; }
+  .ticket .tierbig { font-size: 22px; }
+  .bars { display: flex; align-items: flex-end; gap: 5px; height: 92px; margin-top: 18px; border-bottom: 1.5px solid var(--ink); }
+  .bars i { flex: 1; background: var(--sunk); border-radius: 4px 4px 0 0; transform-origin: bottom; animation: grow 320ms var(--ease-out) both; }
+  .bars i.bw { background: var(--accent); outline: 1.5px solid var(--ink); }
+  .bars i.f { background: repeating-linear-gradient(135deg, var(--ink) 0 2px, transparent 2px 6px); }
+  @keyframes grow { from { transform: scaleY(0); } }
+  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--ink-3); margin-top: 8px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .stamp { position: absolute; right: -14px; top: -18px; width: 92px; height: 92px; }
+  .strip { padding: 0 clamp(16px, 3vw, 40px) 36px; }
+  .strip h2 { font: 600 15px var(--font); margin: 0 0 10px; }
+  .grid60 { display: grid; grid-template-columns: repeat(30, 1fr); gap: 4px; }
+  .grid60 a { aspect-ratio: 1; border-radius: 4px; display: grid; place-items: center; font-size: 10px; color: var(--on-dark); text-decoration: none; }
+  .counts { display: flex; gap: 18px; font-size: 14px; margin-top: 10px; flex-wrap: wrap; }
+  .land { display: block; width: 100%; height: auto; }
+  .landwrap { background: var(--sky); position: relative; }
+  .landwrap .over { position: absolute; left: clamp(16px, 3vw, 40px); top: clamp(24px, 4vw, 56px); max-width: 520px; }
+  .landwrap h2 { font-size: clamp(36px, 5vw, 76px); }
+  @media (max-width: 820px) { .hero { grid-template-columns: 1fr; } .grid60 { grid-template-columns: repeat(12, 1fr); } .landwrap .over { position: static; padding: 24px 16px 0; } }
+</style>
+</head>
+<body>
+<nav class="nav"><span class="brand">Dengue Outlook</span>
+  <span class="links"><a href="#how">How it works</a><a href="#acc">Accuracy</a><a class="btn" href="/app/">Open dashboard</a></span></nav>
+
+<header class="hero">
+  <div>
+    <h1 class="display">Rain today.<br>Dengue in<br><span class="hl">3 weeks.</span></h1>
+    <p class="sub">We forecast cases and risk for 60 city wards in Bangladesh, 2 to 4 weeks ahead, so cleanup teams reach the right wards before the peak.</p>
+    <div class="row"><a class="btn lime" href="/app/">See your ward’s outlook →</a><a class="btn" href="#how">How the forecast works</a></div>
+  </div>
+
+  <article class="ticket" id="ticket" aria-live="polite">
+    <svg class="stamp" viewBox="0 0 100 100" aria-hidden="true">
+      <defs><path id="circ" d="M50 50 m-36 0 a36 36 0 1 1 72 0 a36 36 0 1 1 -72 0"/></defs>
+      <circle cx="50" cy="50" r="48" fill="#D6E04B"/>
+      <text font-family="Hind Siliguri" font-weight="600" font-size="10.5" fill="#2A1810" letter-spacing="2"><textPath href="#circ">LIVE MODEL · LIVE MODEL ·</textPath></text>
+      <path d="M50 34 C 58 46 62 52 62 58 a12 12 0 0 1 -24 0 C 38 52 42 46 50 34Z" fill="#2A1810"/>
+    </svg>
+    <div class="top"><span id="t-city" class="skel">Dhaka South</span><span id="t-week" class="skel">Week of 00 Xxx</span></div>
+    <div class="wd" id="t-ward"><span class="skel">Ward 00</span></div>
+    <div class="tierbig" id="t-tier"><span class="skel">Critical</span></div>
+    <div class="big"><b id="t-cases" class="skel">00</b><span id="t-range" class="skel">expected cases, likely 0–00</span></div>
+    <div class="bars" id="t-bars" role="img" aria-label="Weekly rainfall, last 9 weeks"></div>
+    <div class="legend"><span><i style="background:var(--sunk)"></i>rain, mm/week</span><span><i style="background:var(--accent);outline:1px solid var(--ink)"></i>breeding window</span><span><i style="background:repeating-linear-gradient(135deg,#2A1810 0 2px,transparent 2px 5px)"></i>forecast week</span></div>
+  </article>
+</header>
+
+<section class="strip">
+  <h2 id="s-h">All 60 wards, 3 weeks ahead</h2>
+  <div class="grid60" id="grid"></div>
+  <div class="counts" id="counts"></div>
+</section>
+
+<section class="landwrap" id="how">
+  <div class="over"><h2 class="display">Standing water is the signal</h2>
+  <p>Mosquitoes breed in 7–14 days. Cases follow rain by 2–4 weeks. That delay is the window to act. <small>(EDU AI Hackathon 2026 brief)</small></p></div>
+  <svg class="land" viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <g stroke="#2F4B5A" stroke-width="2" stroke-linecap="round" opacity=".45" id="rainB"></g>
+    <path d="M0 300 C 200 240 360 280 520 250 S 860 200 1040 250 S 1300 280 1440 240 V420 H0Z" fill="#5D7A3B"/>
+    <path d="M0 340 C 240 300 420 340 620 310 S 980 290 1200 330 S 1380 340 1440 320 V420 H0Z" fill="#D7A238"/>
+    <ellipse cx="420" cy="372" rx="120" ry="14" fill="#9CBCEB"/><ellipse cx="980" cy="382" rx="80" ry="10" fill="#9CBCEB"/>
+    <path d="M0 380 C 260 360 520 392 760 374 S 1200 360 1440 386 V420 H0Z" fill="#C4673E"/>
+    <g stroke="#2A1810" stroke-width="2.4" fill="none">
+      <path d="M140 300 q6 -40 0 -70 M152 302 q10 -34 18 -58 M128 302 q-8 -30 -18 -50"/>
+      <path d="M1220 300 q6 -40 0 -70 M1232 302 q10 -34 18 -58 M1208 302 q-8 -30 -18 -50"/>
+      <path d="M700 312 q4 -26 0 -46 M708 312 q8 -22 14 -38"/>
+    </g>
+  </svg>
+</section>
+<div class="protobar">PROTOTYPE · Hero B “Poster + ticket” · live data</div>
+
+<script type="module">
+import { api, fmt1, fmt0, ward, date, tierHTML, TIERVAR, GLYPH } from "./proto.js";
+const rb = document.getElementById("rainB");
+for (let i = 0; i < 120; i++) { const x = (i * 97) % 1440, y = (i * 41) % 230;
+  rb.insertAdjacentHTML("beforeend", `<line x1="${x}" y1="${y}" x2="${x - 6}" y2="${y + 16}"/>`); }
+
+const rank = await api("/api/ranking?as_of=2025-07-14&horizon=3");
+const top = rank.wards[0];
+const f = await api(`/api/forecast?ward_id=${top.ward_id}&as_of=2025-07-14&horizon=3`);
+const set = (id, html) => { const e = document.getElementById(id); e.classList.remove("skel"); e.innerHTML = html; };
+set("t-city", `${f.city} · highest this week`);
+set("t-week", `Week of ${date(f.forecast_week)}`);
+set("t-ward", ward(f.ward_id));
+set("t-tier", tierHTML(f.risk_tier) + " risk");
+set("t-cases", fmt1(f.predicted_cases));
+set("t-range", `expected cases<br>likely ${fmt0(f.range_low)}–${fmt0(f.range_high)}`);
+const tl = f.rain_timeline, max = Math.max(...tl.map((d) => d.rain_mm || 0));
+document.getElementById("t-bars").innerHTML = tl.map((d, i) =>
+  `<i class="${d.status === "forecast" ? "f" : d.in_breeding_window ? "bw" : ""}" title="${date(d.week)}: ${d.rain_mm ?? "not known yet"} mm" style="height:${d.rain_mm == null ? (d.status === "forecast" ? 100 : 6) : Math.max(4, (d.rain_mm / max) * 100)}%;animation-delay:${i * 18}ms"></i>`).join("");
+
+document.getElementById("s-h").textContent = `All ${rank.wards.length} wards, week of ${date(rank.forecast_week)}`;
+document.getElementById("grid").innerHTML = rank.wards.map((w) =>
+  `<a href="/app/?ward=${w.ward_id}#outlook" style="background:${TIERVAR(w.risk_tier)}" title="${ward(w.ward_id)}: ${fmt1(w.predicted_cases)} cases, ${w.risk_tier}"><span aria-hidden="true">${GLYPH[w.risk_tier]}</span></a>`).join("");
+document.getElementById("counts").innerHTML = ["Critical", "High", "Medium", "Low"].map((t) => `<span>${tierHTML(t)} <b>${rank.tier_counts[t]}</b></span>`).join("");
+</script>
+</body>
+</html>

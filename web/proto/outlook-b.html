@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proto · Outlook B · Field cards</title>
+<link rel="stylesheet" href="proto.css">
+<style>
+  .shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+  aside { background: var(--ink); color: var(--on-dark); padding: 22px 18px; display: flex; flex-direction: column; gap: 18px; }
+  aside .brand { font: 400 30px/0.9 var(--display); text-transform: uppercase; color: var(--accent); }
+  aside nav a { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-weight: 600; }
+  aside nav a[aria-current] { background: var(--accent); color: var(--ink); }
+  aside label { display: grid; gap: 6px; font-size: 13px; color: #D9D2C3; }
+  aside select { min-height: 44px; border-radius: 10px; border: 0; background: #3B271C; color: var(--on-dark); font: 600 15px var(--font); padding: 0 10px; }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); background: #3B271C; border-radius: 10px; padding: 4px; position: relative; }
+  .seg button { position: relative; z-index: 1; min-height: 40px; border: 0; background: none; color: var(--on-dark); font: 600 14px var(--font); cursor: pointer; }
+  .seg .thumb { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 3); background: var(--accent); border-radius: 8px; transition: transform 240ms var(--ease-out); }
+  .seg button[aria-pressed="true"] { color: var(--ink); }
+  aside .lang { margin-top: auto; }
+  main { padding: 24px clamp(16px, 2.4vw, 32px) 80px; display: grid; gap: 16px; grid-template-columns: repeat(12, 1fr); align-content: start; }
+  .card { background: var(--paper); border-radius: var(--r-card); padding: 20px; position: relative; overflow: hidden; }
+  .card h2 { font: 400 26px/1 var(--display); text-transform: uppercase; margin: 0 0 12px; letter-spacing: .01em; }
+  .head { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 12px; }
+  .head h1 { font-size: clamp(48px, 6vw, 92px); }
+  .head p { margin: 0; color: var(--ink-2); }
+  .verdict { grid-column: span 5; color: var(--on-dark); min-height: 320px; display: flex; flex-direction: column; }
+  .verdict .lbl { font-weight: 600; opacity: .9; }
+  .verdict .n { font: 400 168px/0.85 var(--display); margin-top: auto; }
+  .verdict .t { font: 400 40px/1 var(--display); text-transform: uppercase; display: flex; gap: 10px; align-items: center; }
+  .verdict .t span:first-child { background: var(--paper); color: var(--ink); border-radius: 8px; padding: 2px 8px; font-size: 30px; }
+  .verdict .r { margin-top: 8px; }
+  .verdict svg.tex { position: absolute; right: -40px; top: -40px; width: 260px; opacity: .22; }
+  .hz { grid-column: span 7; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .hz button { text-align: left; border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 14px; font: inherit; color: inherit; cursor: pointer; transition: transform 160ms var(--ease-out); }
+  .hz button:active { transform: scale(.97); }
+  .hz button[aria-pressed="true"] { border-color: var(--ink); background: var(--accent); }
+  .hz b { display: block; font: 400 56px/1 var(--display); margin: 6px 0; }
+  .hz .card2 { grid-column: 1 / -1; }
+  .mini { display: flex; align-items: end; gap: 4px; height: 70px; }
+  .mini i { flex: 1; background: var(--sunk); border-radius: 3px 3px 0 0; }
+  .mini i.bw { background: var(--accent); outline: 1.5px solid var(--ink); }
+  .mini i.f { background: repeating-linear-gradient(135deg, var(--ink) 0 2px, transparent 2px 6px); }
+  .why { grid-column: span 7; }
+  .inp { grid-column: span 5; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
+  .inp h2 { grid-column: 1 / -1; }
+  .inp div { background: var(--bg); border-radius: 12px; padding: 12px; }
+  .inp div b { display: block; font: 400 32px/1 var(--display); }
+  .inp div span { font-size: 13px; color: var(--ink-2); }
+  .rows { display: grid; gap: 10px; }
+  .drv { display: grid; grid-template-columns: 1fr 64px; gap: 4px 12px; align-items: center; }
+  .drv .l { font-weight: 600; font-size: 15px; }
+  .drv .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .drv .tr { grid-column: 1 / -1; height: 12px; background: var(--sunk); border-radius: 999px; position: relative; }
+  .drv .tr i { position: absolute; top: 0; bottom: 0; border-radius: 999px; transform-origin: left; animation: g 320ms var(--ease-out) both; }
+  @keyframes g { from { transform: scaleX(0); } }
+  .sum { display: flex; align-items: center; gap: 10px; margin: 4px 0 16px; font-size: 15px; }
+  .sum b { font: 400 34px/1 var(--display); }
+  .sum .arr { flex: 1; height: 2px; background: var(--ink); position: relative; }
+  .sum .arr:after { content: ""; position: absolute; right: -2px; top: -5px; border: 6px solid transparent; border-left: 9px solid var(--ink); }
+  .err { grid-column: 1 / -1; color: var(--tier-critical); font-weight: 600; }
+  @media (max-width: 960px) { .shell { grid-template-columns: 1fr; } .verdict, .hz, .why, .inp { grid-column: 1 / -1; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside>
+    <div class="brand">Dengue<br>Outlook</div>
+    <nav><a href="#" aria-current="page">Ward outlook</a><a href="#">All wards</a><a href="#">Model accuracy</a></nav>
+    <label>Ward<select id="ward"></select></label>
+    <label>Week of<select id="asof"></select></label>
+    <div><div style="font-size:13px;color:#D9D2C3;margin-bottom:6px">Forecast ahead</div>
+    <div class="seg" role="group" aria-label="Forecast horizon"><span class="thumb" id="thumb"></span><button data-h="2">2 wk</button><button data-h="3">3 wk</button><button data-h="4">4 wk</button></div></div>
+    <button class="btn lang" style="border-color:var(--on-dark);color:var(--on-dark)" type="button">বাংলা</button>
+  </aside>
+  <main id="main">
+    <div class="head"><h1 class="display" id="title"><span class="skel">Ward 00</span></h1><p id="sub"><span class="skel">Dhaka South · week of 00 Xxx 0000</span></p></div>
+    <article class="card verdict" id="verdict" style="background:var(--ink-3)">
+      <svg class="tex" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="2"><circle cx="50" cy="50" r="10"/><circle cx="50" cy="50" r="22"/><circle cx="50" cy="50" r="34"/><circle cx="50" cy="50" r="46"/></g></svg>
+      <div class="lbl" id="v-l">Expected cases</div>
+      <div class="n" id="v-n"><span class="skel">00</span></div>
+      <div class="t" id="v-t"></div>
+      <div class="r" id="v-r"></div>
+    </article>
+    <section class="card hz"><div class="card2"><h2>Two, three, four weeks out</h2></div><div id="hz" style="display:contents"></div>
+      <div class="card2"><div style="font-size:13px;color:var(--ink-2);margin-bottom:6px">Rain before the forecast week (lime = breeding window, hatched = forecast week)</div><div class="mini" id="mini" role="img"></div></div></section>
+    <section class="card why"><h2>Why this forecast</h2><div class="sum" id="sum"></div><div class="rows" id="drv"></div></section>
+    <section class="card inp" id="inp"><h2>What the model saw</h2></section>
+  </main>
+</div>
+<div class="protobar">PROTOTYPE · Outlook B “Field cards + sidebar” · live data</div>
+<script type="module">
+import { api, fmt1, fmt0, ward, date, GLYPH, TIERVAR, params } from "./proto.js";
+const st = params(), meta = await api("/api/meta");
+const wsel = document.getElementById("ward"), asel = document.getElementById("asof");
+wsel.innerHTML = meta.cities.map((c) => `<optgroup label="${c.city}">${c.wards.map((w) => `<option value="${w}">${ward(w)}</option>`).join("")}</optgroup>`).join("");
+const weeks = []; for (let d = new Date(meta.as_of.max); weeks.length < 104; d.setDate(d.getDate() - 7)) weeks.push(d.toISOString().slice(0, 10));
+asel.innerHTML = weeks.map((w) => `<option value="${w}">${date(w)}</option>`).join("");
+wsel.value = st.ward; asel.value = st.as_of;
+const segBtns = [...document.querySelectorAll(".seg button")];
+async function load() {
+  segBtns.forEach((b, i) => { const on = +b.dataset.h === st.h; b.setAttribute("aria-pressed", on); if (on) document.getElementById("thumb").style.transform = `translateX(${i * 100}%)`; });
+  history.replaceState(null, "", `?ward=${st.ward}&as_of=${st.as_of}&h=${st.h}`);
+  let f; try { f = await api(`/api/forecast?ward_id=${st.ward}&as_of=${st.as_of}&horizon=${st.h}`); }
+  catch (e) { document.getElementById("sub").innerHTML = `<span class="err">${e.message}</span>`; return; }
+  document.getElementById("title").textContent = ward(f.ward_id);
+  document.getElementById("sub").textContent = `${f.city} · forecast for the week of ${date(f.forecast_week)} (data up to ${date(f.as_of)})`;
+  document.getElementById("verdict").style.background = TIERVAR(f.risk_tier);
+  document.getElementById("v-l").textContent = `Expected cases, ${f.horizon} weeks ahead`;
+  document.getElementById("v-n").textContent = fmt1(f.predicted_cases);
+  document.getElementById("v-t").innerHTML = `<span aria-hidden="true">${GLYPH[f.risk_tier]}</span><span>${f.risk_tier} risk</span>`;
+  document.getElementById("v-r").textContent = `Likely ${fmt0(f.range_low)}–${fmt0(f.range_high)} cases (8 weeks in 10)`;
+  document.getElementById("hz").innerHTML = ["2", "3", "4"].map((h) => { const b = f.by_horizon[h];
+    return `<button data-h="${h}" aria-pressed="${+h === st.h}"><span style="font-weight:600">+${h} weeks</span><b>${fmt1(b.predicted_cases)}</b><span class="tier" style="color:${TIERVAR(b.risk_tier)}"><span class="g">${GLYPH[b.risk_tier]}</span>${b.risk_tier}</span></button>`; }).join("");
+  document.querySelectorAll("#hz button").forEach((b) => (b.onclick = () => { st.h = +b.dataset.h; load(); }));
+  const tl = f.rain_timeline, mm = Math.max(...tl.map((d) => d.rain_mm || 0));
+  const mini = document.getElementById("mini");
+  mini.setAttribute("aria-label", `Weekly rainfall: ${tl.filter((d) => d.rain_mm != null).map((d) => `${date(d.week)} ${d.rain_mm} mm`).join(", ")}`);
+  mini.innerHTML = tl.map((d) => `<i class="${d.status === "forecast" ? "f" : d.in_breeding_window ? "bw" : ""}" title="${date(d.week)}: ${d.rain_mm ?? "not known yet"}" style="height:${d.rain_mm == null ? (d.status === "forecast" ? 100 : 4) : Math.max(4, (d.rain_mm / mm) * 100)}%"></i>`).join("");
+  document.getElementById("sum").innerHTML = `<span>Average week</span><b>${fmt1(f.driver_reference_cases)}</b><span class="arr"></span><span>this ward</span><b>${fmt1(f.predicted_cases)}</b>`;
+  const mx = Math.max(...f.top_drivers.map((d) => Math.abs(d.effect)));
+  document.getElementById("drv").innerHTML = f.top_drivers.map((d, i) => `<div class="drv"><span class="l">${d.label}</span><span class="v" style="color:${d.effect >= 0 ? "var(--raises)" : "var(--lowers)"}">${d.effect >= 0 ? "+" : "−"}${fmt1(Math.abs(d.effect))}</span><span class="tr"><i style="left:0;width:${(Math.abs(d.effect) / mx) * 100}%;background:${d.effect >= 0 ? "var(--raises)" : "var(--lowers)"};animation-delay:${i * 40}ms"></i></span></div>`).join("");
+  const r = f.recent, wp = f.ward_profile;
+  document.getElementById("inp").innerHTML = `<h2>What the model saw</h2>` + [
+    [`${fmt0(r.rain_last_4_weeks_mm)} mm`, "rain, last 4 weeks"], [`${fmt0(r.humidity_pct)}%`, "humidity"], [`${fmt1(r.avg_temp_c)}°C`, "average temperature"],
+    [r.cases_this_week, "cases this week"], [wp.water_logging_risk_index, "water-logging risk (0–1)"], [fmt0(wp.population_density_sqkm), "people per km²"],
+  ].map(([v, k]) => `<div><b>${v}</b><span>${k}</span></div>`).join("");
+}
+wsel.onchange = () => { st.ward = wsel.value; load(); };
+asel.onchange = () => { st.as_of = asel.value; load(); };
+segBtns.forEach((b) => (b.onclick = () => { st.h = +b.dataset.h; load(); }));
+load();
+</script>
+</body>
+</html>

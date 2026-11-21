@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proto · Hero A · Disk</title>
+<link rel="stylesheet" href="proto.css">
+<style>
+  .hero { position: relative; overflow: hidden; padding: 0 clamp(16px, 3vw, 40px); }
+  h1.display { font-size: clamp(56px, 10.2vw, 172px); color: var(--ink); white-space: nowrap; }
+  @media (max-width: 760px) { h1.display { white-space: normal; } }
+  .sub { max-width: 34ch; font-size: 17px; margin: 14px 0 0; color: var(--ink-2); }
+  .stage { position: relative; height: clamp(380px, 44vw, 620px); margin-top: 8px; }
+  .disk { position: absolute; left: 50%; transform: translateX(-50%); top: 0; width: min(78vw, 1040px); aspect-ratio: 1; }
+  .chip { z-index: 2; }
+  .cta { position: absolute; right: 0; bottom: 28px; z-index: 3; }
+  .asof { margin: 10px 0 0; display: inline-block; background: var(--paper); padding: 4px 12px; border-radius: 999px; font-size: 13px; color: var(--ink-3); z-index: 3; }
+  .band { position: relative; background: var(--river); color: var(--on-dark); padding: clamp(48px, 7vw, 104px) clamp(16px, 3vw, 40px); overflow: hidden; }
+  .band h2 { font-size: clamp(40px, 6vw, 92px); color: var(--accent); max-width: 11ch; position: relative; }
+  .band p { max-width: 46ch; position: relative; color: #E6E0D2; }
+  .band .facts { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; position: relative; }
+  .band .fact { border: 1.5px solid rgba(244,239,226,.35); border-radius: var(--r-card); padding: 14px 18px; min-width: 190px; }
+  .band .fact b { display: block; font: 400 40px/1 var(--display); color: var(--on-dark); }
+  .band small { display: block; margin-top: 18px; font-size: 12px; color: #CFC8B8; position: relative; }
+  .rain { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .5; }
+  @media (max-width: 760px) {
+    .chip { position: static; margin: 8px 0; box-shadow: none; }
+    .stage { height: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-bottom: 90px; }
+    .disk { display: none; }
+  }
+</style>
+</head>
+<body>
+<nav class="nav"><span class="brand">Dengue Outlook</span>
+  <span class="links"><a href="#how">How it works</a><a href="#acc">Accuracy</a><a class="btn" href="/app/">Open dashboard</a></span></nav>
+
+<header class="hero">
+  <h1 class="display">See the outbreak first</h1>
+  <p class="sub">Ward-level dengue forecasts 2, 3 and 4 weeks ahead, built from last weeks' rain, heat and humidity.</p>
+  <p class="asof" id="asof"><span class="skel">Forecast for week of 00 Xxx 0000</span></p>
+
+  <div class="stage" id="stage">
+    <svg class="disk" viewBox="0 0 1000 1000" aria-hidden="true">
+      <defs>
+        <clipPath id="c"><circle cx="500" cy="500" r="490"/></clipPath>
+        <pattern id="hatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
+          <line x1="0" y1="0" x2="0" y2="14" stroke="#9CBCEB" stroke-width="2" opacity=".55"/></pattern>
+        <radialGradient id="sh" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></radialGradient>
+      </defs>
+      <g clip-path="url(#c)">
+        <rect width="1000" height="1000" fill="#2F4B5A"/>
+        <!-- delta land masses: layered contour blobs -->
+        <path d="M120 300 C 260 180 420 240 520 200 S 820 160 900 300 L 1000 1000 L 0 1000 Z" fill="#5D7A3B"/>
+        <path d="M150 380 C 300 290 430 360 560 300 S 800 280 880 400 L 1000 1000 L 0 1000 Z" fill="#7C8F45"/>
+        <path d="M180 470 C 320 400 460 470 580 420 S 820 410 900 520 L 1000 1000 L 0 1000 Z" fill="#B89A4C"/>
+        <path d="M120 560 C 300 500 440 580 600 520 S 860 540 960 620 L 1000 1000 L 0 1000 Z" fill="#C4673E" opacity=".9"/>
+        <!-- rivers -->
+        <path d="M430 120 C 470 300 380 420 470 560 S 560 800 520 1000" fill="none" stroke="#9CBCEB" stroke-width="16" stroke-linecap="round"/>
+        <path d="M470 560 C 560 600 640 640 720 760" fill="none" stroke="#9CBCEB" stroke-width="9" stroke-linecap="round"/>
+        <path d="M470 400 C 380 470 300 520 230 640" fill="none" stroke="#9CBCEB" stroke-width="7" stroke-linecap="round"/>
+        <!-- contour lines -->
+        <g fill="none" stroke="#F1ECDF" stroke-opacity=".22" stroke-width="2">
+          <path d="M140 340 C 300 250 440 310 560 260 S 820 230 900 350"/>
+          <path d="M160 430 C 320 350 450 420 570 370 S 810 350 890 460"/>
+          <path d="M160 520 C 320 460 450 530 590 470 S 840 480 930 570"/>
+          <path d="M130 610 C 320 560 460 630 610 580 S 870 600 970 680"/>
+        </g>
+        <!-- monsoon rain over the top -->
+        <rect width="1000" height="330" fill="url(#hatch)"/>
+        <rect width="1000" height="1000" fill="url(#sh)"/>
+      </g>
+    </svg>
+    <a class="btn lime cta" href="/app/">Open the ward outlook →</a>
+  </div>
+</header>
+
+<section class="band" id="how">
+  <svg class="rain" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 400 200"><g stroke="#9CBCEB" stroke-width=".6" id="drops"></g></svg>
+  <h2 class="display">Rain today, cases in weeks</h2>
+  <p>Mosquitoes breed in standing water. The cases show up later. The model reads that delay for each of 60 wards and tells health officers where to send larvicide and cleanup teams before the peak.</p>
+  <div class="facts">
+    <div class="fact"><b>7–14 days</b>to breed in standing water</div>
+    <div class="fact"><b>2–4 weeks</b>from rain to cases</div>
+    <div class="fact"><b>150,000+</b>hospitalised in a year</div>
+  </div>
+  <small>Figures: EDU AI Hackathon 2026 brief.</small>
+</section>
+<div class="protobar">PROTOTYPE · Hero A “Delta disk” · live data</div>
+
+<script type="module">
+import { api, fmt1, fmt0, ward, date, GLYPH, TIERVAR } from "./proto.js";
+// rain texture
+const g = document.getElementById("drops");
+for (let i = 0; i < 140; i++) { const x = (i * 37) % 400, y = (i * 53) % 200;
+  g.insertAdjacentHTML("beforeend", `<line x1="${x}" y1="${y}" x2="${x - 3}" y2="${y + 9}"/>`); }
+
+const SW = {
+  clay: `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" fill="#C4673E"/><path d="M0 12 Q10 4 20 12 T40 12 M0 24 Q10 16 20 24 T40 24 M0 36 Q10 28 20 36 T40 36" stroke="#F1ECDF" stroke-width="2.5" fill="none"/></svg>`,
+  ochre: `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" fill="#D7A238"/><g stroke="#2A1810" stroke-width="2.5"><path d="M6 40 L14 0 M16 40 L22 0 M26 40 L30 0 M36 40 L38 0"/></g></svg>`,
+  moss: `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" fill="#5D7A3B"/><g stroke="#D6E04B" stroke-width="2"><path d="M8 40 V18 M14 40 V12 M20 40 V20 M26 40 V10 M32 40 V16"/></g></svg>`,
+  sky: `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" fill="#9CBCEB"/><path d="M4 10 h32 M8 18 h28 M2 26 h30 M10 34 h26" stroke="#2F4B5A" stroke-width="3" stroke-linecap="round"/></svg>`,
+  lime: `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" fill="#D6E04B"/><circle cx="20" cy="20" r="11" fill="none" stroke="#2A1810" stroke-width="3"/><circle cx="20" cy="20" r="4" fill="#2A1810"/></svg>`,
+  ink: `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" fill="#2A1810"/><path d="M6 30 L14 22 L20 26 L34 10" stroke="#D6E04B" stroke-width="3" fill="none"/></svg>`,
+};
+const chip = (sw, k, v, s, pos) =>
+  `<div class="chip" style="${pos}">${SW[sw]}<div><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div></div>`;
+
+const [meta, rank, met] = await Promise.all([api("/api/meta"), api(`/api/ranking?as_of=2025-07-14&horizon=3`), api("/api/metrics")]);
+const tc = rank.tier_counts, top = rank.wards[0], m3 = met.horizons.find((h) => h.horizon === 3);
+const better = Math.round((1 - m3.mae / m3.baseline_mae) * 100);
+document.getElementById("asof").textContent = `Live: forecast for the week of ${date(rank.forecast_week)}, 3 weeks ahead`;
+document.getElementById("stage").insertAdjacentHTML("beforeend", [
+  chip("clay", `${GLYPH.Critical} Critical wards`, tc.Critical, `of ${meta.ward_count}`, "left:21%;top:16%"),
+  chip("ochre", `${GLYPH.High} High wards`, tc.High, `of ${meta.ward_count}`, "left:6%;top:42%"),
+  chip("sky", "Highest ward", fmt1(top.predicted_cases), `${ward(top.ward_id)} · cases/wk`, "right:22%;top:10%"),
+  chip("moss", "Likely range", `${fmt0(top.range_low)}–${fmt0(top.range_high)}`, "80% of weeks land here", "right:6%;top:36%"),
+  chip("lime", "Error vs seasonal avg", `${better}% lower`, `MAE ${m3.mae} on 2024–25 test`, "left:40%;top:36%"),
+  chip("ink", "Ranges hit", `${Math.round(m3.interval80_coverage * 100)}%`, "of test weeks (target 80%)", "left:24%;top:64%"),
+].join(""));
+</script>
+</body>
+</html>

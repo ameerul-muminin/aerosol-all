@@ -4,8 +4,11 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Proto · Hero A · Monsoon city</title>
 <link rel="stylesheet" href="proto.css">
-<link rel="stylesheet" href="palettes.css">
+<link rel="stylesheet" href="warm.css">
 <style>
+  :root { --il-sky: #D9D0C0; --il-cloud: #B9AD9A; --il-rain: #8C7E6B; --il-far: #C7BBA7; --il-near: #6B5D4F;
+          --il-win: #D8B45A; --il-ground: #8A8B5E; --il-water: #7F9AA6; --il-clay: #B46A48; --il-mosq: #2B2520; --river: var(--band); }
+  .heroimg { display: block; margin: 0 auto; width: min(80vw, 1060px); height: auto; }
   .hero { position: relative; overflow: hidden; padding: 0 clamp(16px, 3vw, 40px); }
   h1.display { font-size: clamp(56px, 10.2vw, 172px); color: var(--ink); white-space: nowrap; }
   @media (max-width: 760px) { h1.display { white-space: normal; } }
@@ -14,7 +17,10 @@
   .stage { position: relative; margin-top: 8px; }
   .disk { display: block; margin: 0 auto; width: min(80vw, 1060px); height: auto; }
   .chip { z-index: 2; }
-  .chip .sw { display: grid; place-items: center; font: 400 22px/1 var(--display); color: var(--on-dark); }
+  .chip { padding: 12px 16px; min-width: 0; gap: 0; border-radius: 12px; box-shadow: var(--shadow-md); }
+  .chip .k { font-size: 12px; font-weight: 500; color: var(--ink-2); }
+  .chip .v { font-size: 30px; margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
+  .chip .s { font-size: 12px; color: var(--ink-3); }
   .cta { position: absolute; right: 0; bottom: 28px; z-index: 3; }
   .btn.lime { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
   .band { position: relative; background: var(--river); color: var(--on-dark); padding: clamp(56px, 7vw, 104px) clamp(16px, 3vw, 40px); overflow: hidden; }
@@ -25,17 +31,12 @@
   .band .fact b { display: block; font: 400 40px/1.05 var(--display); color: var(--on-dark); margin-bottom: 4px; }
   .band small { display: block; margin-top: 18px; font-size: 12px; color: var(--on-dark-2); position: relative; }
   .band .rain { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .35; }
-  .pals { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 99; display: flex; gap: 6px; background: var(--paper); padding: 6px; border-radius: 999px; box-shadow: 0 6px 20px -8px rgba(0,0,0,.3); }
-  .pals a { font: 600 12px var(--font); text-decoration: none; padding: 4px 10px; border-radius: 999px; }
-  .pals a[aria-current] { background: var(--ink); color: var(--on-dark); }
   @media (max-width: 760px) {
     .chip { position: static; margin: 0; box-shadow: none; min-width: 0; }
     .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
     .cta { position: static; margin: 16px 0 24px; }
-    .pals { top: auto; bottom: 52px; }
   }
 </style>
-<script>{ const p = new URLSearchParams(location.search).get("p") || "1"; document.documentElement.dataset.p = p; }</script>
 </head>
 <body>
 <nav class="nav"><span class="brand">Dengue Outlook</span>
@@ -47,7 +48,8 @@
   <p class="asof" id="asof"><span class="skel">Forecast for week of 00 Xxx 0000</span></p>
 
   <div class="stage" id="stage">
-    <svg class="disk" viewBox="0 0 1000 600" role="img" aria-label="Illustration: monsoon rain over a dense city, water collecting in tyres, pots and puddles, an Aedes mosquito">
+    <img class="heroimg" id="heroimg" src="../assets/images/hero.webp" alt="" hidden>
+    <svg class="disk" id="heroSvg" viewBox="0 0 1000 600" role="img" aria-label="Illustration: monsoon rain over a dense city, water collecting in tyres, pots and puddles, an Aedes mosquito">
       <defs><clipPath id="c"><circle cx="500" cy="500" r="490"/></clipPath></defs>
       <g clip-path="url(#c)">
         <rect width="1000" height="600" style="fill:var(--il-sky)"/>
@@ -106,7 +108,6 @@
 </header>
 
 <section class="band" id="how">
-  <svg class="rain" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 400 200"><g style="stroke:var(--on-dark-2)" stroke-width=".8" stroke-linecap="round" id="drops"></g></svg>
   <h2 class="display">Rain today, cases in weeks</h2>
   <p>Aedes mosquitoes breed in standing water: tyres, flower pots, rooftop tanks, construction pits. The cases show up weeks later. The model reads that delay for each of 60 wards, so health officers can send cleanup and larvicide teams before the peak.</p>
   <div class="facts">
@@ -116,19 +117,16 @@
   </div>
   <small>Figures: EDU AI Hackathon 2026 brief.</small>
 </section>
-<nav class="pals" aria-label="Palette"><a href="?p=1">1 Paddy &amp; mustard</a><a href="?p=2">2 Aedes alert</a><a href="?p=3">3 Rickshaw monsoon</a></nav>
 
 <script type="module">
-import { api, fmt1, fmt0, ward, date, GLYPH } from "./proto.js";
-const p = document.documentElement.dataset.p;
-document.querySelectorAll(".pals a").forEach((a) => a.getAttribute("href") === `?p=${p}` && a.setAttribute("aria-current", "true"));
+import { api, fmt1, fmt0, ward, date, tierHTML } from "./proto.js";
+// generated illustration (web/assets/images/hero.webp) replaces the SVG placeholder when present
+const img = document.getElementById("heroimg");
+img.onload = () => { img.hidden = false; document.getElementById("heroSvg").remove(); };
 // rain: one drop per 46 x 52 cell, offset every other row
 const rd = document.getElementById("rainD");
 for (let y = 210, r = 0; y < 470; y += 52, r++) for (let x = (r % 2) * 23; x < 1000; x += 46)
   rd.insertAdjacentHTML("beforeend", `<line x1="${x}" y1="${y}" x2="${x - 6}" y2="${y + 20}"/>`);
-const g = document.getElementById("drops");
-for (let y = 0, r = 0; y < 200; y += 26, r++) for (let x = (r % 2) * 14; x < 400; x += 28)
-  g.insertAdjacentHTML("beforeend", `<line x1="${x}" y1="${y}" x2="${x - 2}" y2="${y + 8}"/>`);
 // lit windows (deterministic)
 const W = document.getElementById("wins");
 [[90, 390, 110, 160], [210, 360, 90, 190], [310, 410, 120, 140], [590, 380, 100, 170], [700, 420, 120, 130], [830, 370, 90, 180]].forEach(([x, y, w, h], b) => {
@@ -136,19 +134,18 @@ const W = document.getElementById("wins");
     if ((xx * 7 + yy * 3 + b) % 5 === 0) W.insertAdjacentHTML("beforeend", `<rect x="${xx}" y="${yy}" width="10" height="12"/>`);
 });
 
-const chip = (bg, mark, k, v, s, pos) =>
-  `<div class="chip" style="${pos}"><span class="sw" style="background:${bg}">${mark}</span><div><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div></div>`;
+const chip = (k, v, s, pos) =>
+  `<div class="chip" style="${pos}"><div><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div></div>`;
 const [meta, rank, met] = await Promise.all([api("/api/meta"), api(`/api/ranking?as_of=2025-07-14&horizon=3`), api("/api/metrics")]);
 const tc = rank.tier_counts, top = rank.wards[0], m3 = met.horizons.find((h) => h.horizon === 3);
 const better = Math.round((1 - m3.mae / m3.baseline_mae) * 100);
 document.getElementById("asof").textContent = `Live: forecast for the week of ${date(rank.forecast_week)}, 3 weeks ahead`;
 document.getElementById("chips").innerHTML = [
-  chip("var(--tier-critical)", GLYPH.Critical, "Critical wards", tc.Critical, `of ${meta.ward_count}`, "position:absolute;left:4%;top:8%"),
-  chip("var(--tier-high)", GLYPH.High, "High wards", tc.High, `of ${meta.ward_count}`, "position:absolute;left:1%;top:38%"),
-  chip("var(--ink)", "↑", "Highest ward", fmt1(top.predicted_cases), `${ward(top.ward_id)} · cases/wk`, "position:absolute;right:4%;top:6%"),
-  chip("var(--il-water)", "↔", "Likely range", `${fmt0(top.range_low)}–${fmt0(top.range_high)}`, "8 weeks in 10 land here", "position:absolute;right:1%;top:36%"),
-  chip("var(--il-ground)", "✓", "Error vs seasonal avg", `${better}% lower`, `MAE ${m3.mae}, 2024–25 test`, "position:absolute;left:12%;top:64%"),
-  chip("var(--il-near)", "%", "Ranges hit", `${Math.round(m3.interval80_coverage * 100)}%`, "of test weeks (target 80%)", "position:absolute;right:14%;top:64%"),
+  chip(tierHTML("Critical", " wards"), tc.Critical, `of ${meta.ward_count} wards`, "position:absolute;left:3%;top:10%"),
+  chip(tierHTML("High", " wards"), tc.High, `of ${meta.ward_count} wards`, "position:absolute;left:0;top:42%"),
+  chip("Highest forecast", fmt1(top.predicted_cases), `cases · ${ward(top.ward_id)}`, "position:absolute;right:3%;top:8%"),
+  chip("Likely range", `${fmt0(top.range_low)}–${fmt0(top.range_high)}`, "cases, 8 weeks in 10", "position:absolute;right:0;top:40%"),
+  chip("Error vs seasonal average", `${better}% lower`, `MAE ${m3.mae} on 2024–25 test`, "position:absolute;left:10%;top:70%"),
 ].join("");
 if (matchMedia("(max-width: 760px)").matches) document.querySelectorAll(".chip").forEach((c) => c.removeAttribute("style"));
 </script>

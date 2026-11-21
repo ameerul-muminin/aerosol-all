@@ -1,0 +1,26 @@
+/* PROTOTYPE ONLY: muted warm palette ("Jute"). Loaded after proto.css.
+   Contrast (WCAG): ink 14.3, ink-2 7.2, ink-3 5.2, tier/driver text 4.7–7.4 on --paper.
+   Use --ink-2 (not --ink-3) for text on --sunk. */
+:root {
+  --bg: #F4EFE6; --paper: #FBF8F2; --sunk: #EAE3D6; --line: #E0D7C7; --line-strong: #CFC4B1;
+  --ink: #2B2520; --ink-2: #5C5249; --ink-3: #73675C;
+  --accent: #D8B45A; --accent-soft: #EBD9A6; --accent-ink: #2B2520;   /* muted mustard */
+  --band: #3A322B; --on-dark: #F4EFE6; --on-dark-2: #CFC5B6;
+  --bar: #CDBFA9; --bar-2: #B9A98F;                                     /* neutral data bars */
+  --tier-low: #5A6E4C; --tier-medium: #86651F; --tier-high: #A4532F; --tier-critical: #8E3427;
+  --raises: #A4532F; --lowers: #4F6A80;
+  --shadow-sm: 0 1px 2px rgba(43,37,32,.06), 0 0 0 1px var(--line);
+  --shadow-md: 0 1px 2px rgba(43,37,32,.05), 0 8px 24px -12px rgba(43,37,32,.18), 0 0 0 1px var(--line);
+  --r-card: 16px; --r-chip: 12px;
+}
+.display { line-height: 0.98; letter-spacing: 0; }
+.num { font-variant-numeric: tabular-nums; }
+h1, h2, h3 { text-wrap: balance; } p { text-wrap: pretty; }
+
+/* tier glyph: 4 ascending bars, filled up to the level (colour + shape + word, never colour alone) */
+.tg { display: inline-flex; align-items: flex-end; gap: 2px; height: .9em; vertical-align: -0.05em; }
+.tg i { width: .2em; border-radius: 1px; background: var(--line-strong); }
+.tg i:nth-child(1) { height: 35%; } .tg i:nth-child(2) { height: 55%; } .tg i:nth-child(3) { height: 77%; } .tg i:nth-child(4) { height: 100%; }
+.tg[data-l="1"] i:nth-child(-n+1), .tg[data-l="2"] i:nth-child(-n+2),
+.tg[data-l="3"] i:nth-child(-n+3), .tg[data-l="4"] i:nth-child(-n+4) { background: currentColor; }
+.tier { display: inline-flex; align-items: center; gap: .4em; font-weight: 600; }

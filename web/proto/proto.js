@@ -15,6 +15,8 @@ export const params = () => {
   const u = new URLSearchParams(location.search);
   return { ward: u.get("ward") || "DSCC_Ward_04", as_of: u.get("as_of") || "2025-07-14", h: +(u.get("h") || 3) };
 };
-export function tierHTML(t) {
-  return `<span class="tier" style="color:${TIERVAR(t)}"><span class="g" aria-hidden="true">${GLYPH[t]}</span>${t}</span>`;
+export const LEVEL = { Low: 1, Medium: 2, High: 3, Critical: 4 };
+export const tierGlyph = (t) => `<span class="tg" data-l="${LEVEL[t]}" aria-hidden="true"><i></i><i></i><i></i><i></i></span>`;
+export function tierHTML(t, suffix = "") {
+  return `<span class="tier" style="color:${TIERVAR(t)}">${tierGlyph(t)}${t}${suffix}</span>`;
 }

@@ -27,6 +27,8 @@ TIER_NAMES = ["Low", "Medium", "High", "Critical"]
 SEED = 42
 BUNDLE = ROOT / "models" / "dengue_model.joblib"
 METRICS = ROOT / "reports" / "metrics.json"
+SELECTED = ROOT / "models" / "selected_features.json"   # written by src/feature_selection.py (CV-based)
+FEATURE_LIST = ROOT / "reports" / "feature_list.json"   # final ordered inputs per mode/horizon
 
 
 def split(d):
@@ -189,8 +191,23 @@ def test_metrics(te, p_te, conf_q, actual_cuts, cuts, baseline=None):
     return out, lo, hi
 
 
+def load_selected():
+    """Per-horizon feature lists chosen by time-ordered CV (src/feature_selection.py), if present."""
+    if SELECTED.exists():
+        return {int(h): f for h, f in json.loads(SELECTED.read_text()).items()}
+    return None
+
+
+def write_feature_list(bundle):
+    """D14: the exact input columns and their order for every saved model."""
+    out = {mode: {str(h): {"n_features": len(m["features"]), "features": list(m["features"])}
+                  for h, m in hs.items()} for mode, hs in bundle["modes"].items()}
+    FEATURE_LIST.write_text(json.dumps(out, indent=2))
+
+
 def main():
     feats = feature_columns()
+    selected = load_selected()
     bundle = {"tier_names": TIER_NAMES, "modes": {m: {} for m in MODES}}
     report = {"split": {"train": "target<=2021-12-31", "val": "2022-01..2023-12", "test": "2024-01..2025-12",
                         "cv": f"expanding window inside train, validation years {list(CV_YEARS)}"},
@@ -204,20 +221,28 @@ def main():
         trva = pd.concat([tr, va])
 
         # --- C3: time-ordered CV inside TRAIN: tune HGB, then pick the model family ---
-        hgb_cv = {f"{c['max_iter']}x{c['max_leaf_nodes']}": cross_validate(lambda c=c: HGB(feats, **c), tr)
+        # With a CV-selected feature list (D12) the grid runs on it and the anomaly decision is
+        # already encoded in it; otherwise the base list is tuned and anomaly decided here.
+        base = selected[h] if selected else feats
+        hgb_cv = {f"{c['max_iter']}x{c['max_leaf_nodes']}": cross_validate(lambda c=c: HGB(base, **c), tr)
                   for c in HGB_GRID}
         best_cfg_key = min(hgb_cv, key=lambda k: hgb_cv[k]["mean"]["PoissonDev"])
         best_cfg = next(c for c in HGB_GRID if f"{c['max_iter']}x{c['max_leaf_nodes']}" == best_cfg_key)
-        # rain-anomaly features: kept only if they improve CV deviance at the chosen config
-        feats_anom = feature_columns(anomaly=True)
-        cv_anom = cross_validate(lambda: HGB(feats_anom, **best_cfg), tr)
-        use_anomaly = cv_anom["mean"]["PoissonDev"] < hgb_cv[best_cfg_key]["mean"]["PoissonDev"]
-        feats_h = feats_anom if use_anomaly else feats
+        if selected:
+            cv_anom = None
+            use_anomaly = any(c.startswith("rain_anom") for c in base)
+            feats_h = base
+        else:
+            # rain-anomaly features: kept only if they improve CV deviance at the chosen config
+            feats_anom = feature_columns(anomaly=True)
+            cv_anom = cross_validate(lambda: HGB(feats_anom, **best_cfg), tr)
+            use_anomaly = cv_anom["mean"]["PoissonDev"] < hgb_cv[best_cfg_key]["mean"]["PoissonDev"]
+            feats_h = feats_anom if use_anomaly else feats
         makers = {"seasonal_naive": SeasonalNaive, "poisson_glm": lambda: GLM(feats),
                   "hgb_poisson": lambda: HGB(feats_h, **best_cfg)}
         cv = {"seasonal_naive": cross_validate(makers["seasonal_naive"], tr),
               "poisson_glm": cross_validate(makers["poisson_glm"], tr),
-              "hgb_poisson": cv_anom if use_anomaly else hgb_cv[best_cfg_key]}
+              "hgb_poisson": cv_anom if (use_anomaly and cv_anom) else hgb_cv[best_cfg_key]}
         best = min(cv, key=lambda n: cv[n]["mean"]["PoissonDev"])
 
         # --- held-out VALIDATION: confirm choice, calibrate tiers + intervals (train-only models) ---
@@ -243,9 +268,12 @@ def main():
                                          "tier_actual_cuts": actual_cuts, "kind": best,
                                          "hyperparameters": best_cfg, "features": feats_final}
         report["horizons"][h] = {"selected": best, "hyperparameters": best_cfg, "cv": cv,
+                                 "feature_source": "models/selected_features.json (CV selection)" if selected
+                                                   else "default + CV anomaly decision",
+                                 "n_features": len(feats_final),
                                  "rain_anomaly": {"used": bool(use_anomaly),
-                                                  "cv_poisdev_without": hgb_cv[best_cfg_key]["mean"]["PoissonDev"],
-                                                  "cv_poisdev_with": cv_anom["mean"]["PoissonDev"]},
+                                                  "cv_poisdev_without": None if cv_anom is None else hgb_cv[best_cfg_key]["mean"]["PoissonDev"],
+                                                  "cv_poisdev_with": None if cv_anom is None else cv_anom["mean"]["PoissonDev"]},
                                  "hgb_grid_cv_mean": {k: v["mean"] for k, v in hgb_cv.items()},
                                  "validation": val, "test": test, "tier_cuts_on_prediction": cuts,
                                  "tier_definition_actual_cases": actual_cuts, "conformal_q": conf_q,
@@ -267,8 +295,8 @@ def main():
         report["modes"]["weather_cases"][h] = {"cv": cv_c, "validation": scores(yva, p_va_c), "test": test_c,
                                                "tier_cuts_on_prediction": cuts_c, "conformal_q": conf_c}
 
-        print(f"h={h}w selected={best} {best_cfg} rain_anomaly={use_anomaly} "
-              f"(CV {hgb_cv[best_cfg_key]['mean']['PoissonDev']:.3f} -> {cv_anom['mean']['PoissonDev']:.3f})\n   CV PoisDev: " +
+        print(f"h={h}w selected={best} {best_cfg} features={len(feats_final)} rain_anomaly={use_anomaly}"
+              f"{' (from CV selection)' if selected else ''}\n   CV PoisDev: " +
               ", ".join(f"{n}={v['mean']['PoissonDev']:.3f}" for n, v in cv.items()) +
               f", +cases={cv_c['mean']['PoissonDev']:.3f}"
               " | val PoisDev: " + ", ".join(f"{n}={v['PoissonDev']:.3f}" for n, v in val.items()))
@@ -280,6 +308,7 @@ def main():
     BUNDLE.parent.mkdir(exist_ok=True)
     joblib.dump(bundle, BUNDLE, compress=3)
     METRICS.write_text(json.dumps(report, indent=2))
+    write_feature_list(bundle)
     print(f"saved {BUNDLE} in {time.time()-t0:.0f}s")
 
 

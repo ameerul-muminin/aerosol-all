@@ -14,7 +14,7 @@ import time
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import ExtraTreesRegressor, HistGradientBoostingRegressor
+from sklearn.ensemble import ExtraTreesRegressor, HistGradientBoostingRegressor, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import PoissonRegressor
 from sklearn.pipeline import make_pipeline
@@ -29,6 +29,7 @@ SEED = 42
 BUNDLE = ROOT / "models" / "dengue_model.joblib"
 METRICS = ROOT / "reports" / "metrics.json"
 SELECTED = ROOT / "models" / "selected_features.json"   # written by src/feature_selection.py (CV-based)
+ENSEMBLE = ROOT / "models" / "ensemble.json"            # written by src/ensemble.py, if adopted
 HYPERPARAMS = ROOT / "models" / "hyperparameters.json"  # written by src/tuning.py (CV-based), if adopted
 FEATURE_LIST = ROOT / "reports" / "feature_list.json"   # final ordered inputs per mode/horizon
 
@@ -113,9 +114,54 @@ class Blend:
         return 0.5 * (np.clip(self.hgb.predict(d), 0, None) + et)
 
 
+class _Pipe:
+    """A scikit-learn regressor on the feature list with a median imputer (+ optional scaler)
+    fitted on the training data only (extra trees / random forest / GLM cannot take NaN)."""
+    def __init__(self, feats, est, scale):
+        self.feats, self.est, self.scale = feats, est, scale
+
+    def fit(self, d):
+        steps = [SimpleImputer(strategy="median")] + ([StandardScaler()] if self.scale else []) + [self.est]
+        self.m = make_pipeline(*steps).fit(d[self.feats], d["target"])
+        return self
+
+    def predict(self, d):
+        return np.clip(self.m.predict(d[self.feats]), 0, None)
+
+
+class Ensemble:
+    """Part H: weighted average of members with FIXED weights, learned by src/ensemble.py on
+    out-of-fold training predictions (never on validation). Members with weight 0 are skipped."""
+    def __init__(self, feats, weights, **params):
+        self.feats, self.weights, self.params = feats, dict(weights), params
+
+    def _member(self, name):
+        if name == "hgb":
+            return HGB(self.feats, **self.params)
+        if name == "extra_trees":
+            return _Pipe(self.feats, ExtraTreesRegressor(n_estimators=200, min_samples_leaf=20, max_features=0.5,
+                                                         n_jobs=-1, random_state=SEED), scale=False)
+        if name == "random_forest":
+            return _Pipe(self.feats, RandomForestRegressor(n_estimators=200, min_samples_leaf=20, max_features=0.5,
+                                                           n_jobs=-1, random_state=SEED), scale=False)
+        if name == "poisson_glm":
+            return _Pipe(self.feats, PoissonRegressor(alpha=1.0, max_iter=1000), scale=True)
+        raise ValueError(f"unknown ensemble member {name!r}")
+
+    def fit(self, d):
+        self.members_ = {n: self._member(n).fit(d) for n, w in self.weights.items() if w > 0}
+        self.used_ = self.members_["hgb"].used_ if "hgb" in self.members_ else list(self.feats)
+        return self
+
+    def predict(self, d):
+        return sum(self.weights[n] * np.clip(m.predict(d), 0, None) for n, m in self.members_.items())
+
+
 def deployed_model(m):
     """Fresh, unfitted model of the same kind, features and settings as a saved bundle entry
     (plain HistGradientBoosting, possibly outbreak-weighted, or the HGB + extra-trees blend)."""
+    if m.get("kind") == "weighted_ensemble":
+        return Ensemble(list(m["features"]), m["ensemble_weights"], **m["hyperparameters"])
     cls = Blend if m.get("kind") == "blend_hgb_extra_trees" else HGB
     return cls(list(m["features"]), **m["hyperparameters"])
 
@@ -256,6 +302,7 @@ def main():
     feats = feature_columns()
     selected = load_selected()
     tuned = load_hyperparameters()
+    ens_cfg = {int(h): v for h, v in json.loads(ENSEMBLE.read_text()).items()} if ENSEMBLE.exists() else {}
     bundle = {"tier_names": TIER_NAMES, "modes": {m: {} for m in MODES}}
     report = {"split": {"train": "target<=2021-12-31", "val": "2022-01..2023-12", "test": "2024-01..2025-12",
                         "cv": f"expanding window inside train, validation years {list(CV_YEARS)}"},
@@ -281,6 +328,9 @@ def main():
             best_cfg_key = min(hgb_cv, key=lambda k: hgb_cv[k]["mean"]["PoissonDev"])
             best_cfg = next(c for c in HGB_GRID if f"{c['max_iter']}x{c['max_leaf_nodes']}" == best_cfg_key)
         use_blend = bool(tuned and tuned[h].get("blend"))
+        ens_w = ens_cfg.get(h, {}).get("weights")     # Part H weighted ensemble, if adopted
+        if ens_w:
+            use_blend = False
         if selected:
             cv_anom = None
             use_anomaly = any(c.startswith("rain_anom") for c in base)
@@ -292,11 +342,12 @@ def main():
             use_anomaly = cv_anom["mean"]["PoissonDev"] < hgb_cv[best_cfg_key]["mean"]["PoissonDev"]
             feats_h = feats_anom if use_anomaly else feats
         makers = {"seasonal_naive": SeasonalNaive, "poisson_glm": lambda: GLM(feats),
-                  "hgb_poisson": (lambda: Blend(feats_h, **best_cfg)) if use_blend
+                  "hgb_poisson": (lambda: Ensemble(feats_h, ens_w, **best_cfg)) if ens_w
+                                 else (lambda: Blend(feats_h, **best_cfg)) if use_blend
                                  else (lambda: HGB(feats_h, **best_cfg))}
         cv = {"seasonal_naive": cross_validate(makers["seasonal_naive"], tr),
               "poisson_glm": cross_validate(makers["poisson_glm"], tr),
-              "hgb_poisson": cross_validate(makers["hgb_poisson"], tr) if use_blend
+              "hgb_poisson": cross_validate(makers["hgb_poisson"], tr) if (use_blend or ens_w)
                              else (cv_anom if (use_anomaly and cv_anom) else hgb_cv[best_cfg_key])}
         best = min(cv, key=lambda n: cv[n]["mean"]["PoissonDev"])
 
@@ -321,7 +372,9 @@ def main():
         feats_final = feats_h if best == "hgb_poisson" else feats
         bundle["modes"]["weather"][h] = {"model": final, "conformal_q": conf_q, "tier_cuts": cuts,
                                          "tier_actual_cuts": actual_cuts,
-                                         "kind": "blend_hgb_extra_trees" if use_blend and best == "hgb_poisson" else best,
+                                         "kind": ("weighted_ensemble" if ens_w and best == "hgb_poisson" else
+                                                  "blend_hgb_extra_trees" if use_blend and best == "hgb_poisson" else best),
+                                         "ensemble_weights": ens_w if (ens_w and best == "hgb_poisson") else None,
                                          "hyperparameters": best_cfg, "features": feats_final}
         report["horizons"][h] = {"selected": best, "hyperparameters": best_cfg, "cv": cv,
                                  "feature_source": "models/selected_features.json (CV selection)" if selected

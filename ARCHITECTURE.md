@@ -56,17 +56,18 @@ There is no random shuffle anywhere (sklearn's random early stopping is off).
 | Best baseline (seasonal mean / Ridge) | 1.91 (1.74) | 1.98 (1.96) | 1.98 (1.96) |
 | Extra trees | 1.03 (0.98) | 1.16 (1.10) | 1.44 (1.57) |
 | HistGradientBoosting, Poisson loss | 0.96 (1.03) | 1.14 (1.20) | 1.31 (1.70) |
-| **Deployed after tuning** | **0.97 (1.00)** | **1.08 (1.10)** | **1.28 (1.58)** |
+| **Deployed (tuned / ensemble)** | **0.95 (0.97)** | **1.08 (1.10)** | **1.28 (1.58)** |
 
 Random search (75 trials, `reports/tuning_log.json`) and single-change tests, under rules fixed in
 advance, adopted: outbreak-week weighting at h=2 (outbreak error −14%), a boosting + extra-trees
-average at h=3, and regularised settings at h=4. Recent case counts didn't help, so the model stays
+average at h=3, and regularised settings at h=4. **Ensemble (Part H):** at h=2 a weighted average
+(boosting 0.65, random forest 0.22, Poisson GLM 0.13; weights fitted on out-of-fold training
+predictions) beat it by 2.2% on CV; stacking never helped (`reports/ensemble.json`). Recent case counts didn't help, so the model stays
 weather-only.
 
 **Test (2024–25):**
-- MAE 1.18 / 1.08 / 1.25 (seasonal baseline 1.26). At h=2, weighting trades average error for
-  outbreak accuracy: Critical-week error 6.4 → 5.4 cases.
-- Truly Critical weeks flagged High or above: 88% / 83% / 68%; alert precision 0.48 (h=2).
+- MAE 1.12 / 1.08 / 1.25 (seasonal baseline 1.26).
+- Truly Critical weeks flagged High or above: 88% / 83% / 68%; alert precision 0.49 (h=2).
 - Outbreak weeks are still under-predicted by 5–8 cases (`reports/outbreak_errors.json`).
 
 At h=4 the model barely beats the baseline, because the main driver (rain 3 weeks earlier) hasn't

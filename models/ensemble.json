@@ -1,0 +1,11 @@
+{
+  "2": {
+    "type": "weighted_avg",
+    "weights": {
+      "hgb": 0.647,
+      "extra_trees": 0.0,
+      "random_forest": 0.225,
+      "poisson_glm": 0.128
+    }
+  }
+}

@@ -2,7 +2,7 @@
    Contrast (WCAG): ink 14.3, ink-2 7.2, ink-3 5.2, tier/driver text 4.7–7.4 on --paper.
    Use --ink-2 (not --ink-3) for text on --sunk. */
 :root {
-  --bg: #F4EFE6; --paper: #FBF8F2; --sunk: #EAE3D6; --line: #E0D7C7; --line-strong: #CFC4B1;
+  --bg: #F4EDE1; --paper: #FBF8F2; --sunk: #EAE3D6; --line: #E0D7C7; --line-strong: #CFC4B1;
   --ink: #2B2520; --ink-2: #5C5249; --ink-3: #73675C;
   --accent: #D8B45A; --accent-soft: #EBD9A6; --accent-ink: #2B2520;   /* muted mustard */
   --band: #3A322B; --on-dark: #F4EFE6; --on-dark-2: #CFC5B6;

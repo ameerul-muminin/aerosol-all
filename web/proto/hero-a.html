@@ -2,39 +2,35 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Proto · Hero A · Monsoon city</title>
+<title>Proto · Hero</title>
 <link rel="stylesheet" href="proto.css">
 <link rel="stylesheet" href="warm.css">
 <style>
-  :root { --il-sky: #D9D0C0; --il-cloud: #B9AD9A; --il-rain: #8C7E6B; --il-far: #C7BBA7; --il-near: #6B5D4F;
-          --il-win: #D8B45A; --il-ground: #8A8B5E; --il-water: #7F9AA6; --il-clay: #B46A48; --il-mosq: #2B2520; --river: var(--band); }
-  .heroimg { display: block; margin: 0 auto; width: min(80vw, 1060px); height: auto; }
-  .hero { position: relative; overflow: hidden; padding: 0 clamp(16px, 3vw, 40px); }
-  h1.display { font-size: clamp(56px, 10.2vw, 172px); color: var(--ink); white-space: nowrap; }
-  @media (max-width: 760px) { h1.display { white-space: normal; } }
-  .sub { max-width: 36ch; font-size: 17px; margin: 18px 0 0; color: var(--ink-2); }
-  .asof { margin: 12px 0 0; display: inline-block; background: var(--paper); padding: 4px 12px; border-radius: 999px; font-size: 13px; color: var(--ink-2); }
-  .stage { position: relative; margin-top: 8px; }
-  .disk { display: block; margin: 0 auto; width: min(80vw, 1060px); height: auto; }
-  .chip { z-index: 2; }
-  .chip { padding: 12px 16px; min-width: 0; gap: 0; border-radius: 12px; box-shadow: var(--shadow-md); }
+  .hero { position: relative; padding: 0 clamp(16px, 3vw, 40px); }
+  h1.display { font-size: clamp(56px, 10.2vw, 172px); white-space: nowrap; }
+  .lede { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 16px 32px; margin-top: 18px; }
+  .sub { max-width: 34ch; font-size: 18px; margin: 0; color: var(--ink-2); }
+  .live { margin: 10px 0 0; font-size: 13px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 8px; }
+  .live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
+  .stage { position: relative; margin: 24px auto 0; max-width: 1240px; }
+  .stage img { display: block; width: 100%; height: auto; }
+  .chip { display: block; z-index: 2; padding: 12px 16px; min-width: 0; border-radius: 12px; box-shadow: var(--shadow-md); }
   .chip .k { font-size: 12px; font-weight: 500; color: var(--ink-2); }
-  .chip .v { font-size: 30px; margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
+  .chip .v { font-size: 32px; margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
   .chip .s { font-size: 12px; color: var(--ink-3); }
-  .cta { position: absolute; right: 0; bottom: 28px; z-index: 3; }
   .btn.lime { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-  .band { position: relative; background: var(--river); color: var(--on-dark); padding: clamp(56px, 7vw, 104px) clamp(16px, 3vw, 40px); overflow: hidden; }
-  .band h2 { font-size: clamp(40px, 6vw, 92px); color: var(--accent); max-width: 12ch; position: relative; margin-bottom: 20px; }
-  .band p { max-width: 46ch; position: relative; color: var(--on-dark-2); }
-  .band .facts { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; position: relative; }
-  .band .fact { border: 1.5px solid color-mix(in srgb, var(--on-dark) 35%, transparent); border-radius: var(--r-card); padding: 16px 18px; min-width: 190px; }
-  .band .fact b { display: block; font: 400 40px/1.05 var(--display); color: var(--on-dark); margin-bottom: 4px; }
-  .band small { display: block; margin-top: 18px; font-size: 12px; color: var(--on-dark-2); position: relative; }
-  .band .rain { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .35; }
+  .band { background: var(--band); color: var(--on-dark); padding: clamp(56px, 7vw, 104px) clamp(16px, 3vw, 40px); }
+  .band h2 { font-size: clamp(40px, 6vw, 88px); color: var(--accent); max-width: 12ch; margin-bottom: 20px; }
+  .band p { max-width: 44ch; color: var(--on-dark-2); margin: 0; }
+  .facts { display: flex; flex-wrap: wrap; gap: 40px; margin-top: 40px; }
+  .facts b { display: block; font: 400 44px/1.05 var(--display); color: var(--on-dark); }
+  .facts span { color: var(--on-dark-2); }
+  .band small { display: block; margin-top: 28px; font-size: 12px; color: var(--on-dark-2); }
   @media (max-width: 760px) {
-    .chip { position: static; margin: 0; box-shadow: none; min-width: 0; }
+    h1.display { white-space: normal; }
+    .nav .links a:not(.btn) { display: none; }
+    .chip { position: static !important; box-shadow: var(--shadow-sm); }
     .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-    .cta { position: static; margin: 16px 0 24px; }
   }
 </style>
 </head>
@@ -44,110 +40,40 @@
 
 <header class="hero">
   <h1 class="display">See the outbreak first</h1>
-  <p class="sub">Ward-level dengue forecasts 2, 3 and 4 weeks ahead for Dhaka, Chattogram, Gazipur and Narayanganj, built from recent rain, heat and humidity.</p>
-  <p class="asof" id="asof"><span class="skel">Forecast for week of 00 Xxx 0000</span></p>
-
-  <div class="stage" id="stage">
-    <img class="heroimg" id="heroimg" src="../assets/images/hero.webp" alt="" hidden>
-    <svg class="disk" id="heroSvg" viewBox="0 0 1000 600" role="img" aria-label="Illustration: monsoon rain over a dense city, water collecting in tyres, pots and puddles, an Aedes mosquito">
-      <defs><clipPath id="c"><circle cx="500" cy="500" r="490"/></clipPath></defs>
-      <g clip-path="url(#c)">
-        <rect width="1000" height="600" style="fill:var(--il-sky)"/>
-        <!-- monsoon clouds -->
-        <g style="fill:var(--il-cloud)">
-          <circle cx="250" cy="150" r="70"/><circle cx="330" cy="120" r="85"/><circle cx="420" cy="150" r="65"/><rect x="200" y="150" width="270" height="60" rx="30"/>
-          <circle cx="640" cy="110" r="60"/><circle cx="720" cy="90" r="80"/><circle cx="800" cy="120" r="58"/><rect x="590" y="110" width="260" height="56" rx="28"/>
-        </g>
-        <!-- rain (well spaced) -->
-        <g id="rainD" style="stroke:var(--il-rain)" stroke-width="4" stroke-linecap="round"></g>
-        <!-- far skyline -->
-        <g style="fill:var(--il-far)">
-          <rect x="60" y="330" width="70" height="200"/><rect x="140" y="300" width="56" height="230"/><rect x="206" y="350" width="80" height="180"/>
-          <rect x="300" y="290" width="60" height="240"/><rect x="560" y="300" width="70" height="230"/><rect x="640" y="340" width="90" height="190"/>
-          <rect x="745" y="285" width="60" height="245"/><rect x="815" y="330" width="80" height="200"/><rect x="905" y="350" width="60" height="180"/>
-        </g>
-        <!-- near skyline: dense blocks, rooftop water tanks, one dome + minaret -->
-        <g style="fill:var(--il-near)">
-          <rect x="90" y="390" width="110" height="160"/><rect x="210" y="360" width="90" height="190"/><rect x="310" y="410" width="120" height="140"/>
-          <path d="M440 470 h120 v80 h-120z M460 470 a40 40 0 0 1 80 0z"/><rect x="566" y="396" width="14" height="154"/><path d="M563 396 l10 -22 l10 22z"/>
-          <rect x="590" y="380" width="100" height="170"/><rect x="700" y="420" width="120" height="130"/><rect x="830" y="370" width="90" height="180"/>
-          <!-- water tanks -->
-          <rect x="112" y="372" width="26" height="18" rx="3"/><rect x="236" y="342" width="26" height="18" rx="3"/><rect x="356" y="392" width="26" height="18" rx="3"/>
-          <rect x="626" y="362" width="26" height="18" rx="3"/><rect x="848" y="352" width="26" height="18" rx="3"/>
-        </g>
-        <g id="wins" style="fill:var(--il-win)"></g>
-        <!-- ground, puddles -->
-        <path d="M0 540 C 160 520 330 548 500 532 S 820 520 1000 540 V600 H0Z" style="fill:var(--il-ground)"/>
-        <g style="fill:var(--il-water)"><ellipse cx="300" cy="566" rx="90" ry="12"/><ellipse cx="640" cy="572" rx="70" ry="10"/></g>
-        <g fill="none" style="stroke:var(--il-sky)" stroke-width="2" opacity=".8"><ellipse cx="290" cy="566" rx="22" ry="4"/><ellipse cx="290" cy="566" rx="44" ry="7"/></g>
-        <!-- breeding sites: tyre, clay pot, bucket -->
-        <g>
-          <circle cx="430" cy="548" r="34" style="fill:var(--il-mosq)"/><circle cx="430" cy="548" r="16" style="fill:var(--il-water)"/>
-          <path d="M760 520 h60 l-10 50 h-40z" style="fill:var(--il-clay)"/><ellipse cx="790" cy="520" rx="30" ry="6" style="fill:var(--il-water)"/>
-          <path d="M180 528 h46 l-6 40 h-34z" style="fill:var(--accent)"/><ellipse cx="203" cy="528" rx="23" ry="5" style="fill:var(--il-water)"/>
-        </g>
-        <!-- Aedes mosquito: banded legs -->
-        <g transform="translate(700 250) rotate(-12)" style="stroke:var(--il-mosq)" stroke-linecap="round">
-          <g stroke-width="5" fill="none">
-            <path d="M-10 6 l-40 30 l-14 46"/><path d="M0 8 l-14 40 l-6 50"/><path d="M12 6 l30 34 l26 40"/>
-          </g>
-          <g stroke-width="5" fill="none" stroke="#fff" stroke-dasharray="4 10">
-            <path d="M-10 6 l-40 30 l-14 46"/><path d="M0 8 l-14 40 l-6 50"/><path d="M12 6 l30 34 l26 40"/>
-          </g>
-          <ellipse cx="-24" cy="-26" rx="44" ry="14" transform="rotate(-25)" fill="#fff" opacity=".7" stroke-width="2"/>
-          <ellipse cx="4" cy="-0" rx="40" ry="11" style="fill:var(--il-mosq)" stroke="none"/>
-          <path d="M-14 -6 v12 M-2 -9 v18 M10 -9 v18" stroke="#fff" stroke-width="3"/>
-          <circle cx="48" cy="-4" r="11" style="fill:var(--il-mosq)" stroke="none"/>
-          <path d="M56 -2 l46 10" stroke-width="3"/>
-        </g>
-      </g>
-    </svg>
+  <div class="lede">
+    <div><p class="sub">Dengue cases and risk for 60 city wards, 2 to 4 weeks ahead.</p><p class="live" id="live"></p></div>
+    <a class="btn lime" href="/app/">Open the ward outlook →</a>
+  </div>
+  <div class="stage">
+    <img src="../assets/images/hero.webp" srcset="../assets/images/hero-900.webp 900w, ../assets/images/hero.webp 1774w" sizes="(max-width: 1300px) 94vw, 1240px"
+         width="1774" height="887" alt="A rainy Dhaka street: water collects in a tyre, a bucket and puddles beside a parked rickshaw.">
     <div class="chips" id="chips"></div>
-    <a class="btn lime cta" href="/app/">Open the ward outlook →</a>
   </div>
 </header>
 
 <section class="band" id="how">
   <h2 class="display">Rain today, cases in weeks</h2>
-  <p>Aedes mosquitoes breed in standing water: tyres, flower pots, rooftop tanks, construction pits. The cases show up weeks later. The model reads that delay for each of 60 wards, so health officers can send cleanup and larvicide teams before the peak.</p>
+  <p>Mosquitoes breed in standing water after rain. Cases follow weeks later. That gap is the time to act.</p>
   <div class="facts">
-    <div class="fact"><b>7–14 days</b>to breed in standing water</div>
-    <div class="fact"><b>2–4 weeks</b>from rain to cases</div>
-    <div class="fact"><b>150,000+</b>hospitalised in a year</div>
+    <div><b>7–14 days</b><span>to breed</span></div>
+    <div><b>2–4 weeks</b><span>rain to cases</span></div>
+    <div><b>150,000+</b><span>hospitalised a year</span></div>
   </div>
-  <small>Figures: EDU AI Hackathon 2026 brief.</small>
+  <small>Source: EDU AI Hackathon 2026 brief.</small>
 </section>
 
 <script type="module">
-import { api, fmt1, fmt0, ward, date, tierHTML } from "./proto.js";
-// generated illustration (web/assets/images/hero.webp) replaces the SVG placeholder when present
-const img = document.getElementById("heroimg");
-img.onload = () => { img.hidden = false; document.getElementById("heroSvg").remove(); };
-// rain: one drop per 46 x 52 cell, offset every other row
-const rd = document.getElementById("rainD");
-for (let y = 210, r = 0; y < 470; y += 52, r++) for (let x = (r % 2) * 23; x < 1000; x += 46)
-  rd.insertAdjacentHTML("beforeend", `<line x1="${x}" y1="${y}" x2="${x - 6}" y2="${y + 20}"/>`);
-// lit windows (deterministic)
-const W = document.getElementById("wins");
-[[90, 390, 110, 160], [210, 360, 90, 190], [310, 410, 120, 140], [590, 380, 100, 170], [700, 420, 120, 130], [830, 370, 90, 180]].forEach(([x, y, w, h], b) => {
-  for (let yy = y + 16; yy < y + h - 20; yy += 26) for (let xx = x + 12; xx < x + w - 14; xx += 22)
-    if ((xx * 7 + yy * 3 + b) % 5 === 0) W.insertAdjacentHTML("beforeend", `<rect x="${xx}" y="${yy}" width="10" height="12"/>`);
-});
-
-const chip = (k, v, s, pos) =>
-  `<div class="chip" style="${pos}"><div><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div></div>`;
-const [meta, rank, met] = await Promise.all([api("/api/meta"), api(`/api/ranking?as_of=2025-07-14&horizon=3`), api("/api/metrics")]);
+import { api, fmt1, ward, date, tierHTML } from "./proto.js";
+const chip = (k, v, s, pos) => `<div class="chip" style="position:absolute;${pos}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+const [meta, rank, met] = await Promise.all([api("/api/meta"), api("/api/ranking?as_of=2025-07-14&horizon=3"), api("/api/metrics")]);
 const tc = rank.tier_counts, top = rank.wards[0], m3 = met.horizons.find((h) => h.horizon === 3);
-const better = Math.round((1 - m3.mae / m3.baseline_mae) * 100);
-document.getElementById("asof").textContent = `Live: forecast for the week of ${date(rank.forecast_week)}, 3 weeks ahead`;
 document.getElementById("chips").innerHTML = [
-  chip(tierHTML("Critical", " wards"), tc.Critical, `of ${meta.ward_count} wards`, "position:absolute;left:3%;top:10%"),
-  chip(tierHTML("High", " wards"), tc.High, `of ${meta.ward_count} wards`, "position:absolute;left:0;top:42%"),
-  chip("Highest forecast", fmt1(top.predicted_cases), `cases · ${ward(top.ward_id)}`, "position:absolute;right:3%;top:8%"),
-  chip("Likely range", `${fmt0(top.range_low)}–${fmt0(top.range_high)}`, "cases, 8 weeks in 10", "position:absolute;right:0;top:40%"),
-  chip("Error vs seasonal average", `${better}% lower`, `MAE ${m3.mae} on 2024–25 test`, "position:absolute;left:10%;top:70%"),
+  chip(tierHTML("Critical"), tc.Critical, `wards of ${meta.ward_count}`, "left:2%;top:4%"),
+  chip(tierHTML("High"), tc.High, `wards of ${meta.ward_count}`, "left:2%;top:30%"),
+  chip("Highest", fmt1(top.predicted_cases), `cases · ${ward(top.ward_id)}`, "right:2%;top:4%"),
+  chip("Error vs seasonal", `−${Math.round((1 - m3.mae / m3.baseline_mae) * 100)}%`, "2024–25 test", "right:2%;top:30%"),
 ].join("");
-if (matchMedia("(max-width: 760px)").matches) document.querySelectorAll(".chip").forEach((c) => c.removeAttribute("style"));
+document.getElementById("live").textContent = `Live forecast · week of ${date(rank.forecast_week)}`;
 </script>
 </body>
 </html>

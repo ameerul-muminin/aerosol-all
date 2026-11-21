@@ -141,6 +141,45 @@ def ranking(as_of: str, horizon: int, city: str | None = None) -> dict:
     }
 
 
+# ---------------------------------------------------------------- /api/warnings
+@lru_cache(maxsize=512)
+def warnings(as_of: str, city: str | None = None) -> dict:
+    """Early warnings: wards getting worse over the next 4 weeks. A ward is listed when its risk tier
+    at +3 or +4 weeks is higher than at +2 weeks ("rising"), or when it is already High/Critical at
+    +2 weeks and its forecast cases go up at every step to +4 weeks ("escalating"). Reuses the cached
+    all-ward forecasts for each horizon, so it costs no extra model calls."""
+    by_h = {h: _ranking_df(as_of, h).set_index("ward_id") for h in HORIZONS}
+    first, last = HORIZONS[0], HORIZONS[-1]
+    base = by_h[first]
+    if city:
+        if city not in set(base["city"]):
+            raise ValueError(f"Unknown city: {city}")
+        base = base[base["city"] == city]
+    lvl = TIERS.index
+    rows = []
+    for w, r in base.iterrows():
+        steps = [{"horizon": h, "forecast_week": str(by_h[h].at[w, "forecast_week"]),
+                  "predicted_cases": _num(by_h[h].at[w, "predicted_cases"]),
+                  "risk_tier": by_h[h].at[w, "risk_tier"]} for h in HORIZONS]
+        start, later = lvl(steps[0]["risk_tier"]), max(lvl(s["risk_tier"]) for s in steps[1:])
+        cases = [s["predicted_cases"] for s in steps]
+        cases_up = all(b > a for a, b in zip(cases, cases[1:]))
+        if later > start:
+            reason = "rising"
+        elif start >= lvl("High") and cases_up:
+            reason = "escalating"
+        else:
+            continue
+        peak = max(steps, key=lambda s: (lvl(s["risk_tier"]), s["predicted_cases"]))
+        rows.append({"ward_id": w, "city": r["city"], "reason": reason, "steps": steps,
+                     "peak_tier": peak["risk_tier"], "peak_horizon": peak["horizon"]})
+    rows.sort(key=lambda x: (-lvl(x["peak_tier"]), -max(s["predicted_cases"] for s in x["steps"])))
+    return {"as_of": as_of, "city": city, "horizons": list(HORIZONS), "n_wards": int(len(base)),
+            "rule": f"Tier at +{HORIZONS[1]} or +{last} weeks higher than at +{first} weeks, or High/Critical "
+                    f"at +{first} weeks with forecast cases rising at every step to +{last} weeks.",
+            "wards": rows}
+
+
 # ---------------------------------------------------------------- /api/forecast
 @lru_cache(maxsize=4096)
 def forecast(ward_id: str, as_of: str, horizon: int) -> dict:

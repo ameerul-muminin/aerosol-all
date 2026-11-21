@@ -47,6 +47,7 @@ export const api = {
   meta: () => get("/api/meta"),
   forecast: (ward_id, as_of, horizon) => get("/api/forecast", { ward_id, as_of, horizon }),
   ranking: (as_of, horizon, city) => get("/api/ranking", { as_of, horizon, city }),
+  warnings: (as_of, city) => get("/api/warnings", { as_of, city }),
   metrics: () => get("/api/metrics"),
   lagProfile: (city) => get("/api/lag_profile", { city }),
   history: (ward_id, horizon) => get("/api/history", { ward_id, horizon }),

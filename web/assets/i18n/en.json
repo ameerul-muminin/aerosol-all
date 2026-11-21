@@ -170,6 +170,16 @@
     "clock_note": "Correlation from 0 (no link) to 1, {from}–{to}. Rain and cases are each compared with that ward's usual level for the time of year, so the monsoon alone does not count.",
     "clock_aria": "Correlation between rain and later cases, by weeks of delay: {list}"
   },
+  "warn": {
+    "title": "Early warnings: getting worse in the next 4 weeks",
+    "count": "{n} of {total} wards",
+    "none": "No ward gets worse between +2 and +4 weeks from this date.",
+    "cases": "{n} cases",
+    "rising": "Risk rising",
+    "escalating": "High and rising every week",
+    "show_all": "Show all {n}",
+    "rule": "Listed when the risk tier at +3 or +4 weeks is higher than at +2 weeks, or when a ward is already High or Critical and its forecast cases rise every week. Worst first. Each horizon has its own tier cut-offs, because forecasts further ahead are smoother."
+  },
   "state": {
     "loading": "Loading…",
     "offline": "Can't reach the forecast server. Check that it is running, then try again.",

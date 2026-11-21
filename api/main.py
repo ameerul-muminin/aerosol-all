@@ -84,6 +84,10 @@ def create_app() -> Flask:
     def ranking():
         return jsonify(service.ranking(_as_of(), _horizon(), request.args.get("city") or None))
 
+    @app.get("/api/warnings")
+    def warnings():
+        return jsonify(service.warnings(_as_of(), request.args.get("city") or None))
+
     @app.get("/api/metrics")
     def metrics():
         return jsonify(service.metrics())

@@ -71,3 +71,22 @@ def test_lag_profile_peaks_inside_the_breeding_window():
     assert service.lag_profile("Gazipur")["n_rows"] == 5 * 522
     with pytest.raises(ValueError):
         service.lag_profile("Atlantis")
+
+
+def test_warnings_follow_the_rule_and_match_the_ranking():
+    """Every listed ward really gets worse, and its numbers are the same forecasts /api/ranking serves."""
+    lvl = service.TIERS.index
+    w = service.warnings("2025-08-18")
+    assert w["wards"], "peak season should raise at least one warning"
+    for x in w["wards"]:
+        tiers = [lvl(s["risk_tier"]) for s in x["steps"]]
+        cases = [s["predicted_cases"] for s in x["steps"]]
+        assert max(tiers[1:]) > tiers[0] or (tiers[0] >= lvl("High") and cases[0] < cases[1] < cases[2])
+        for s in x["steps"]:
+            r = next(r for r in service.ranking("2025-08-18", s["horizon"])["wards"] if r["ward_id"] == x["ward_id"])
+            assert (r["predicted_cases"], r["risk_tier"]) == (s["predicted_cases"], s["risk_tier"])
+    peaks = [lvl(x["peak_tier"]) for x in w["wards"]]
+    assert peaks == sorted(peaks, reverse=True)
+    assert all(x["city"] == "Gazipur" for x in service.warnings("2025-08-18", "Gazipur")["wards"])
+    with pytest.raises(ValueError):
+        service.warnings("2025-08-18", "Atlantis")

@@ -71,6 +71,10 @@ counts didn't help, so the model stays weather-only.
 - Truly Critical weeks flagged High or above: 88% / 78% / 68%; alert precision 0.49 (h=2).
 - Outbreak weeks are still under-predicted by 5–8 cases (`reports/outbreak_errors.json`).
 
+**Ablation** (`reports/ablation.json`): removing weather raises CV MAE by 39% / 26% / 4% (h=2/3/4);
+removing ward attributes by 13% / 10% / 6%. **Ward ranking** (`reports/ranking_eval.json`): about half of
+each in-season week's predicted top-10 wards are truly top-10 (test 0.51 / 0.49 / 0.48; random 0.17).
+
 At h=4 the model barely beats the baseline, because the main driver (rain 3 weeks earlier) hasn't
 fallen yet, so **2–3 weeks is the dependable window**. An unseen-city hold-out matches seen cities
 (MAE 1.08 against 1.08 at h=2).

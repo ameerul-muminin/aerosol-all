@@ -8,7 +8,7 @@ from src.test_lock import LOCK, fingerprint
 ROOT = Path(__file__).resolve().parents[1]
 # Scripts that only REPORT final numbers may read the test split; every other script that calls
 # split() chooses something (features, settings, models) and must discard it.
-REPORTING_ONLY = {"src/train.py", "src/evaluate.py", "src/test_lock.py"}
+REPORTING_ONLY = {"src/train.py", "src/evaluate.py", "src/test_lock.py", "src/ranking_eval.py"}
 
 
 def test_test_set_unchanged_since_lock():

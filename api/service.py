@@ -64,9 +64,38 @@ def meta() -> dict:
 
 
 # ---------------------------------------------------------------- /api/ranking
+DRIVER_LABELS = {
+    "Rainfall": "Rainfall (lags 0-8 weeks)",
+    "Temperature": "Temperature (last 4 weeks)",
+    "Humidity": "Humidity (last 4 weeks)",
+    "Season": "Time of year",
+    "Ward vulnerability": "Ward vulnerability (drainage, crowding, sanitation)",
+    "Recent cases": "Recent cases",
+}
+
+
 @lru_cache(maxsize=256)
 def _ranking_df(as_of: str, horizon: int) -> pd.DataFrame:
-    return predict_all(features(), as_of, horizon)
+    """All wards for one week/horizon, with exact grouped-Shapley drivers (src/explain.py).
+    Contributions add up to (prediction - average-week reference), so the UI can show them honestly."""
+    from src.explain import contributions
+    from src.features import required_columns
+    from src.predict import _check_horizon
+
+    f = features()
+    out = predict_all(f, as_of, horizon, with_drivers=False)
+    m = _check_horizon(horizon)
+    rows = f[f["date"] == pd.Timestamp(as_of)].dropna(subset=required_columns(cases=False)).reset_index(drop=True)
+    drv = contributions(m["model"], rows)
+    cols = [c for c in drv.columns if c.startswith("driver_")]
+    names = {c: next(g for g in DRIVER_LABELS if "driver_" + g.lower().replace(" ", "_") == c) for c in cols}
+    per_ward = {}
+    for i, w in enumerate(rows["ward_id"]):
+        items = sorted(((DRIVER_LABELS[names[c]], float(drv.at[i, c])) for c in cols), key=lambda kv: -abs(kv[1]))
+        per_ward[w] = (items, float(drv.at[i, "base_cases"]))
+    out["top_drivers"] = out["ward_id"].map(lambda w: per_ward[w][0])
+    out["driver_reference_cases"] = out["ward_id"].map(lambda w: per_ward[w][1])
+    return out
 
 
 def _row(r) -> dict:
@@ -77,6 +106,7 @@ def _row(r) -> dict:
         "range_low": _num(r["range_low"]), "range_high": _num(r["range_high"]),
         "risk_tier": r["risk_tier"],
         "top_drivers": [{"label": k, "effect": _num(v, 3)} for k, v in r["top_drivers"]],
+        "driver_reference_cases": _num(r.get("driver_reference_cases")),
     }
 
 

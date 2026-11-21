@@ -3,13 +3,14 @@
 ## Project
 EDU AI Engineering Hackathon 2026, Phase 1: "AI for Urban Dengue Outbreak".
 Build window 21 Nov 2026 2:00 PM → 22 Nov 2026 2:00 PM (Asia/Dhaka). **Submit by 1:30 PM.**
-A Streamlit app that forecasts **ward-level dengue cases and risk tier 2, 3 and 4 weeks ahead**
+A web app (JSON API + HTML/CSS/JS frontend) that forecasts **ward-level dengue cases and risk tier 2, 3 and 4 weeks ahead**
 from lagged weather and ward attributes, so public health officers can target high-risk wards early.
 
 ## Team (each person runs their own Claude Code session, on their own branch)
 - **A (Nazifa): ML.** Owns `src/features.py`, `src/train.py`, models, metrics, and the ARCHITECTURE.md ML sections.
 - **B (Azman): repo and efficiency.** Owns requirements, README, AI disclosure, tests, timings, the git audit and the clean-clone test.
-- **C: dashboard and docs.** Owns `app.py`, `.streamlit/`, the ARCHITECTURE.md diagram/UI/cost sections, screenshots and the video.
+- **C (Srijita): frontend engineer.** Owns `web/` (marketing page `web/index.html`, dashboard `web/app/`), the design, screenshots and the UI part of the video.
+  B and A share `api/`, ARCHITECTURE.md and the rest of the video.
 
 Only edit files outside your own area if their owner agrees. Branches: `a/<task>`, `b/<task>`, `c/<task>`; merge via PR.
 
@@ -24,21 +25,36 @@ models/dengue_model.joblib        one bundle: model per horizon, tier cuts, conf
 reports/metrics.json              validation + test metrics per horizon (source of every number shown)
 reports/test_predictions_h{2,3,4}.csv   per-row test predictions (for the error tab)
 tests/                            pytest
-app.py                            Streamlit UI (C)
+api/service.py                    JSON-ready views of the model (pure Python, tested)
+api/main.py                       Flask app: /api/* routes + serves web/
+web/index.html                    marketing page (C)
+web/app/index.html                dashboard (C)
+web/assets/                       css, js, fonts, images (C) — no CDN, no build step
 ```
 
-## Interface (the UI must use only these functions)
+## Web API (the frontend talks ONLY to these; run `python -m api`)
+`GET /api/meta` · `/api/forecast?ward_id&as_of&horizon` · `/api/ranking?as_of&horizon[&city]` ·
+`/api/metrics` · `/api/history?ward_id&horizon` · `/api/health`. Errors: HTTP 400 `{"error": "<friendly message>"}`.
+Dates are ISO `YYYY-MM-DD` Mondays; horizon 2|3|4. Shapes are documented in docs/frontend/ (guide PDF).
+
+## Python interface (used by api/service.py)
 ```python
 from src.predict import build_features, predict_risk, predict_all
-feat = build_features()                                   # cache with st.cache_data
+feat = build_features()                                   # cached in api/service.py
 predict_risk(feat, ward_id, as_of_date, horizon) -> dict  # one ward
 predict_all(feat, as_of_date, horizon) -> DataFrame       # all wards, sorted by predicted_cases
 ```
 Keys/columns: `ward_id, city, forecast_week, predicted_cases, range_low, range_high,
 risk_tier ("Low"|"Medium"|"High"|"Critical"), top_drivers [(plain-language label, contribution)]`.
 Contribution > 0 means the factor raises predicted cases, and < 0 means it lowers them (what-if occlusion against training averages).
-Bad input raises `ValueError` with a user-friendly message. Show it with `st.warning`, never a traceback.
+Bad input raises `ValueError` with a user-friendly message; the API returns it as a 400 and the UI shows it inline, never a traceback.
 `load_bundle()` is cached and retrains automatically if the model file can't be loaded.
+
+## Challenge brief (Hackathon_preli_nov21.pdf) — scoring
+Setup 10 · Lag pipeline 15 · Prediction engine 15 · UI 10 (needs driver breakdown) · ARCHITECTURE.md 10
+(1–2 pages, diagram + split + model rationale) · Compute/API cost 10 (documented caching/cost controls)
+· 3-min uncut video 20 · Git history + AI disclosure 10 · Bonus +5 (ward heatmap, confidence intervals,
+MAE/RMSE validation dashboard). Treat the code as Stage 1 of a production system (reused in the onsite final).
 
 ## Verified facts
 - Data: 31,320 rows = 60 wards × 522 weekly rows, 2016-01-04 → 2025-12-29, no gaps or missing values.
@@ -56,7 +72,8 @@ Bad input raises `ValueError` with a user-friendly message. Show it with `st.war
 3. Relative paths only, no secrets/.env in the repo, and no external API calls at runtime.
 4. Small commits from the person's own GitHub account. No force-push and no bulk final commit.
 5. Every AI tool used goes in the README section "AI Assistants and External APIs".
-6. Keep requirements minimal. Charts use Streamlit built-ins or Altair (ships with Streamlit). Don't add plotly etc.
+6. Keep requirements minimal. Frontend = plain HTML/CSS/vanilla JS (ES modules), no npm/build step, no CDN at runtime;
+   charts are hand-built with HTML/CSS/SVG. Fonts and images are committed under web/assets/.
 7. Explain in simple language, one step at a time, and wait for confirmation.
 
 ## Commands
@@ -65,5 +82,6 @@ python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\a
 pip install -r requirements.txt
 python -m src.train          # retrain (~5 s)
 pytest -q
-streamlit run app.py
+python -m api                # http://127.0.0.1:8000  (dashboard: /app/)
+python -m scripts.measure_efficiency --train   # -> reports/efficiency.json
 ```

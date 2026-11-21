@@ -78,7 +78,8 @@ fallen yet, so **2–3 weeks is the dependable window**. An unseen-city hold-out
 **Tiers:** 2 / 9 / 15 or more cases (training p70/p90/p97), calibrated on validation.
 **Intervals:** conformal per prediction level and season (Jul–Oct coverage 0.77–0.78).
 **Drivers:** exact grouped Shapley values, plus global importance and partial dependence (`reports/explainability.json`). The tier and interval issues
-were first seen on test, then confirmed on validation.
+were first seen on test, then confirmed on validation. Test rows are hash-locked
+(`reports/test_set_lock.json`), and a test fails if any decision script reads them.
 
 ## Serving, compute and API cost efficiency
 

@@ -7,6 +7,9 @@ Team interface (used by the Streamlit app; keys/columns are a contract, see CLAU
 
 Analysis function:
   * predict(origin_date, horizon, wards=None)           -> DataFrame for weeks in the dataset
+
+Every function takes mode="weather" (default: weather + ward attributes + season) or
+mode="weather_cases" (optional: also uses reported cases up to the origin week).
 """
 from __future__ import annotations
 from functools import lru_cache
@@ -35,6 +38,7 @@ DRIVER_GROUPS = {
     "Ward water-logging risk": ["water_logging_risk_index"],
     "Ward population density": ["population_density_sqkm"],
     "Ward sanitation score": ["sanitation_score"],
+    "Reported cases (last 4 weeks)": [f"cases_lag{k}" for k in range(5)] + ["cases_sum_0_3"],
 }
 MIN_HISTORY_WEEKS = 8  # rain_lag8 needs 8 earlier weeks
 
@@ -70,11 +74,15 @@ def _featurized():
 def _reference_values() -> pd.Series:
     """Training-period average of each feature: the 'typical conditions' baseline for drivers."""
     d = _featurized()
-    return d.loc[d["date"] <= TRAIN_END, feature_columns(anomaly=True)].mean()
+    return d.loc[d["date"] <= TRAIN_END, feature_columns(anomaly=True, cases=True)].mean()
 
 
-def _check_horizon(horizon):
-    hs = load_bundle()["horizons"]
+def _check_horizon(horizon, mode="weather"):
+    b = load_bundle()
+    modes = b.get("modes") or {"weather": b["horizons"]}
+    if mode not in modes:
+        raise ValueError(f"mode must be one of {sorted(modes)}, got {mode!r}")
+    hs = modes[mode]
     if horizon not in hs:
         raise ValueError(f"Horizon must be one of {tuple(sorted(hs))} weeks, got {horizon!r}.")
     return hs[horizon]
@@ -93,22 +101,22 @@ def _model_predict(m, d: pd.DataFrame) -> np.ndarray:
 
 # ---------------------------------------------------------------- analysis functions
 
-def _score(rows: pd.DataFrame, horizon: int) -> pd.DataFrame:
+def _score(rows: pd.DataFrame, horizon: int, mode: str = "weather") -> pd.DataFrame:
     """Run the horizon's model on featurized rows (one row per ward at its origin week)."""
-    m = _check_horizon(horizon)
-    rows = rows.dropna(subset=required_columns())
+    m = _check_horizon(horizon, mode)
+    rows = rows.dropna(subset=required_columns(cases=mode == "weather_cases"))
     rows = rows.assign(target_date=rows["date"] + pd.Timedelta(weeks=horizon))
     p = _model_predict(m, rows)
     lo, hi = conformal_interval(p, m["conformal_q"])
     out = rows[["ward_id", "city", "date", "target_date"]].assign(
-        horizon_weeks=horizon, predicted_cases=p, lower_80=lo, upper_80=hi,
+        horizon_weeks=horizon, mode=mode, predicted_cases=p, lower_80=lo, upper_80=hi,
         risk_tier=[TIER_NAMES[i] for i in to_tier(p, m["tier_cuts"])])
     return out.sort_values("predicted_cases", ascending=False).reset_index(drop=True)
 
 
-def predict(origin_date, horizon: int, wards=None) -> pd.DataFrame:
+def predict(origin_date, horizon: int, wards=None, mode: str = "weather") -> pd.DataFrame:
     """Forecast cases `horizon` weeks after `origin_date` using dataset weather up to that date."""
-    _check_horizon(horizon)
+    _check_horizon(horizon, mode)
     d = _featurized()
     d = d[d["date"] == pd.Timestamp(origin_date)]
     if d.empty:
@@ -116,7 +124,7 @@ def predict(origin_date, horizon: int, wards=None) -> pd.DataFrame:
         raise ValueError(f"no data for {origin_date}; dataset weeks are Mondays {lo} to {hi}.")
     if wards is not None:
         d = d[d["ward_id"].isin(wards)]
-    return _score(d, horizon)
+    return _score(d, horizon, mode)
 
 
 # ---------------------------------------------------------------- team interface
@@ -155,12 +163,13 @@ def _drivers(m, X: pd.DataFrame, base_pred: np.ndarray, top_k: int = 5) -> list[
     return out
 
 
-def predict_all(feat_df: pd.DataFrame, as_of_date, horizon: int, with_drivers: bool = True) -> pd.DataFrame:
+def predict_all(feat_df: pd.DataFrame, as_of_date, horizon: int, with_drivers: bool = True,
+                mode: str = "weather") -> pd.DataFrame:
     """All wards for one as-of date and horizon, sorted by predicted cases (one row per ward)."""
     as_of = _check_inputs(feat_df, as_of_date, horizon)
-    m = _check_horizon(horizon)
+    m = _check_horizon(horizon, mode)
     feats = _features_of(m)
-    d = feat_df[feat_df["date"] == as_of].dropna(subset=required_columns())
+    d = feat_df[feat_df["date"] == as_of].dropna(subset=required_columns(cases=mode == "weather_cases"))
     X = d[feats]
     p = _model_predict(m, X)
     lo, hi = conformal_interval(p, m["conformal_q"])
@@ -178,13 +187,14 @@ def predict_all(feat_df: pd.DataFrame, as_of_date, horizon: int, with_drivers: b
     return out.sort_values("predicted_cases", ascending=False).reset_index(drop=True)
 
 
-def predict_risk(feat_df: pd.DataFrame, ward_id: str, as_of_date, horizon: int) -> dict:
+def predict_risk(feat_df: pd.DataFrame, ward_id: str, as_of_date, horizon: int,
+                 mode: str = "weather") -> dict:
     """One ward: ward_id, forecast_week, predicted_cases, range_low, range_high, risk_tier, top_drivers."""
     if ward_id not in set(feat_df["ward_id"]):
         raise ValueError(f"Unknown ward: {ward_id}")
     as_of = _check_inputs(feat_df, as_of_date, horizon)
     one = feat_df[feat_df["ward_id"] == ward_id]
-    res = predict_all(one, as_of, horizon)
+    res = predict_all(one, as_of, horizon, mode=mode)
     if res.empty:
         raise ValueError("Not enough history for this ward on that date.")
     return res.iloc[0].to_dict()

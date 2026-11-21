@@ -9,6 +9,7 @@ Analysis / scenario functions:
   * predict(origin_date, horizon, wards=None)           -> DataFrame for weeks in the dataset
   * predict_from_weather(weather, horizon)              -> NEW weekly weather rows joined onto history
   * what_if(origin_date, horizon, rainfall_mm=...)      -> override one week's weather and re-predict
+  explain=True on these three adds exact grouped-Shapley driver columns (src/explain.py).
 
 Every function takes mode="weather" (default: weather + ward attributes + season) or
 mode="weather_cases" (optional: also uses reported cases up to the origin week).
@@ -109,8 +110,9 @@ def _model_predict(m, d: pd.DataFrame) -> np.ndarray:
 
 # ---------------------------------------------------------------- analysis functions
 
-def _score(rows: pd.DataFrame, horizon: int, mode: str = "weather") -> pd.DataFrame:
-    """Run the horizon's model on featurized rows (one row per ward at its origin week)."""
+def _score(rows: pd.DataFrame, horizon: int, mode: str = "weather", explain: bool = False) -> pd.DataFrame:
+    """Run the horizon's model on featurized rows (one row per ward at its origin week).
+    explain=True adds per-prediction driver contributions (see src/explain.py)."""
     m = _check_horizon(horizon, mode)
     rows = rows.dropna(subset=required_columns(cases=mode == "weather_cases"))
     rows = rows.assign(target_date=rows["date"] + pd.Timedelta(weeks=horizon))
@@ -119,10 +121,15 @@ def _score(rows: pd.DataFrame, horizon: int, mode: str = "weather") -> pd.DataFr
     out = rows[["ward_id", "city", "date", "target_date"]].assign(
         horizon_weeks=horizon, mode=mode, predicted_cases=p, lower_80=lo, upper_80=hi,
         risk_tier=[TIER_NAMES[i] for i in to_tier(p, m["tier_cuts"])])
+    if explain:
+        from src.explain import contributions
+        drv = contributions(m["model"], rows, cases=mode == "weather_cases")
+        out = pd.concat([out.reset_index(drop=True), drv], axis=1)
     return out.sort_values("predicted_cases", ascending=False).reset_index(drop=True)
 
 
-def predict(origin_date, horizon: int, wards=None, mode: str = "weather") -> pd.DataFrame:
+def predict(origin_date, horizon: int, wards=None, mode: str = "weather",
+            explain: bool = False) -> pd.DataFrame:
     """Forecast cases `horizon` weeks after `origin_date` using dataset weather up to that date."""
     _check_horizon(horizon, mode)
     d = _featurized()
@@ -133,7 +140,7 @@ def predict(origin_date, horizon: int, wards=None, mode: str = "weather") -> pd.
                          "Use predict_from_weather() for new weeks.")
     if wards is not None:
         d = d[d["ward_id"].isin(wards)]
-    return _score(d, horizon, mode)
+    return _score(d, horizon, mode, explain)
 
 
 def _validate_weather(weather: pd.DataFrame, cases: bool = False) -> pd.DataFrame:
@@ -166,7 +173,8 @@ def _validate_weather(weather: pd.DataFrame, cases: bool = False) -> pd.DataFram
     return w
 
 
-def predict_from_weather(weather: pd.DataFrame, horizon: int, mode: str = "weather") -> pd.DataFrame:
+def predict_from_weather(weather: pd.DataFrame, horizon: int, mode: str = "weather",
+                         explain: bool = False) -> pd.DataFrame:
     """Predict from NEW weekly weather rows (columns: date, ward_id + the 5 weather columns).
 
     Rows can continue the dataset (e.g. 2026-01-05 onward) or replace existing weeks.
@@ -196,10 +204,11 @@ def predict_from_weather(weather: pd.DataFrame, horizon: int, mode: str = "weath
     feats = add_lag_features(combined)
     origin = w.groupby("ward_id")["date"].max()
     rows = feats[feats["date"] == feats["ward_id"].map(origin)]
-    return _score(rows, horizon, mode)
+    return _score(rows, horizon, mode, explain)
 
 
-def what_if(origin_date, horizon: int, wards=None, mode: str = "weather", **overrides) -> pd.DataFrame:
+def what_if(origin_date, horizon: int, wards=None, mode: str = "weather", explain: bool = False,
+            **overrides) -> pd.DataFrame:
     """Scenario: take the dataset weather at `origin_date`, override some columns
     (e.g. rainfall_mm=150), and predict. Unspecified columns keep their real values."""
     bad = set(overrides) - set(WEATHER)
@@ -212,7 +221,7 @@ def what_if(origin_date, horizon: int, wards=None, mode: str = "weather", **over
     if wards is not None:
         base = base[base["ward_id"].isin(wards)]
     base = base[["date", "ward_id", *WEATHER, "dengue_cases"]].assign(**overrides)
-    return predict_from_weather(base, horizon, mode)
+    return predict_from_weather(base, horizon, mode, explain)
 
 
 # ---------------------------------------------------------------- team interface

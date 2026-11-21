@@ -17,13 +17,14 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python -m api                      # open http://127.0.0.1:8000
 ```
-Tested with Python 3.11–3.13. The trained model is committed, so no training is needed to launch.
+Tested with Python 3.11, 3.12 and 3.13. **Python 3.14 is not supported** (no scikit-learn 1.6.1 build for it yet).
+The trained model is committed, so no training is needed to launch.
 One process serves the marketing page (`/`), the dashboard (`/app/`) and the JSON API (`/api/...`). No Node.js needed.
 
 ## Retrain (one command)
 ```bash
-python -m src.train      # rebuilds models/dengue_model.joblib and reports/metrics.json
-pytest -q                # lag pipeline, leakage and interface tests
+python -m src.train      # rebuilds models/dengue_model.joblib and reports/metrics.json (~70 s)
+python -m pytest -q      # lag pipeline, leakage, model and API tests
 ```
 
 ## Project structure

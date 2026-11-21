@@ -54,25 +54,30 @@ There is no random shuffle anywhere (sklearn's random early stopping is off).
 | Poisson deviance, CV mean (validation) | h=2 | h=3 | h=4 |
 |---|---|---|---|
 | Best baseline (seasonal mean / Ridge) | 1.91 (1.74) | 1.98 (1.96) | 1.98 (1.96) |
-| Poisson GLM | 1.16 (1.15) | 1.38 (1.31) | 1.69 (1.88) |
 | Extra trees | 1.03 (0.98) | 1.16 (1.10) | 1.44 (1.57) |
-| **HistGradientBoosting, Poisson loss** | **0.96 (1.03)** | **1.14 (1.20)** | **1.31 (1.70)** |
+| HistGradientBoosting, Poisson loss | 0.96 (1.03) | 1.14 (1.20) | 1.31 (1.70) |
+| **Deployed after tuning** | **0.97 (1.00)** | **1.09 (1.11)** | **1.28 (1.58)** |
 
-Boosting wins on CV at every horizon, so it stays (the rule requires a more-than-2% CV win to
-replace it). Extra trees does better on validation, so averaging the two is a natural next step. Recent case counts didn't help, so the model stays weather-only.
+Random search (75 trials, `reports/tuning_log.json`) and single-change tests, under rules fixed in
+advance, adopted outbreak-week weighting (h=2 ×4, h=3 ×2 on a boosting + extra-trees average) and
+regularised settings at h=4. Recent-year weights and isotonic recalibration were rejected
+(`reports/improvements_round2.json`). Recent case counts didn't help, so the model stays
+weather-only.
 
 **Test (2024–25):**
-- MAE 1.07 / 1.11 / 1.28, against 1.26 for the seasonal baseline.
-- Truly Critical weeks flagged High or above: 85% / 83% / 68%; alert precision 0.50 (h=2).
-- Outbreak weeks are under-predicted by about 6 cases (`reports/outbreak_errors.json`), which is
-  why tier cut points are calibrated.
+- MAE 1.18 / 1.12 / 1.25 (seasonal baseline 1.26). At h=2, weighting trades average error for
+  outbreak accuracy: Critical-week error 6.4 → 5.4 cases.
+- Truly Critical weeks flagged High or above: 88% / 78% / 68%; alert precision 0.48 (h=2).
+- Outbreak weeks are still under-predicted by 5–8 cases (`reports/outbreak_errors.json`).
 
-At h=4 the model matches the baseline, because the main driver (rain 3 weeks earlier) hasn't fallen
-yet, so **2–3 weeks is the dependable window**. An unseen-city hold-out matches seen cities (MAE 1.00).
+At h=4 the model barely beats the baseline, because the main driver (rain 3 weeks earlier) hasn't
+fallen yet, so **2–3 weeks is the dependable window**. An unseen-city hold-out matches seen cities
+(MAE 1.11 against 1.12 at h=2).
 
 **Tiers:** 2 / 9 / 15 or more cases (training p70/p90/p97), calibrated on validation.
-**Intervals:** conformal (coverage 0.79). **Drivers:** exact grouped Shapley values. The tier and
-interval issues were first seen on test, then confirmed on validation.
+**Intervals:** conformal per prediction level and season (Jul–Oct coverage 0.77–0.79). **Drivers:** exact grouped Shapley values, plus global
+importance and partial dependence (`reports/explainability.json`). The tier and interval issues
+were first seen on test, then confirmed on validation.
 
 ## Serving, compute and API cost efficiency
 

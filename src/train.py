@@ -14,7 +14,9 @@ import time
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.ensemble import ExtraTreesRegressor, HistGradientBoostingRegressor
+from sklearn.impute import SimpleImputer
+from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import PoissonRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -28,6 +30,8 @@ SEED = 42
 BUNDLE = ROOT / "models" / "dengue_model.joblib"
 METRICS = ROOT / "reports" / "metrics.json"
 SELECTED = ROOT / "models" / "selected_features.json"   # written by src/feature_selection.py (CV-based)
+HYPERPARAMS = ROOT / "models" / "hyperparameters.json"  # written by src/tuning.py (CV-based), if adopted
+POSTPROCESS = ROOT / "models" / "postprocess.json"      # written by src/improvements.py, if adopted
 FEATURE_LIST = ROOT / "reports" / "feature_list.json"   # final ordered inputs per mode/horizon
 
 
@@ -51,13 +55,14 @@ CV_YEARS = (2017, 2018, 2019, 2020, 2021)   # validation year of each expanding-
 HGB_GRID = [{"max_iter": n, "max_leaf_nodes": l} for n in (150, 300) for l in (7, 15)]
 
 
-def hgb(max_iter=300, max_leaf_nodes=15, loss="poisson", **kw):
+def hgb(max_iter=300, max_leaf_nodes=15, learning_rate=0.05, min_samples_leaf=40,
+        l2_regularization=1.0, max_features=1.0, loss="poisson", **kw):
     # early_stopping=False: sklearn's default early stopping holds out a RANDOM 10% of rows,
     # which would shuffle time inside training. Tree count is chosen by time-ordered CV instead.
-    return HistGradientBoostingRegressor(loss=loss, max_iter=max_iter, learning_rate=0.05,
-                                         max_leaf_nodes=max_leaf_nodes, min_samples_leaf=40,
-                                         l2_regularization=1.0, early_stopping=False,
-                                         random_state=SEED, **kw)
+    return HistGradientBoostingRegressor(loss=loss, max_iter=max_iter, learning_rate=learning_rate,
+                                         max_leaf_nodes=max_leaf_nodes, min_samples_leaf=min_samples_leaf,
+                                         l2_regularization=l2_regularization, max_features=max_features,
+                                         early_stopping=False, random_state=SEED, **kw)
 
 
 def time_folds(tr):
@@ -67,6 +72,25 @@ def time_folds(tr):
     yr = tr["target_date"].dt.year
     for y in CV_YEARS:
         yield y, tr[yr < y], tr[yr == y]
+
+
+WEIGHT_KEYS = ("outbreak_weight", "outbreak_threshold", "recency_weight")
+
+
+def split_weight_params(params, d):
+    """Separate the sample-weight options from model settings and build the weights (or None).
+      outbreak_weight w, outbreak_threshold t: rows with target >= t count w times (G5).
+      recency_weight r: linear ramp by target year within this training set, oldest 1, newest 1 + r."""
+    params = dict(params)
+    w, thr, r = (params.pop(k, None) for k in WEIGHT_KEYS)
+    sw = np.ones(len(d))
+    if w and thr is not None:
+        sw = sw * np.where(d["target"].to_numpy() >= thr, w, 1.0)
+    if r:
+        yr = d["target_date"].dt.year.to_numpy()
+        span = max(yr.max() - yr.min(), 1)
+        sw = sw * (1.0 + r * (yr - yr.min()) / span)
+    return params, (sw if (w and thr is not None) or r else None)
 
 
 class HGB:
@@ -80,11 +104,67 @@ class HGB:
         # scikit-learn 1.6 tolerates them but newer versions raise, so they are skipped at fit and
         # at predict. Results are unchanged on 1.6.1 (verified fold by fold).
         self.used_ = [f for f in self.feats if X[f].notna().any()]
-        self.m = hgb(**self.params).fit(X[self.used_], d["target"])
+        params, sw = split_weight_params(self.params, d)
+        self.m = hgb(**params).fit(X[self.used_], d["target"], sample_weight=sw)
         return self
 
     def predict(self, d):
         return self.m.predict(d[getattr(self, "used_", self.feats)])
+
+
+class Blend:
+    """Optional (G5): average of HistGradientBoosting and extra trees (median imputer fitted on
+    the training data only, because extra trees cannot take NaN)."""
+    def __init__(self, feats, **params):
+        self.feats, self.params = feats, params
+
+    def fit(self, d):
+        self.hgb = HGB(self.feats, **self.params).fit(d)
+        self.used_ = self.hgb.used_
+        self.imp = SimpleImputer(strategy="median").fit(d[self.used_])
+        _, sw = split_weight_params(self.params, d)     # same sample weights for both halves
+        self.et = ExtraTreesRegressor(n_estimators=200, min_samples_leaf=20, max_features=0.5,
+                                      n_jobs=-1, random_state=SEED).fit(self.imp.transform(d[self.used_]),
+                                                                        d["target"], sample_weight=sw)
+        return self
+
+    def predict(self, d):
+        et = np.clip(self.et.predict(self.imp.transform(d[self.used_])), 0, None)
+        return 0.5 * (np.clip(self.hgb.predict(d), 0, None) + et)
+
+
+class Calibrated:
+    """Optional outbreak fix: isotonic recalibration of a base model's predictions. The mapping is
+    fitted on OUT-OF-FOLD predictions from the time-ordered folds inside the training data, so the
+    validation years stay untouched for calibrating tiers/intervals and for checking the change."""
+    def __init__(self, base_cls, feats, **params):
+        self.base_cls, self.feats, self.params = base_cls, feats, params
+
+    def fit(self, d):
+        self.base = self.base_cls(self.feats, **self.params).fit(d)
+        self.used_ = self.base.used_
+        ps, ys = [], []
+        for _, a, b in time_folds(d):
+            if len(a) and len(b):
+                ps.append(self.base_cls(self.feats, **self.params).fit(a).predict(b))
+                ys.append(b["target"].to_numpy())
+        self.iso = (IsotonicRegression(y_min=0, increasing=True, out_of_bounds="clip")
+                    .fit(np.concatenate(ps), np.concatenate(ys)) if ps else None)
+        return self
+
+    def predict(self, d):
+        p = np.clip(self.base.predict(d), 0, None)
+        return self.iso.predict(p) if self.iso is not None else p
+
+
+def deployed_model(m):
+    """Fresh, unfitted model of the same kind, features and settings as a saved bundle entry
+    (plain HistGradientBoosting, possibly weighted, the HGB + extra-trees blend, optionally
+    wrapped in isotonic recalibration)."""
+    cls = Blend if m.get("kind", "").startswith("blend") or m.get("base_kind") == "blend_hgb_extra_trees" else HGB
+    if m.get("calibrated"):
+        return Calibrated(cls, list(m["features"]), **m["hyperparameters"])
+    return cls(list(m["features"]), **m["hyperparameters"])
 
 
 class GLM:
@@ -148,22 +228,44 @@ def _conf_q(p, y, coverage):
     return float(np.quantile((p - y) / scale, lvl)), float(np.quantile((y - p) / scale, lvl))
 
 
-def conformal_fit(val_pred, val_actual, coverage=0.80):
+def _season(months):
+    return np.where(np.isin(np.asarray(months), (7, 8, 9, 10)), "peak", "off")
+
+
+def conformal_fit(val_pred, val_actual, coverage=0.80, months=None):
     """Split-conformal intervals, asymmetric and variance-scaled (count noise ~ sqrt(mean)),
     calibrated SEPARATELY per predicted-value bin (Mondrian). A single global calibration is
     dominated by off-season near-zero weeks and under-covers the outbreak season.
     Uses VALIDATION residuals of a train-only model. Returns {bin_index: (q_lo, q_hi)}."""
     p, y = np.asarray(val_pred), np.asarray(val_actual)
     b = np.digitize(p, CONF_BINS)
-    return {int(k): _conf_q(p[b == k], y[b == k], coverage) for k in np.unique(b)}
+    q = {int(k): _conf_q(p[b == k], y[b == k], coverage) for k in np.unique(b)}
+    if months is not None:   # season-aware: also calibrate per (prediction bin, Jul-Oct vs rest)
+        s = _season(months)
+        for k in np.unique(b):
+            for sea in ("peak", "off"):
+                sel = (b == k) & (s == sea)
+                if sel.sum() >= 30:          # enough points for a stable 80% quantile
+                    q[f"{int(k)}|{sea}"] = _conf_q(p[sel], y[sel], coverage)
+    return q
 
 
-def conformal_interval(pred, q):
+def conformal_interval(pred, q, months=None):
+    """80% range. With season-aware quantiles and the target months, use the (bin, season)
+    calibration where available; otherwise the prediction-bin calibration."""
     pred = np.clip(np.asarray(pred, dtype=float), 0, None)
     b = np.digitize(pred, CONF_BINS)
-    fallback = q[max(q)]
-    qlo = np.array([q.get(int(k), fallback)[0] for k in b])
-    qhi = np.array([q.get(int(k), fallback)[1] for k in b])
+    q = {(int(k) if isinstance(k, str) and k.isdigit() else k): v for k, v in q.items()}   # JSON keys
+    int_keys = [k for k in q if isinstance(k, int)]
+    fallback = q[max(int_keys)]
+    if months is not None and any(isinstance(k, str) for k in q):
+        s = np.broadcast_to(_season(months), b.shape)
+        keys = [f"{int(k)}|{sea}" for k, sea in zip(b, s)]
+        qq = [q.get(key, q.get(int(k), fallback)) for key, k in zip(keys, b)]
+    else:
+        qq = [q.get(int(k), fallback) for k in b]
+    qlo = np.array([v[0] for v in qq])
+    qhi = np.array([v[1] for v in qq])
     scale = np.sqrt(pred + 1.0)
     return np.clip(pred - qlo * scale, 0, None), pred + qhi * scale
 
@@ -179,7 +281,7 @@ def test_metrics(te, p_te, conf_q, actual_cuts, cuts, baseline=None):
     """Final held-out numbers. Called once per mode/horizon; nothing downstream reads them to
     make a choice."""
     yte = te["target"].to_numpy()
-    lo, hi = conformal_interval(p_te, conf_q)
+    lo, hi = conformal_interval(p_te, conf_q, months=te["target_date"].dt.month.to_numpy())
     tier_true, tier_pred = to_tier(yte, actual_cuts), to_tier(p_te, cuts)
     ins = te["target_date"].dt.month.between(7, 10).to_numpy()
     out = scores(yte, p_te)
@@ -195,6 +297,22 @@ def test_metrics(te, p_te, conf_q, actual_cuts, cuts, baseline=None):
                                                                    fill_value=0).values.tolist(),
     })
     return out, lo, hi
+
+
+def load_hyperparameters():
+    """Per-horizon settings adopted by src/tuning.py under its pre-set rules, if present:
+    {h: {"hgb": {...}, "blend": bool}}."""
+    if HYPERPARAMS.exists():
+        return {int(h): v for h, v in json.loads(HYPERPARAMS.read_text()).items()}
+    return None
+
+
+def load_postprocess():
+    """Post-processing adopted by src/improvements.py: {"season_intervals": bool,
+    "isotonic": {"2": bool, ...}}. Defaults to off."""
+    if POSTPROCESS.exists():
+        return json.loads(POSTPROCESS.read_text())
+    return {"season_intervals": False, "isotonic": {}}
 
 
 def load_selected():
@@ -214,6 +332,8 @@ def write_feature_list(bundle):
 def main():
     feats = feature_columns()
     selected = load_selected()
+    tuned = load_hyperparameters()
+    post = load_postprocess()
     bundle = {"tier_names": TIER_NAMES, "modes": {m: {} for m in MODES}}
     report = {"split": {"train": "target<=2021-12-31", "val": "2022-01..2023-12", "test": "2024-01..2025-12",
                         "cv": f"expanding window inside train, validation years {list(CV_YEARS)}"},
@@ -230,10 +350,15 @@ def main():
         # With a CV-selected feature list (D12) the grid runs on it and the anomaly decision is
         # already encoded in it; otherwise the base list is tuned and anomaly decided here.
         base = selected[h] if selected else feats
-        hgb_cv = {f"{c['max_iter']}x{c['max_leaf_nodes']}": cross_validate(lambda c=c: HGB(base, **c), tr)
-                  for c in HGB_GRID}
-        best_cfg_key = min(hgb_cv, key=lambda k: hgb_cv[k]["mean"]["PoissonDev"])
-        best_cfg = next(c for c in HGB_GRID if f"{c['max_iter']}x{c['max_leaf_nodes']}" == best_cfg_key)
+        if tuned:   # settings adopted by src/tuning.py (random search on the same time folds)
+            best_cfg, best_cfg_key = dict(tuned[h]["hgb"]), "tuned"
+            hgb_cv = {"tuned": cross_validate(lambda: HGB(base, **best_cfg), tr)}
+        else:
+            hgb_cv = {f"{c['max_iter']}x{c['max_leaf_nodes']}": cross_validate(lambda c=c: HGB(base, **c), tr)
+                      for c in HGB_GRID}
+            best_cfg_key = min(hgb_cv, key=lambda k: hgb_cv[k]["mean"]["PoissonDev"])
+            best_cfg = next(c for c in HGB_GRID if f"{c['max_iter']}x{c['max_leaf_nodes']}" == best_cfg_key)
+        use_blend = bool(tuned and tuned[h].get("blend"))
         if selected:
             cv_anom = None
             use_anomaly = any(c.startswith("rain_anom") for c in base)
@@ -245,19 +370,27 @@ def main():
             use_anomaly = cv_anom["mean"]["PoissonDev"] < hgb_cv[best_cfg_key]["mean"]["PoissonDev"]
             feats_h = feats_anom if use_anomaly else feats
         makers = {"seasonal_naive": SeasonalNaive, "poisson_glm": lambda: GLM(feats),
-                  "hgb_poisson": lambda: HGB(feats_h, **best_cfg)}
+                  "hgb_poisson": (lambda: Blend(feats_h, **best_cfg)) if use_blend
+                                 else (lambda: HGB(feats_h, **best_cfg))}
         cv = {"seasonal_naive": cross_validate(makers["seasonal_naive"], tr),
               "poisson_glm": cross_validate(makers["poisson_glm"], tr),
-              "hgb_poisson": cv_anom if (use_anomaly and cv_anom) else hgb_cv[best_cfg_key]}
+              "hgb_poisson": cross_validate(makers["hgb_poisson"], tr) if use_blend
+                             else (cv_anom if (use_anomaly and cv_anom) else hgb_cv[best_cfg_key])}
         best = min(cv, key=lambda n: cv[n]["mean"]["PoissonDev"])
 
         # --- held-out VALIDATION: confirm choice, calibrate tiers + intervals (train-only models) ---
+        base_kind = "blend_hgb_extra_trees" if use_blend and best == "hgb_poisson" else best
+        use_iso = bool(post.get("isotonic", {}).get(str(h))) and best == "hgb_poisson"
+        if use_iso:   # isotonic recalibration on out-of-fold training predictions (outbreak fix)
+            base_cls = Blend if use_blend else HGB
+            makers["hgb_poisson"] = lambda: Calibrated(base_cls, feats_h, **best_cfg)
         cands = {n: makers[n]().fit(tr) for n in makers}
         val = {n: scores(yva, cands[n].predict(va)) for n in cands}
         p_va = cands[best].predict(va)
         actual_cuts = tier_thresholds(tr["target"])
         cuts = calibrate_pred_cuts(p_va, yva, actual_cuts)
-        conf_q = conformal_fit(p_va, yva, 0.80)
+        months_va = va["target_date"].dt.month.to_numpy() if post.get("season_intervals") else None
+        conf_q = conformal_fit(p_va, yva, 0.80, months=months_va)
 
         # --- deployment model: same family + hyperparameters, refit on train+val ---
         final = makers[best]().fit(trva)
@@ -271,7 +404,10 @@ def main():
 
         feats_final = feats_h if best == "hgb_poisson" else feats
         bundle["modes"]["weather"][h] = {"model": final, "conformal_q": conf_q, "tier_cuts": cuts,
-                                         "tier_actual_cuts": actual_cuts, "kind": best,
+                                         "tier_actual_cuts": actual_cuts,
+                                         "kind": ("calibrated_" if use_iso else "") + base_kind,
+                                         "base_kind": base_kind, "calibrated": use_iso,
+                                         "season_intervals": bool(post.get("season_intervals")),
                                          "hyperparameters": best_cfg, "features": feats_final}
         report["horizons"][h] = {"selected": best, "hyperparameters": best_cfg, "cv": cv,
                                  "feature_source": "models/selected_features.json (CV selection)" if selected
@@ -292,7 +428,7 @@ def main():
         m_c = make_c().fit(tr)
         p_va_c = m_c.predict(va)
         cuts_c = calibrate_pred_cuts(p_va_c, yva, actual_cuts)
-        conf_c = conformal_fit(p_va_c, yva, 0.80)
+        conf_c = conformal_fit(p_va_c, yva, 0.80, months=months_va)
         test_c, _, _ = test_metrics(te, m_c.predict(te), conf_c, actual_cuts, cuts_c)
         bundle["modes"]["weather_cases"][h] = {"model": make_c().fit(trva), "conformal_q": conf_c,
                                                "tier_cuts": cuts_c, "tier_actual_cuts": actual_cuts,

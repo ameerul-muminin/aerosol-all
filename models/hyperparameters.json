@@ -1,0 +1,31 @@
+{
+  "2": {
+    "hgb": {
+      "max_iter": 300,
+      "max_leaf_nodes": 7,
+      "outbreak_weight": 4.0,
+      "outbreak_threshold": 9.0
+    },
+    "blend": false
+  },
+  "3": {
+    "hgb": {
+      "max_iter": 300,
+      "max_leaf_nodes": 7,
+      "outbreak_weight": 2.0,
+      "outbreak_threshold": 9.0
+    },
+    "blend": true
+  },
+  "4": {
+    "hgb": {
+      "min_samples_leaf": 160,
+      "max_leaf_nodes": 7,
+      "max_iter": 150,
+      "max_features": 0.5,
+      "learning_rate": 0.05,
+      "l2_regularization": 3.0
+    },
+    "blend": false
+  }
+}

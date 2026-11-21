@@ -14,6 +14,9 @@ Writes:
       F1, macro-F1, confusion matrix, "alert" (High or Critical) precision/recall, and a
       precision-recall curve + average precision for detecting Critical weeks (score =
       predicted cases). sMAPE is not reported: 58% of weeks have 0 cases, where it is undefined.
+  reports/explainability.json           (G8)
+      Global grouped-Shapley contributions (mean |cases| per driver group) and partial-dependence
+      curves (breeding-window rain, humidity, ward attributes) on validation, train-only model.
   reports/outbreak_errors.json          (F4)
       MAE / RMSE / mean bias on all weeks, Jul-Oct, and outbreak weeks (actual >= High and
       >= Critical case thresholds), validation and test.
@@ -30,13 +33,14 @@ from sklearn.metrics import (average_precision_score, mean_poisson_deviance, pre
                              precision_recall_fscore_support, r2_score)
 
 from src.features import ROOT, HORIZONS, build_dataset, add_lag_features, load_raw
-from src.train import BUNDLE, HGB, TIER_NAMES, split, time_folds, to_tier
-from src.explain import group_of, GROUP_ORDER
+from src.train import BUNDLE, TIER_NAMES, deployed_model, split, time_folds, to_tier
+from src.explain import group_of, GROUP_ORDER, global_contributions, partial_dependence
 
 ERRORS = ROOT / "reports" / "validation_errors.csv"
 IMPORTANCE = ROOT / "reports" / "feature_importance.json"
 CLASSIFICATION = ROOT / "reports" / "classification_metrics.json"
 OUTBREAK = ROOT / "reports" / "outbreak_errors.json"
+EXPLAIN = ROOT / "reports" / "explainability.json"
 SEED = 0
 
 
@@ -121,15 +125,15 @@ def permutation_importance(model, d, repeats=5):
 def main():
     bundle = joblib.load(BUNDLE)
     featurized = add_lag_features(load_raw())
-    raw_errors, importance, classification, outbreak = [], {}, {}, {}
+    raw_errors, importance, classification, outbreak, explain = [], {}, {}, {}, {}
     for h in HORIZONS:
         m = bundle["horizons"][h]
         feats, cfg = m["features"], m["hyperparameters"]
         d = build_dataset(h, featurized, featurized=True, cases=True)   # same rows as train.py
         tr, va, te = split(d)
         for y, fit, val in time_folds(tr):
-            raw_errors.append(_rows(f"cv_{y}", "cv", h, val, HGB(feats, **cfg).fit(fit).predict(val)))
-        model_tr = HGB(feats, **cfg).fit(tr)                            # train-only model
+            raw_errors.append(_rows(f"cv_{y}", "cv", h, val, deployed_model(m).fit(fit).predict(val)))
+        model_tr = deployed_model(m).fit(tr)                            # train-only deployed model
         raw_errors.append(_rows("validation", "validation", h, va, model_tr.predict(va)))
         raw_errors.append(_rows("test", "test", h, te, model_tr.predict(te)))
         importance[h] = permutation_importance(model_tr, va)
@@ -138,6 +142,8 @@ def main():
         classification[h] = {"validation": classification_metrics(va["target"], p_va, cuts_a, cuts_p),
                              "test": classification_metrics(te["target"], p_te, cuts_a, cuts_p)}
         outbreak[h] = {"validation": outbreak_errors(va, p_va, cuts_a), "test": outbreak_errors(te, p_te, cuts_a)}
+        explain[h] = {"global_shapley": global_contributions(model_tr, va),
+                      "partial_dependence": partial_dependence(model_tr, va)}
         c = classification[h]["test"]
         print(f"   test: macro-F1 {c['macro_f1']:.2f}, alert recall {c['alert_high_or_critical']['recall']:.2f} / "
               f"precision {c['alert_high_or_critical']['precision']:.2f}, Critical AP "
@@ -152,6 +158,9 @@ def main():
                                       "horizons": importance}, indent=2))
     CLASSIFICATION.write_text(json.dumps({"note": "tiers as classes; train-only model; sMAPE omitted (58% zero weeks)",
                                           "horizons": classification}, indent=2))
+    EXPLAIN.write_text(json.dumps({"note": "validation rows, train-only model; Shapley vs training-average "
+                                           "reference; PDP = mean prediction with input(s) set to each value",
+                                   "horizons": explain}, indent=2))
     OUTBREAK.write_text(json.dumps({"note": "pred - actual; outbreak = actual >= High / Critical case thresholds",
                                     "horizons": outbreak}, indent=2))
     summ = table.groupby(["horizon_weeks", "kind"])[["n", "sum_abs_err", "sum_sq_err"]].sum()

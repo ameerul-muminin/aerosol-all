@@ -32,7 +32,7 @@ model cannot extrapolate beyond what it has seen.
 ## Retrain (one command)
 ```bash
 python -m src.train      # rebuilds models/dengue_model.joblib and reports/metrics.json (about 2 min)
-python scripts/measure_efficiency.py   # re-measures speed, memory and model size -> reports/efficiency.json
+python scripts/measure_efficiency.py --train --train-repeats 3   # re-measures speed, memory, model size and retrain time -> reports/efficiency.json (the model is restored afterwards)
 python -m pytest -q      # lag pipeline, leakage, model and API tests
 ```
 

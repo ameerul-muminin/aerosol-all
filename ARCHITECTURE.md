@@ -104,21 +104,22 @@ were first seen on test, then confirmed on validation. Test rows are hash-locked
 - **Minimal dependencies.** Python only (scikit-learn, pandas, Flask). There's no Node build or GPU,
   and it runs on a basic office laptop.
 
-Measured with `python scripts/measure_efficiency.py --train` on a MacBook (Apple silicon, Python 3.9.6, 21 Nov 2026); medians over 50 calls.
+Measured with `python scripts/measure_efficiency.py --train --train-repeats 3` on a MacBook (Apple silicon, 8 cores,
+Python 3.9.6, 21 Nov 2026, load average 5.12 at start); medians over 50 calls, retrain median of 3.
 Source: `reports/efficiency.json`.
 
 | Measure | Value |
 |---|---|
 | Model file size (3 horizon models, incl. 2-week ensemble) | 11.4 MB |
-| Model load at startup (once) | 0.42 s |
-| Lag features for all 60 wards × 522 weeks (once at startup) | 8.1 s |
-| App startup, including pre-computing the default week | 2.9 s |
-| One-ward forecast, uncached: median / 95th percentile of 50 calls | 0.85 s / 1.15 s |
+| Model load at startup (once) | 0.43 s |
+| Lag features for all 60 wards × 522 weeks (once at startup, from the CSV cache; a fresh clone reads the Excel file once, which is slower) | 1.0 s |
+| App startup, including pre-computing the default week | 2.7 s |
+| One-ward forecast, uncached: median / 95th percentile of 50 calls | 0.76 s / 0.88 s |
 | Ranking of 60 wards / one-ward forecast, cached (median of 50) | 0.002 s / 0.0006 s |
-| What-if scenario (POST /api/what_if, 4 weeks replaced): new / repeated | 0.52 s / 0.015 s |
+| What-if scenario (POST /api/what_if, 4 weeks replaced): new / repeated | 0.53 s / 0.016 s |
 | Ranking payload, raw → gzip | 31.7 KB → 3.3 KB |
-| Peak Python memory | 235 MB |
-| Full retrain, 3 horizons with time-ordered CV | 129 s |
+| Peak Python memory | 229 MB |
+| Full retrain, 3 horizons with time-ordered CV: median (min–max of 3) | 100 s (97–106 s) |
 | External API calls / LLM calls during the run | 0 / 0 |
 
 ## Path to a live system (Phase 2)
@@ -129,5 +130,5 @@ The split into model → `api/service.py` → `api/main.py` → `web/` keeps eac
   lag pipeline and API contract don't change.
 - **Scale out.** The API is stateless, so several workers can run behind a load balancer (for example
   gunicorn), with the static `web/` folder on a CDN.
-- **Retraining.** `python -m src.train` rebuilds every artifact in about 2 minutes (129 s measured). Metrics are versioned next to
+- **Retraining.** `python -m src.train` rebuilds every artifact in under 2 minutes (100 s median of 3 runs). Metrics are versioned next to
   the model in `reports/`.

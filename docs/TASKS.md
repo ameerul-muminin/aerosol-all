@@ -19,7 +19,7 @@ Order matters; each step is demo-able on its own.
       default 4), "Run what-if" button → `POST /api/what_if`. Baseline vs scenario side by side: tier badge
       (colour AND text), predicted cases, range, change (`change.cases`, `tier_changed`). Show `warnings[]`
       and any `error` message from the API inline. No new packages. Demo line: 0 → 250 mm.
-- [ ] **F4 All wards (Alif):** tier counts, ranking with +2/+3/+4 heat strip (bonus: heatmap), by-city bars, CSV.
+- [x] **F4 All wards (Alif):** tier counts, ranking with +2/+3/+4 heat strip (bonus: heatmap), by-city bars, CSV.
 - [ ] **F5 Model accuracy (Nazifa):** MAE/RMSE per horizon vs seasonal baseline, by city, `/api/history`
       chart with 80% band (bonus: confidence intervals + validation dashboard).
 - [ ] **F6 Marketing page (Srijita):** `web/index.html` + `landing.css` + `landing.js` from `web/proto/hero-a.html`.

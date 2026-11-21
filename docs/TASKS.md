@@ -7,25 +7,25 @@ Owner, check. Tick `[x]` in the commit that finishes a task.
 - [x] API incl. `POST /api/what_if`, efficiency script with tests (Alif + Nazifa)
 - [x] PR #13 closed (duplicate of #12)
 
-## Critical path: frontend (night direction, `build-ui` skill, prototype artboards Night A/B/C)
+## Critical path: frontend (warm paper "Jute" direction, `build-ui` skill, prototypes in `web/proto/`)
 Nothing in `web/` is real yet. UI = 10 points + 5 bonus, and the video (20) shows it.
 Order matters; each step is demo-able on its own.
-- [ ] **F1 Shell (Alif):** `web/app/index.html`, `assets/css/base.css` + `components.css`, `assets/js/api.js`,
+- [x] **F1 Shell (Alif):** `web/app/index.html`, `assets/css/base.css` + `components.css`, `assets/js/api.js`,
       `format.js`, `app.js` (hash router `#outlook #wards #accuracy`, URL state, inputs from `/api/meta`).
-- [ ] **F2 Ward outlook (Alif):** verdict card (cases, tier glyph+colour+word, likely range), rain-to-risk bars,
+- [x] **F2 Ward outlook (Alif):** verdict card (cases, tier glyph+colour+word, likely range), rain-to-risk bars,
       2/3/4 segmented control, drivers with "average week X → this ward Y", model inputs.
-- [ ] **F3 What-if panel (Alif, on the outlook view):** spec from Nazifa:
+- [x] **F3 What-if panel (Alif, on the outlook view):** spec from Nazifa:
       three number inputs (rainfall "mm per week", average temperature °C, humidity %), weeks selector (1–8,
       default 4), "Run what-if" button → `POST /api/what_if`. Baseline vs scenario side by side: tier badge
       (colour AND text), predicted cases, range, change (`change.cases`, `tier_changed`). Show `warnings[]`
       and any `error` message from the API inline. No new packages. Demo line: 0 → 250 mm.
-- [ ] **F4 All wards (Alif):** tier counts, ranking with +2/+3/+4 heat strip (bonus: heatmap), by-city bars, CSV.
+- [x] **F4 All wards (Alif):** tier counts, ranking with +2/+3/+4 heat strip (bonus: heatmap), by-city bars, CSV.
 - [ ] **F5 Model accuracy (Nazifa):** MAE/RMSE per horizon vs seasonal baseline, by city, `/api/history`
       chart with 80% band (bonus: confidence intervals + validation dashboard).
-- [ ] **F6 Marketing page (Srijita):** `web/index.html` + `landing.css` + `landing.js` from Night A.
+- [ ] **F6 Marketing page (Srijita):** `web/index.html` + `landing.css` + `landing.js` from `web/proto/hero-a.html`.
       Live card from `/api/forecast`, accuracy from `/api/metrics`. No login/register pages: the app has no
       accounts, and a page that doesn't work reads as mock UI.
-- [ ] **F7 Fonts + screenshots (Srijita):** Outfit 400/500/600 woff2 into `web/assets/fonts/`; screenshots of
+- [ ] **F7 Screenshots (Srijita):** fonts are vendored (Anton + Hind Siliguri); screenshots of
       each view into `docs/screenshots/`, linked from README.
 - [ ] **F8 Polish (Alif):** widths 360/768/1440, keyboard, error states (stop the server and reload),
       no console errors, `verify` skill.

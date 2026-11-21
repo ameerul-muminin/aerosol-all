@@ -1,0 +1,58 @@
+/* PROTOTYPE ONLY — candidate "Field" direction (warm paper, deep ink, one lime accent).
+   Not imported by the real app. If picked, these values move into assets/css/tokens.css. */
+@font-face { font-family: "Anton"; src: url("../assets/fonts/anton-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Hind Siliguri"; src: url("../assets/fonts/hind-siliguri-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2190-21FF, U+2580-259F; }
+@font-face { font-family: "Hind Siliguri"; src: url("../assets/fonts/hind-siliguri-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2190-21FF, U+2580-259F; }
+@font-face { font-family: "Hind Siliguri"; src: url("../assets/fonts/hind-siliguri-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2190-21FF, U+2580-259F; }
+@font-face { font-family: "Hind Siliguri"; src: url("../assets/fonts/hind-siliguri-bengali-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+25CC, U+A8F1; }
+@font-face { font-family: "Hind Siliguri"; src: url("../assets/fonts/hind-siliguri-bengali-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+25CC, U+A8F1; }
+
+:root {
+  --bg: #F1ECDF;        /* warm paper */
+  --paper: #FBF8F0;     /* raised card */
+  --sunk: #E6DFCD;      /* inset / track */
+  --line: #D8CFBA;
+  --ink: #2A1810;       /* deep warm brown: headlines + body */
+  --ink-2: #5B4434;     /* 7.6:1 on --bg */
+  --ink-3: #6E5847;     /* 5.6:1 on --bg */
+  --accent: #D6E04B;    /* lime: the ONE accent (CTA, focus, breeding window) */
+  --accent-ink: #2A1810;
+  --sky: #9CBCEB;       /* earthy secondaries */
+  --clay: #C4673E;
+  --moss: #5D7A3B;
+  --ochre: #D7A238;
+  --river: #2F4B5A;     /* dark band */
+  --river-2: #23394A;
+  --on-dark: #F4EFE2;
+  --tier-low: #5D7A3B;  --tier-medium: #C8901F; --tier-high: #C4673E; --tier-critical: #8E2A1E;
+  --raises: #C4673E; --lowers: #4C77A8;
+  --display: "Anton", "Hind Siliguri", Impact, "Arial Narrow", sans-serif;
+  --font: "Hind Siliguri", system-ui, "Segoe UI", sans-serif;
+  --r-card: 18px; --r-chip: 12px; --r-pill: 999px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.display { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: -0.01em; line-height: 0.86; margin: 0; }
+.nav { display: flex; align-items: center; justify-content: space-between; padding: 18px clamp(16px, 3vw, 40px); font-weight: 600; font-size: 14px; }
+.nav .brand { font-family: var(--display); font-size: 28px; letter-spacing: 0.01em; }
+.nav .links { display: flex; gap: 22px; align-items: center; }
+.nav .links a { text-decoration: none; }
+.btn { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 20px; border-radius: var(--r-pill); border: 1.5px solid var(--ink); background: transparent; color: var(--ink); font: 600 15px var(--font); text-decoration: none; cursor: pointer; transition: transform 160ms var(--ease-out); }
+.btn:active { transform: scale(.97); }
+.btn.lime { background: var(--accent); border-color: var(--accent); }
+.btn.dark { background: var(--ink); color: var(--on-dark); }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; box-shadow: 0 0 0 6px var(--accent); }
+.chip { position: absolute; display: flex; gap: 10px; align-items: center; background: var(--paper); border-radius: var(--r-chip); padding: 8px 14px 8px 8px; box-shadow: 0 10px 30px -12px rgba(42,24,16,.35); min-width: 168px; }
+.chip .sw { width: 40px; height: 40px; border-radius: 8px; flex: none; }
+.chip .k { font-size: 11px; font-weight: 600; color: var(--ink-2); line-height: 1.2; }
+.chip .v { font-family: var(--display); font-size: 26px; line-height: 1; }
+.chip .s { font-size: 11px; color: var(--ink-3); }
+.tier { display: inline-flex; gap: 6px; align-items: center; font-weight: 600; }
+.tier .g { font-size: 1.1em; }
+.skel { background: linear-gradient(90deg, var(--sunk), var(--paper), var(--sunk)); background-size: 200% 100%; animation: sk 1.2s linear infinite; border-radius: 6px; color: transparent !important; }
+@keyframes sk { to { background-position: -200% 0; } }
+.protobar { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--on-dark); font: 600 12px var(--font); padding: 6px 14px; border-radius: 999px; z-index: 99; opacity: .9; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

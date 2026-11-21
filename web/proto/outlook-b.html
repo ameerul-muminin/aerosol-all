@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proto · Ward outlook</title>
+<link rel="stylesheet" href="proto.css">
+<link rel="stylesheet" href="warm.css">
+<style>
+  body { font-size: 15px; }
+  /* sidebar */
+  .shell { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; background: linear-gradient(to right, var(--sunk) 248px, transparent 248px); }
+  aside { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 28px; padding: 24px 20px; background: var(--sunk); border-right: 1px solid var(--line); }
+  .brand { font: 400 26px/1 var(--display); letter-spacing: .01em; }
+  .tabs { display: grid; gap: 2px; margin: 0 -8px; }
+  .tabs a { display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; text-decoration: none; color: var(--ink-2); font-weight: 500; transition: background-color 160ms var(--ease-out), color 160ms var(--ease-out); }
+  .tabs a:hover { color: var(--ink); background: color-mix(in srgb, var(--paper) 60%, transparent); }
+  .tabs a[aria-current] { color: var(--ink); font-weight: 600; background: var(--paper); box-shadow: var(--shadow-sm); }
+  .side-ctl { display: grid; gap: 16px; padding-top: 24px; border-top: 1px solid var(--line-strong); }
+  .lang { margin-top: auto; align-self: start; display: inline-flex; border-radius: 999px; box-shadow: 0 0 0 1px var(--line-strong); padding: 3px; }
+  .lang button { min-height: 32px; padding: 0 12px; border: 0; border-radius: 999px; background: none; font: 500 13px var(--font); color: var(--ink-2); cursor: pointer; }
+  .lang button[aria-pressed="true"] { background: var(--ink); color: var(--on-dark); }
+  .wrap { width: 100%; max-width: 1120px; padding: 32px 32px 96px; }
+  /* controls */
+  .side-ctl label, .side-ctl .ctl-h { display: grid; gap: 6px; font-size: 13px; font-weight: 500; color: var(--ink-2); }
+  select { appearance: none; min-height: 44px; width: 100%; padding: 0 40px 0 14px; border: 0; border-radius: 10px; background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235C5249' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 14px center; box-shadow: var(--shadow-sm); font: 500 15px var(--font); color: var(--ink); cursor: pointer; transition: box-shadow 160ms var(--ease-out); }
+  select:hover { box-shadow: 0 0 0 1px var(--line-strong); }
+  .seg { position: relative; display: inline-grid; grid-template-columns: repeat(3, 1fr); background: color-mix(in srgb, var(--ink) 7%, var(--sunk)); border-radius: 10px; padding: 3px; }
+  .seg button { position: relative; z-index: 1; min-height: 38px; border: 0; background: none; font: 500 14px var(--font); color: var(--ink-2); cursor: pointer; transition: color 160ms var(--ease-out); }
+  .seg button[aria-pressed="true"] { color: var(--ink); font-weight: 600; }
+  .seg .thumb { position: absolute; top: 3px; left: 3px; width: calc((100% - 6px) / 3); height: 38px; background: var(--paper); border-radius: 8px; box-shadow: 0 1px 2px rgba(43,37,32,.12); transition: transform 240ms var(--ease-out); }
+
+  .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; margin-bottom: 20px; }
+  .head h1 { font-size: clamp(44px, 5vw, 72px); }
+  .head p { margin: 0; color: var(--ink-2); }
+
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+  .card { background: var(--paper); border-radius: var(--r-card); box-shadow: var(--shadow-sm); padding: 24px; }
+  .card h2 { font: 600 15px/1.3 var(--font); margin: 0 0 4px; }
+  .card .hint { font-size: 13px; color: var(--ink-3); margin: 0 0 18px; }
+
+  /* verdict */
+  .verdict { grid-column: span 6; display: grid; grid-template-columns: auto 1fr; gap: 6px 28px; align-items: end; align-content: space-between; }
+  .verdict .lbl { grid-column: 1 / -1; font-size: 13px; font-weight: 500; color: var(--ink-2); }
+  .verdict .n { font: 400 132px/0.82 var(--display); letter-spacing: -0.01em; }
+  .verdict .tierline { font-size: 22px; }
+  .verdict .rng { font-size: 14px; color: var(--ink-2); margin: 10px 0 12px; }
+  .rbar { position: relative; height: 8px; border-radius: 999px; background: var(--sunk); }
+  .rbar i { position: absolute; top: 0; bottom: 0; border-radius: 999px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+  .rbar b { position: absolute; top: -4px; width: 2px; height: 16px; background: var(--ink); border-radius: 1px; }
+  .rscale { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); margin-top: 6px; }
+
+  /* horizons */
+  .hz { grid-column: span 6; display: flex; flex-direction: column; }
+  .hzrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: auto; }
+  .hzrow button { text-align: left; border: 0; background: none; padding: 14px 16px 12px; border-radius: 12px; font: inherit; color: inherit; cursor: pointer; transition: background-color 160ms var(--ease-out), transform 160ms var(--ease-out); }
+  .hzrow button:hover { background: var(--bg); }
+  .hzrow button:active { transform: scale(.97); }
+  .hzrow button[aria-pressed="true"] { background: var(--bg); box-shadow: inset 0 0 0 1px var(--line-strong); }
+  .hzrow .w { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+  .hzrow b { display: block; font: 400 52px/1 var(--display); margin: 8px 0 6px; }
+  .hzrow .tier { font-size: 14px; }
+
+  /* rain */
+  .rainc { grid-column: 1 / -1; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--ink-2); margin: 0 0 18px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 10px; height: 10px; border-radius: 2px; }
+  .rain { display: grid; grid-template-columns: repeat(12, 1fr); gap: 10px; height: 200px; align-items: end; }
+  .rain .c { display: flex; flex-direction: column; justify-content: flex-end; height: 100%; min-width: 0; text-align: center; }
+  .rain .c i { display: block; background: var(--bar); border-radius: 4px 4px 1px 1px; transform-origin: bottom; animation: gy 320ms var(--ease-out) both; }
+  .rain .c.bw i { background: var(--accent); }
+  .rain .c.u i, .rain .c.f i { height: 100% !important; background: none; box-shadow: inset 0 0 0 1px var(--line-strong); border-radius: 4px; animation: none; }
+  .rain .c.f i { box-shadow: inset 0 0 0 1.5px var(--ink); background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--ink) 10%, transparent) 6px 7px); }
+  .rain .mm { font-size: 12px; font-weight: 500; color: var(--ink-2); margin-bottom: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .rain em { font-style: normal; font-size: 12px; color: var(--ink-3); margin-top: 8px; white-space: nowrap; overflow: hidden; }
+  .rain .c.f em { color: var(--ink); font-weight: 600; }
+  @keyframes gy { from { transform: scaleY(0); } }
+
+  /* why */
+  .why { grid-column: span 7; }
+  .sum { margin: 0 0 20px; color: var(--ink-2); }
+  .sum b { font-weight: 600; color: var(--ink); }
+  .wf { display: grid; grid-template-columns: minmax(130px, 220px) 1fr 48px; grid-auto-flow: row dense; gap: 10px 14px; align-items: center; }
+  .wf .lab { grid-column: 1; font-size: 14px; line-height: 1.3; }
+  .wf .track { grid-column: 2; position: relative; height: 20px; }
+  .wf .track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--line); }
+  .wf .s2 { position: absolute; top: 0; bottom: 0; border-radius: 3px; transform-origin: left; animation: gx 320ms var(--ease-out) both; }
+  .wf .val { grid-column: 3; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; font-size: 14px; }
+  .wf .end { font-weight: 600; }
+  .wf hr { grid-column: 1 / -1; border: 0; border-top: 1px solid var(--line); margin: 2px 0; }
+  @keyframes gx { from { transform: scaleX(0); } }
+
+  /* inputs */
+  .inp { grid-column: span 5; }
+  dl { margin: 0; }
+  dl div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); }
+  dl div:first-child { border-top: 0; padding-top: 0; }
+  dt { color: var(--ink-2); }
+  dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .err { color: var(--tier-critical); font-weight: 600; }
+  .still .rain .c i, .still .wf .s2 { animation: none; }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; background: none; }
+    aside { background: var(--sunk); }
+    aside { position: relative; height: auto; gap: 16px; padding: 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+    aside .tabs { display: none; } .side-ctl { padding-top: 0; border-top: 0; grid-template-columns: 1fr 1fr; } .side-ctl .ctl-h { grid-column: 1 / -1; }
+    .lang { position: absolute; top: 14px; right: 16px; margin: 0; }
+    .wrap { padding: 20px 16px 80px; }
+    .verdict, .hz, .why, .inp { grid-column: 1 / -1; }
+    .verdict { grid-template-columns: 1fr; } .verdict .n { font-size: 112px; }
+    .rain { gap: 4px; height: 150px; } .rain .mm { visibility: hidden; } .rain em { font-size: 10px; }
+    .wf { grid-template-columns: 1fr 48px; } .wf .val { grid-column: 2; } .wf .track { grid-column: 1 / -1; margin: -6px 0 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+<aside>
+  <span class="brand">aerosol-all</span>
+  <nav class="tabs"><a href="#" aria-current="page">Ward outlook</a><a href="#">All wards</a><a href="#">Model accuracy</a></nav>
+  <div class="side-ctl">
+    <label>Ward<select id="ward"></select></label>
+    <label>As of<select id="asof"></select></label>
+    <div class="ctl-h" style="display:grid;gap:6px;font-size:13px;font-weight:500;color:var(--ink-2)"><span id="hz-l">Ahead</span><div class="seg" role="group" aria-labelledby="hz-l"><span class="thumb" id="thumb"></span><button data-h="2">2 weeks</button><button data-h="3">3 weeks</button><button data-h="4">4 weeks</button></div></div>
+  </div>
+  <div class="lang" role="group" aria-label="Language"><button aria-pressed="true">EN</button><button aria-pressed="false" lang="bn">বাংলা</button></div>
+</aside>
+<main class="wrap">
+
+  <div class="head"><h1 class="display" id="title"><span class="skel">Ward 00</span></h1><p id="sub"><span class="skel">Dhaka South · week of 00 Xxx 0000</span></p></div>
+
+  <div class="grid">
+    <section class="card verdict" aria-live="polite">
+      <div class="lbl" id="v-l">Expected cases</div>
+      <div class="n num" id="v-n"><span class="skel">00</span></div>
+      <div>
+        <div class="tierline" id="v-t"></div>
+        <div class="rng" id="v-r"></div>
+        <div class="rbar" id="v-bar"></div>
+        <div class="rscale"><span>0</span><span id="v-max"></span></div>
+      </div>
+    </section>
+
+    <section class="card hz">
+      <h2>By horizon</h2>
+      <div class="hzrow" id="hz"></div>
+    </section>
+
+    <section class="card rainc">
+      <h2>Rain to risk</h2>
+      <div class="legend"><span><i style="background:var(--bar)"></i>Rain, mm/week</span><span><i style="background:var(--accent)"></i>Breeding window</span><span><i style="box-shadow:inset 0 0 0 1px var(--line-strong)"></i>Not yet</span></div>
+      <div class="rain" id="rain" role="img"></div>
+    </section>
+
+    <section class="card why">
+      <h2>Why this forecast</h2>
+      <p class="sum" id="sum"></p>
+      <div class="wf" id="drv"></div>
+    </section>
+
+    <section class="card inp">
+      <h2>Model inputs</h2>
+      <dl id="inp"></dl>
+    </section>
+  </div>
+</main>
+</div>
+
+<script type="module">
+import { api, fmt1, fmt0, ward, date, tierHTML, params } from "./proto.js";
+const st = params(), meta = await api("/api/meta");
+const $ = (id) => document.getElementById(id);
+$("ward").innerHTML = meta.cities.map((c) => `<optgroup label="${c.city}">${c.wards.map((w) => `<option value="${w}">${ward(w)}</option>`).join("")}</optgroup>`).join("");
+const weeks = []; for (let d = new Date(meta.as_of.max); weeks.length < 104; d.setDate(d.getDate() - 7)) weeks.push(d.toISOString().slice(0, 10));
+$("asof").innerHTML = weeks.map((w) => `<option value="${w}">${date(w)}</option>`).join("");
+$("ward").value = st.ward; $("asof").value = st.as_of;
+const seg = [...document.querySelectorAll(".seg button")];
+let first = true;
+
+async function load() {
+  seg.forEach((b, i) => { const on = +b.dataset.h === st.h; b.setAttribute("aria-pressed", on); if (on) $("thumb").style.transform = `translateX(${i * 100}%)`; });
+  history.replaceState(null, "", `?ward=${st.ward}&as_of=${st.as_of}&h=${st.h}`);
+  let f; try { f = await api(`/api/forecast?ward_id=${st.ward}&as_of=${st.as_of}&horizon=${st.h}`); }
+  catch (e) { $("sub").innerHTML = `<span class="err">${e.message}</span>`; return; }
+  document.body.classList.toggle("still", !first); first = false;   // bars grow on first paint only
+
+  $("title").textContent = ward(f.ward_id);
+  $("sub").textContent = `${f.city} · forecast for the week of ${date(f.forecast_week)}`;
+  $("v-l").textContent = "Expected cases";
+  $("v-n").textContent = fmt1(f.predicted_cases);
+  $("v-t").innerHTML = tierHTML(f.risk_tier, " risk");
+  $("v-r").textContent = `Likely ${fmt0(f.range_low)}–${fmt0(f.range_high)} (80% range)`;
+  const mx = Math.ceil(Math.max(20, f.range_high * 1.2) / 5) * 5, p = (v) => (v / mx) * 100;
+  $("v-bar").innerHTML = `<i style="left:${p(f.range_low)}%;width:${p(f.range_high) - p(f.range_low)}%"></i><b style="left:calc(${p(f.predicted_cases)}% - 1px)"></b>`;
+  $("v-max").textContent = mx;
+
+  $("hz").innerHTML = ["2", "3", "4"].map((h) => { const b = f.by_horizon[h];
+    return `<button data-h="${h}" aria-pressed="${+h === st.h}"><span class="w">+${h} weeks</span><b class="num">${fmt1(b.predicted_cases)}</b>${tierHTML(b.risk_tier)}</button>`; }).join("");
+  document.querySelectorAll("#hz button").forEach((b) => (b.onclick = () => { st.h = +b.dataset.h; load(); }));
+
+  const tl = f.rain_timeline, mm = Math.max(...tl.map((d) => d.rain_mm || 0));
+  $("rain").setAttribute("aria-label", `Weekly rainfall before the forecast week: ${tl.filter((d) => d.rain_mm != null).map((d) => `${date(d.week)} ${d.rain_mm} mm`).join(", ")}`);
+  $("rain").innerHTML = tl.map((d, i) => {
+    const cls = d.status === "forecast" ? "f" : d.status === "unknown" ? "u" : d.in_breeding_window ? "bw" : "";
+    const lab = d.status === "forecast" ? "" : d.status === "unknown" ? "–" : fmt0(d.rain_mm);
+    const day = d.status === "forecast" ? "Forecast" : new Date(d.week).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    return `<div class="c ${cls}"><span class="mm">${lab}</span><i style="height:${d.rain_mm == null ? 100 : Math.max(2, (d.rain_mm / mm) * 100)}%;animation-delay:${i * 16}ms"></i><em>${day}</em></div>`;
+  }).join("");
+
+  $("sum").innerHTML = `Average week <b>${fmt1(f.driver_reference_cases)}</b> → this ward <b>${fmt1(f.predicted_cases)}</b>`;
+  let run = f.driver_reference_cases, peak = run;
+  const rest = f.predicted_cases - run - f.top_drivers.reduce((a, d) => a + d.effect, 0);
+  const ds = [...f.top_drivers]; if (Math.abs(rest) >= 0.05) ds.push({ label: "Everything else", effect: rest });
+  ds.forEach((d) => { run += d.effect; peak = Math.max(peak, run); }); run = f.driver_reference_cases;
+  const P = (v) => (Math.max(0, v) / (peak * 1.04)) * 100;
+  const rows = [`<div class="lab end">Average week</div><div class="val">${fmt1(run)}</div><div class="track"><span class="s2" style="left:0;width:${P(run)}%;background:var(--bar-2)"></span></div>`];
+  ds.forEach((d, i) => { const a = run, b = run + d.effect; run = b; const col = d.effect >= 0 ? "var(--raises)" : "var(--lowers)";
+    rows.push(`<div class="lab">${d.label}</div><div class="val" style="color:${col}">${d.effect >= 0 ? "+" : "−"}${fmt1(Math.abs(d.effect))}</div><div class="track"><span class="s2" style="left:${P(Math.min(a, b))}%;width:${Math.max(0.6, Math.abs(P(b) - P(a)))}%;background:${col};animation-delay:${(i + 1) * 30}ms"></span></div>`); });
+  rows.push(`<hr><div class="lab end">This ward</div><div class="val">${fmt1(f.predicted_cases)}</div><div class="track"><span class="s2" style="left:0;width:${P(f.predicted_cases)}%;background:var(--ink)"></span></div>`);
+  $("drv").innerHTML = rows.join("");
+
+  const r = f.recent, wp = f.ward_profile;
+  $("inp").innerHTML = [
+    ["Rain, last 4 weeks", `${fmt0(r.rain_last_4_weeks_mm)} mm`], ["Humidity", `${fmt0(r.humidity_pct)}%`], ["Average temperature", `${fmt1(r.avg_temp_c)} °C`],
+    ["Cases this week", r.cases_this_week], ["Water-logging (0–1)", wp.water_logging_risk_index], ["Sanitation (0–1)", wp.sanitation_score], ["People per km²", fmt0(wp.population_density_sqkm)],
+  ].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+}
+$("ward").onchange = () => { st.ward = $("ward").value; load(); };
+$("asof").onchange = () => { st.as_of = $("asof").value; load(); };
+seg.forEach((b) => (b.onclick = () => { st.h = +b.dataset.h; load(); }));
+load();
+</script>
+</body>
+</html>

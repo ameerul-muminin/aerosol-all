@@ -1,1 +1,36 @@
-<!doctype html><title>Dashboard</title><p>Dashboard goes here (Srijita). Data: <a href="/api/meta">/api/meta</a></p>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aerosol-all</title>
+<meta name="description" content="Ward-level dengue forecasts 2, 3 and 4 weeks ahead for Bangladeshi cities.">
+<link rel="preload" href="/assets/fonts/anton-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/hind-siliguri-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/tokens.css">
+<link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/components.css">
+<script type="module" src="/assets/js/app.js"></script>
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="app.skip">Skip to content</a>
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="/" data-i18n="app.name">aerosol-all</a>
+    <nav class="tabs" data-i18n-attr="aria-label:nav.label">
+      <a href="#outlook" data-view="outlook" data-i18n="nav.outlook">Ward outlook</a>
+      <a href="#wards" data-view="wards" data-i18n="nav.wards">All wards</a>
+    </nav>
+    <div class="side-ctl">
+      <label class="field" id="f-ward"><span data-i18n="ctl.ward">Ward</span><select id="ward"></select></label>
+      <label class="field"><span data-i18n="ctl.as_of">As of</span><select id="asof"></select></label>
+    </div>
+    <div class="lang" role="group" data-i18n-attr="aria-label:lang.label">
+      <button type="button" data-lang="en" lang="en">EN</button>
+      <button type="button" data-lang="bn" lang="bn">বাংলা</button>
+    </div>
+  </aside>
+  <main class="main" id="main" tabindex="-1"></main>
+</div>
+</body>
+</html>

@@ -40,8 +40,9 @@ Dates are ISO `YYYY-MM-DD` Mondays; horizon 2|3|4. Shapes are documented in docs
 
 ## Working here
 - Remaining work, owners and checks: `docs/TASKS.md`. Tick tasks in the commit that finishes them.
-- Frontend: use the `build-ui` skill. Design = night direction (`web/assets/css/tokens.css`), which replaces the
-  light palette in the frontend brief PDF. The PDF's API reference and task order still apply.
+- Frontend: use the `build-ui` skill. Design = warm paper "Jute" direction (`web/assets/css/tokens.css`, locked
+  22 Nov; prototypes in `web/proto/`), which replaces the palette in the frontend brief PDF. The PDF's API reference
+  and task order still apply. Every UI string goes through i18n (`web/assets/i18n/en.json` + `bn.json`).
 - Before every commit: `verify` skill, or delegate it to the `verifier` subagent to save context.
 
 ## Python interface (used by api/service.py)

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proto · Hero</title>
+<link rel="stylesheet" href="proto.css">
+<link rel="stylesheet" href="warm.css">
+<style>
+  .hero { position: relative; padding: 0 clamp(16px, 3vw, 40px); }
+  h1.display { font-size: clamp(56px, 10.2vw, 172px); white-space: nowrap; }
+  .lede { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 16px 32px; margin-top: 18px; }
+  .sub { max-width: 34ch; font-size: 18px; margin: 0; color: var(--ink-2); }
+  .live { margin: 10px 0 0; font-size: 13px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 8px; }
+  .live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
+  .stage { position: relative; margin: 24px auto 0; max-width: 1240px; }
+  .stage img { display: block; width: 100%; height: auto; }
+  .chip { display: block; z-index: 2; padding: 12px 16px; min-width: 0; border-radius: 12px; box-shadow: var(--shadow-md); }
+  .chip .k { font-size: 12px; font-weight: 500; color: var(--ink-2); }
+  .chip .v { font-size: 32px; margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
+  .chip .s { font-size: 12px; color: var(--ink-3); }
+  .btn.lime { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .band { background: var(--band); color: var(--on-dark); padding: clamp(56px, 7vw, 104px) clamp(16px, 3vw, 40px); }
+  .band h2 { font-size: clamp(40px, 6vw, 88px); color: var(--accent); max-width: 12ch; margin-bottom: 20px; }
+  .band p { max-width: 44ch; color: var(--on-dark-2); margin: 0; }
+  .facts { display: flex; flex-wrap: wrap; gap: 40px; margin-top: 40px; }
+  .facts b { display: block; font: 400 44px/1.05 var(--display); color: var(--on-dark); }
+  .facts span { color: var(--on-dark-2); }
+  .band small { display: block; margin-top: 28px; font-size: 12px; color: var(--on-dark-2); }
+  @media (max-width: 760px) {
+    h1.display { white-space: normal; }
+    .nav .links a:not(.btn) { display: none; }
+    .chip { position: static !important; box-shadow: var(--shadow-sm); }
+    .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  }
+</style>
+</head>
+<body>
+<nav class="nav"><span class="brand">aerosol-all</span>
+  <span class="links"><a href="#how">How it works</a><a href="#acc">Accuracy</a><a class="btn" href="/app/">Open dashboard</a></span></nav>
+
+<header class="hero">
+  <h1 class="display">See the outbreak first</h1>
+  <div class="lede">
+    <div><p class="sub">Dengue cases and risk for 60 city wards, 2 to 4 weeks ahead.</p><p class="live" id="live"></p></div>
+    <a class="btn lime" href="/app/">Open the ward outlook →</a>
+  </div>
+  <div class="stage">
+    <img src="../assets/images/hero.webp" srcset="../assets/images/hero-900.webp 900w, ../assets/images/hero.webp 1774w" sizes="(max-width: 1300px) 94vw, 1240px"
+         width="1774" height="887" alt="A rainy Dhaka street: water collects in a tyre, a bucket and puddles beside a parked rickshaw.">
+    <div class="chips" id="chips"></div>
+  </div>
+</header>
+
+<section class="band" id="how">
+  <h2 class="display">Rain today, cases in weeks</h2>
+  <p>Mosquitoes breed in standing water after rain. Cases follow weeks later. That gap is the time to act.</p>
+  <div class="facts">
+    <div><b>7–14 days</b><span>to breed</span></div>
+    <div><b>2–4 weeks</b><span>rain to cases</span></div>
+    <div><b>150,000+</b><span>hospitalised a year</span></div>
+  </div>
+  <small>Source: EDU AI Hackathon 2026 brief.</small>
+</section>
+
+<script type="module">
+import { api, fmt1, ward, date, tierHTML } from "./proto.js";
+const chip = (k, v, s, pos) => `<div class="chip" style="position:absolute;${pos}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+const [meta, rank, met] = await Promise.all([api("/api/meta"), api("/api/ranking?as_of=2025-07-14&horizon=3"), api("/api/metrics")]);
+const tc = rank.tier_counts, top = rank.wards[0], m3 = met.horizons.find((h) => h.horizon === 3);
+document.getElementById("chips").innerHTML = [
+  chip(tierHTML("Critical"), tc.Critical, `wards of ${meta.ward_count}`, "left:2%;top:4%"),
+  chip(tierHTML("High"), tc.High, `wards of ${meta.ward_count}`, "left:2%;top:30%"),
+  chip("Highest", fmt1(top.predicted_cases), `cases · ${ward(top.ward_id)}`, "right:2%;top:4%"),
+  chip("Error vs seasonal", `−${Math.round((1 - m3.mae / m3.baseline_mae) * 100)}%`, "2024–25 test", "right:2%;top:30%"),
+].join("");
+document.getElementById("live").textContent = `Live forecast · week of ${date(rank.forecast_week)}`;
+</script>
+</body>
+</html>

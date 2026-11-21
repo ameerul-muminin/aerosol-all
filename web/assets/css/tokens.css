@@ -1,46 +1,56 @@
-/* Night direction design tokens (prototype: "Night B/C" artboards).
-   Every page imports this first. Change values here, never inline. */
+/* Design tokens: warm paper direction ("Jute"). Every page imports this first.
+   Change values here, never inline. Contrast is WCAG-checked against --paper (and --bg):
+   ink 14.3, ink-2 7.2, ink-3 5.2, tier/driver text 4.7-7.4. Use --ink-2 (not --ink-3) for text on --sunk. */
 :root {
   /* surfaces */
-  --bg: #0F1B24;            /* page */
-  --panel: #15232D;         /* solid panel */
-  --panel-glass: rgba(23, 38, 47, 0.62);  /* glass panel over the rain layer */
-  --line: #22343F;          /* panel border */
-  --line-soft: rgba(190, 221, 234, 0.14);
-  --fill-soft: rgba(231, 239, 243, 0.05);
+  --bg: #F4EDE1;            /* page; matches the hero illustration background */
+  --paper: #FBF8F2;         /* cards */
+  --sunk: #EAE3D6;          /* sidebar, tracks, insets */
+  --sunk-2: #E1D8C8;        /* segmented-control track */
+  --line: #E0D7C7;          /* hairline borders */
+  --line-strong: #CFC4B1;
 
-  /* text (all pass 4.5:1 on --bg and --panel) */
-  --text: #E7EFF3;
-  --text-2: #B7C7D1;
-  --text-3: #93A7B4;
+  /* text */
+  --ink: #2B2520;
+  --ink-2: #5C5249;
+  --ink-3: #73675C;
+  --on-dark: #F4EDE1;
+  --on-dark-2: #CFC5B6;
+  --band: #3A322B;          /* the one dark section on the marketing page */
 
-  /* accent: primary action, focus ring, breeding-window bars */
-  --accent: #6FD3C7;
-  --accent-hover: #8BE0D5;
-  --on-accent: #0F1B24;
-  --bar-other: #2C4250;
+  /* the ONE accent: muted mustard. Primary button, breeding window, likely range */
+  --accent: #D8B45A;
+  --accent-soft: #EBD9A6;
+  --accent-ink: #2B2520;
 
-  /* risk tiers: ALWAYS colour + glyph + word */
-  --tier-low: #4CC38A;      /* ▁ */
-  --tier-medium: #F2C14E;   /* ▃ */
-  --tier-high: #F08A5D;     /* ▅ */
-  --tier-critical: #F2545B; /* ▇ */
+  /* data */
+  --bar: #CDBFA9;           /* neutral bars (rain) */
+  --bar-2: #B9A98F;         /* waterfall start */
 
-  /* drivers */
-  --raises: #F08A5D;
-  --lowers: #6FB5E8;
+  /* risk tiers: ALWAYS colour + 4-bar glyph + word (never colour alone) */
+  --tier-low: #5A6E4C;
+  --tier-medium: #86651F;
+  --tier-high: #A4532F;
+  --tier-critical: #8E3427;
 
-  /* heat ramp (expected cases, low -> high) */
-  --heat-1: #173A52; --heat-2: #1D4D6B; --heat-3: #246386; --heat-4: #2C7AA3;
-  --heat-5: #3891C0; --heat-6: #4FA8D6; --heat-7: #6FC0E6;
+  /* drivers: > 0 raises cases, < 0 lowers them */
+  --raises: #A4532F;
+  --lowers: #4F6A80;
 
-  /* type: Outfit, vendored under web/assets/fonts/ (no CDN at runtime) */
-  --font: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --fs-display: 96px; --fs-h1: 36px; --fs-h2: 19px; --fs-body: 16px; --fs-small: 13px;
+  /* heat ramp (expected cases, low -> high); text flips to --on-dark from --heat-5 */
+  --heat-1: #F1E9DA; --heat-2: #EBD9B8; --heat-3: #E2C28F; --heat-4: #D5A06A;
+  --heat-5: #BF7B4E; --heat-6: #A4532F; --heat-7: #7E3524;
 
-  /* shape and space (8px grid) */
-  --r-panel: 22px; --r-tile: 14px; --r-pill: 999px;
+  /* type: Anton (Latin display), Hind Siliguri (body, Latin + Bangla). Vendored in assets/fonts/. */
+  --display: "Anton", "Hind Siliguri", Impact, "Arial Narrow", sans-serif;
+  --font: "Hind Siliguri", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-display: clamp(44px, 5vw, 72px); --fs-num: 132px; --fs-h2: 15px; --fs-body: 15px; --fs-small: 13px;
+
+  /* shape, space (8px grid), elevation */
+  --r-card: 16px; --r-ctl: 10px; --r-pill: 999px;
   --s-1: 8px; --s-2: 16px; --s-3: 24px; --s-4: 32px;
+  --shadow-sm: 0 1px 2px rgba(43, 37, 32, .06), 0 0 0 1px var(--line);
+  --shadow-md: 0 1px 2px rgba(43, 37, 32, .05), 0 8px 24px -12px rgba(43, 37, 32, .18), 0 0 0 1px var(--line);
 
   /* motion (Emil Kowalski rules: transform/opacity only, ease-out, short) */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);

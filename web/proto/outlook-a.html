@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proto · Outlook A · Editorial</title>
+<link rel="stylesheet" href="proto.css">
+<style>
+  .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 0 clamp(16px, 3vw, 40px) 18px; border-bottom: 1.5px solid var(--ink); }
+  select { min-height: 44px; border-radius: var(--r-pill); border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); font: 600 15px var(--font); padding: 0 14px; }
+  .seg { position: relative; display: inline-flex; background: var(--sunk); border-radius: var(--r-pill); padding: 4px; }
+  .seg button { position: relative; z-index: 1; min-width: 92px; min-height: 40px; border: 0; background: none; font: 600 14px var(--font); color: var(--ink); cursor: pointer; border-radius: var(--r-pill); }
+  .seg .thumb { position: absolute; top: 4px; bottom: 4px; left: 4px; width: 92px; background: var(--ink); border-radius: var(--r-pill); transition: transform 240ms var(--ease-out); }
+  .seg button[aria-pressed="true"] { color: var(--on-dark); }
+  main { padding: 0 clamp(16px, 3vw, 40px); }
+  .verdict { display: grid; grid-template-columns: auto 1fr; gap: 0 clamp(16px, 3vw, 48px); align-items: end; padding: 28px 0 8px; position: relative; }
+  .eyebrow { font-weight: 600; font-size: 14px; color: var(--ink-2); grid-column: 1 / -1; }
+  .num { font: 400 clamp(140px, 20vw, 300px)/0.8 var(--display); letter-spacing: -0.02em; }
+  .num small { font-size: .26em; letter-spacing: 0; margin-left: .1em; }
+  .tierword { font: 400 clamp(56px, 8vw, 128px)/0.85 var(--display); text-transform: uppercase; display: flex; gap: .18em; align-items: flex-end; }
+  .rng { font-size: 18px; margin-top: 10px; }
+  .rngbar { position: relative; height: 14px; background: var(--sunk); border-radius: 999px; margin-top: 10px; max-width: 520px; }
+  .rngbar i { position: absolute; top: 0; bottom: 0; background: var(--accent); border: 1.5px solid var(--ink); border-radius: 999px; }
+  .rngbar b { position: absolute; top: -5px; width: 4px; height: 24px; background: var(--ink); border-radius: 2px; }
+  .chips { position: relative; display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 6px; }
+  .chips .chip { position: static; }
+  section.band { margin: 32px calc(-1 * clamp(16px, 3vw, 40px)) 0; padding: 32px clamp(16px, 3vw, 40px); }
+  .b-dark { background: var(--river); color: var(--on-dark); }
+  h2.display { font-size: clamp(36px, 4.6vw, 64px); margin-bottom: 6px; }
+  .b-dark h2 { color: var(--accent); }
+  .b-dark p { color: #E2DCCD; margin: 0 0 18px; max-width: 60ch; }
+  .rain { display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; align-items: end; height: 220px; }
+  .rain .c { display: flex; flex-direction: column; justify-content: flex-end; height: 100%; text-align: center; font-size: 12px; }
+  .rain .c i { display: block; background: #4A6878; border-radius: 6px 6px 0 0; transform-origin: bottom; animation: grow 320ms var(--ease-out) both; }
+  .rain .c.bw i { background: var(--accent); }
+  .rain .c.u i { background: repeating-linear-gradient(135deg, rgba(244,239,226,.35) 0 2px, transparent 2px 7px); height: 100% !important; border: 1.5px dashed rgba(244,239,226,.45); }
+  .rain .c.f i { background: var(--paper); height: 100% !important; }
+  .rain .c em { font-style: normal; color: #CFC8B8; margin-top: 6px; white-space: nowrap; }
+  .rain .c .mm { color: var(--on-dark); font-weight: 600; margin-bottom: 4px; }
+  @keyframes grow { from { transform: scaleY(0); } }
+  .why h2 { color: var(--ink); }
+  .wf { display: grid; grid-template-columns: minmax(150px, 280px) 1fr 70px; gap: 10px 16px; align-items: center; margin-top: 18px; }
+  .wf .lab { font-weight: 600; }
+  .wf .track { position: relative; height: 30px; }
+  .wf .seg2 { position: absolute; top: 0; bottom: 0; border-radius: 6px; transform-origin: left; animation: grow2 320ms var(--ease-out) both; }
+  @keyframes grow2 { from { transform: scaleX(0); } }
+  .wf .val { font-variant-numeric: tabular-nums; text-align: right; font-weight: 600; }
+  .wf .total .seg2 { background: var(--ink); }
+  .wf .ref .seg2 { background: var(--ink-3); }
+  .err { color: var(--tier-critical); font-weight: 600; }
+  @media (max-width: 760px) { .verdict { grid-template-columns: 1fr; } .rain { height: 160px; gap: 4px; } .rain .c em { font-size: 10px; } .wf { grid-template-columns: 1fr 54px; } .wf .track { grid-column: 1 / -1; order: 3; } }
+</style>
+</head>
+<body>
+<nav class="nav"><span class="brand">aerosol-all</span><span class="links"><a href="#" aria-current="page"><b>Ward outlook</b></a><a href="#">All wards</a><a href="#">Accuracy</a><button class="btn" type="button">বাংলা</button></span></nav>
+<div class="bar">
+  <label>Ward <select id="ward"></select></label>
+  <label>Week of <select id="asof"></select></label>
+  <div class="seg" role="group" aria-label="Forecast horizon"><span class="thumb" id="thumb"></span>
+    <button data-h="2" aria-pressed="false">+2 weeks</button><button data-h="3" aria-pressed="true">+3 weeks</button><button data-h="4" aria-pressed="false">+4 weeks</button></div>
+</div>
+
+<main id="main">
+  <div class="verdict">
+    <p class="eyebrow" id="eyebrow"><span class="skel">Dhaka South · forecast for week of 00 Xxx 0000</span></p>
+    <div class="num" id="num"><span class="skel">00</span></div>
+    <div>
+      <div class="tierword" id="tier"><span class="skel">Critical</span></div>
+      <div class="rng" id="rng"><span class="skel">Likely between 0 and 00 cases</span></div>
+      <div class="rngbar" id="rngbar"></div>
+    </div>
+  </div>
+  <div class="chips" id="chips"></div>
+
+  <section class="band b-dark">
+    <h2 class="display">Rain to risk</h2>
+    <p>Lime weeks are the breeding window: rain that falls then is what drives the forecast week.</p>
+    <div class="rain" id="rain" role="img"></div>
+  </section>
+
+  <section class="why" style="padding:36px 0 80px">
+    <h2 class="display">Why this forecast</h2>
+    <p id="whyline" style="color:var(--ink-2);margin:0"></p>
+    <div class="wf" id="wf"></div>
+  </section>
+</main>
+<div class="protobar">PROTOTYPE · Outlook A “Editorial verdict” · live data</div>
+
+<script type="module">
+import { api, fmt1, fmt0, ward, date, GLYPH, TIERVAR, params } from "./proto.js";
+const st = params();
+const meta = await api("/api/meta");
+const wsel = document.getElementById("ward"), asel = document.getElementById("asof");
+wsel.innerHTML = meta.cities.map((c) => `<optgroup label="${c.city}">${c.wards.map((w) => `<option value="${w}">${ward(w)}</option>`).join("")}</optgroup>`).join("");
+const weeks = []; for (let d = new Date(meta.as_of.max); d >= new Date(meta.as_of.min) && weeks.length < 104; d.setDate(d.getDate() - 7)) weeks.push(d.toISOString().slice(0, 10));
+asel.innerHTML = weeks.map((w) => `<option value="${w}">${date(w)}</option>`).join("");
+wsel.value = st.ward; asel.value = st.as_of;
+const btns = [...document.querySelectorAll(".seg button")];
+const SW = `<svg class="sw" viewBox="0 0 40 40"><rect width="40" height="40" style="fill:COL"/><path d="M0 14 Q10 6 20 14 T40 14 M0 28 Q10 20 20 28 T40 28" stroke="#F1ECDF" stroke-width="2.5" fill="none"/></svg>`;
+
+async function load() {
+  btns.forEach((b, i) => { const on = +b.dataset.h === st.h; b.setAttribute("aria-pressed", on); if (on) document.getElementById("thumb").style.transform = `translateX(${i * 92}px)`; });
+  history.replaceState(null, "", `?ward=${st.ward}&as_of=${st.as_of}&h=${st.h}`);
+  let f;
+  try { f = await api(`/api/forecast?ward_id=${st.ward}&as_of=${st.as_of}&horizon=${st.h}`); }
+  catch (e) { document.getElementById("eyebrow").innerHTML = `<span class="err">${e.message}</span>`; return; }
+  document.getElementById("eyebrow").textContent = `${f.city} · ${ward(f.ward_id)} · expected cases in the week of ${date(f.forecast_week)}`;
+  document.getElementById("num").innerHTML = `${fmt1(f.predicted_cases)}`;
+  document.getElementById("tier").innerHTML = `<span aria-hidden="true" style="font-size:.55em;line-height:1.3;color:${TIERVAR(f.risk_tier)}">${GLYPH[f.risk_tier]}</span><span style="color:${TIERVAR(f.risk_tier)}">${f.risk_tier}</span><span style="font-size:.4em;line-height:1.6;color:var(--ink-2)">risk</span>`;
+  document.getElementById("rng").textContent = `Likely between ${fmt0(f.range_low)} and ${fmt0(f.range_high)} cases (8 weeks in 10)`;
+  const mx = Math.max(25, f.range_high * 1.15), p = (v) => (v / mx) * 100;
+  document.getElementById("rngbar").innerHTML = `<i style="left:${p(f.range_low)}%;width:${p(f.range_high) - p(f.range_low)}%"></i><b style="left:calc(${p(f.predicted_cases)}% - 2px)"></b>`;
+  const r = f.recent, wp = f.ward_profile;
+  const chip = (col, k, v, s) => `<div class="chip">${SW.replace("COL", col)}<div><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div></div>`;
+  document.getElementById("chips").innerHTML = [
+    chip("#9CBCEB", "Rain, last 4 weeks", `${fmt0(r.rain_last_4_weeks_mm)} mm`, "model input"),
+    chip("#5D7A3B", "Humidity", `${fmt0(r.humidity_pct)}%`, "this week"),
+    chip("#C4673E", "Avg temperature", `${fmt1(r.avg_temp_c)}°C`, "this week"),
+    chip("#D7A238", "Cases this week", r.cases_this_week, "reported"),
+    chip("#2F4B5A", "Water-logging risk", wp.water_logging_risk_index, "0 = none, 1 = worst"),
+  ].join("");
+  const tl = f.rain_timeline, mm = Math.max(...tl.map((d) => d.rain_mm || 0));
+  const rain = document.getElementById("rain");
+  rain.setAttribute("aria-label", `Weekly rainfall before the forecast week. ${tl.filter((d) => d.rain_mm != null).map((d) => `${date(d.week)} ${d.rain_mm} mm`).join(", ")}`);
+  rain.innerHTML = tl.map((d, i) => {
+    const cls = d.status === "forecast" ? "f" : d.status === "unknown" ? "u" : d.in_breeding_window ? "bw" : "";
+    const lab = d.status === "forecast" ? "forecast" : d.status === "unknown" ? "not yet" : `${fmt0(d.rain_mm)}`;
+    return `<div class="c ${cls}"><span class="mm">${lab}</span><i style="height:${d.rain_mm == null ? 100 : Math.max(3, (d.rain_mm / mm) * 100)}%;animation-delay:${i * 18}ms"></i><em>${new Date(d.week).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</em></div>`;
+  }).join("");
+  // waterfall: average week -> drivers -> this ward
+  document.getElementById("whyline").innerHTML = `An average week has <b>${fmt1(f.driver_reference_cases)}</b> cases. These factors take this ward to <b>${fmt1(f.predicted_cases)}</b>.`;
+  const top = Math.max(f.predicted_cases, f.driver_reference_cases) * 1.05;
+  let run = f.driver_reference_cases; const P = (v) => (v / top) * 100;
+  const rows = [`<div class="lab ref">Average week</div><div class="track ref"><span class="seg2" style="left:0;width:${P(run)}%"></span></div><div class="val">${fmt1(run)}</div>`];
+  const others = f.predicted_cases - f.driver_reference_cases - f.top_drivers.reduce((a, d) => a + d.effect, 0);
+  const ds = [...f.top_drivers]; if (Math.abs(others) > 0.05) ds.push({ label: "Everything else", effect: others });
+  ds.forEach((d, i) => {
+    const a = run, b = run + d.effect; run = b;
+    rows.push(`<div class="lab">${d.label}</div><div class="track"><span class="seg2" style="left:${P(Math.min(a, b))}%;width:${Math.abs(P(b) - P(a))}%;background:${d.effect >= 0 ? "var(--raises)" : "var(--lowers)"};animation-delay:${(i + 1) * 40}ms"></span></div><div class="val" style="color:${d.effect >= 0 ? "var(--raises)" : "var(--lowers)"}">${d.effect >= 0 ? "+" : "−"}${fmt1(Math.abs(d.effect))}</div>`);
+  });
+  rows.push(`<div class="lab">This ward</div><div class="track total"><span class="seg2" style="left:0;width:${P(f.predicted_cases)}%"></span></div><div class="val">${fmt1(f.predicted_cases)}</div>`);
+  document.getElementById("wf").innerHTML = rows.join("");
+}
+wsel.onchange = () => { st.ward = wsel.value; load(); };
+asel.onchange = () => { st.as_of = asel.value; load(); };
+btns.forEach((b) => (b.onclick = () => { st.h = +b.dataset.h; load(); }));
+load();
+</script>
+</body>
+</html>

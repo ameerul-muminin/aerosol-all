@@ -1,0 +1,136 @@
+{
+  "app": {
+    "name": "aerosol-all",
+    "title": "aerosol-all · ওয়ার্ডভিত্তিক ডেঙ্গু পূর্বাভাস",
+    "skip": "মূল অংশে যান"
+  },
+  "nav": {
+    "label": "পাতা",
+    "outlook": "ওয়ার্ডের পূর্বাভাস",
+    "wards": "সব ওয়ার্ড"
+  },
+  "lang": {
+    "label": "ভাষা",
+    "en": "EN",
+    "bn": "বাংলা"
+  },
+  "ctl": {
+    "ward": "ওয়ার্ড",
+    "as_of": "তথ্যের সপ্তাহ",
+    "city_all": "সব শহর",
+    "city": "শহর"
+  },
+  "city": {
+    "Chattogram": "চট্টগ্রাম",
+    "Dhaka North": "ঢাকা উত্তর",
+    "Dhaka South": "ঢাকা দক্ষিণ",
+    "Gazipur": "গাজীপুর",
+    "Narayanganj": "নারায়ণগঞ্জ"
+  },
+  "ward": {
+    "name": "ওয়ার্ড {n}",
+    "full": "{city} · ওয়ার্ড {n}"
+  },
+  "tier": {
+    "Low": "কম",
+    "Medium": "মাঝারি",
+    "High": "বেশি",
+    "Critical": "সংকটজনক",
+    "risk": "ঝুঁকি: {tier}"
+  },
+  "action": {
+    "Low": "নিয়মিত নজরদারি চালিয়ে যান।",
+    "Medium": "জমে থাকা পানি খুঁজুন এবং স্থানীয় দলকে জানান।",
+    "High": "এই সপ্তাহের মধ্যে পরিচ্ছন্নতা ও লার্ভানাশক কার্যক্রম নির্ধারণ করুন।",
+    "Critical": "এখনই পরিচ্ছন্নতা, লার্ভানাশক এবং হাসপাতালের প্রস্তুতিকে অগ্রাধিকার দিন।"
+  },
+  "driver": {
+    "Rainfall (lags 0-8 weeks)": "সাম্প্রতিক বৃষ্টি",
+    "Rainfall (lags 0-8 weeks).detail": "গত ৮ সপ্তাহের বৃষ্টি",
+    "Temperature (last 4 weeks)": "তাপমাত্রা",
+    "Temperature (last 4 weeks).detail": "গত ৪ সপ্তাহের গড়",
+    "Humidity (last 4 weeks)": "আর্দ্রতা",
+    "Humidity (last 4 weeks).detail": "গত ৪ সপ্তাহের গড়",
+    "Time of year": "বছরের সময়",
+    "Time of year.detail": "ডেঙ্গু সবচেয়ে বেশি জুলাই থেকে অক্টোবরে",
+    "Ward vulnerability (drainage, crowding, sanitation)": "ওয়ার্ডের অবস্থা",
+    "Ward vulnerability (drainage, crowding, sanitation).detail": "পানি নিষ্কাশন, ঘনবসতি ও স্যানিটেশন",
+    "Recent cases": "সাম্প্রতিক রোগী",
+    "Recent cases.detail": "গত কয়েক সপ্তাহে শনাক্ত রোগী",
+    "other": "অন্যান্য",
+    "other.detail": "ছোট প্রভাবগুলো একসাথে"
+  },
+  "outlook": {
+    "subtitle": "{city} · {week} সপ্তাহের পূর্বাভাস",
+    "expected": "সম্ভাব্য রোগী",
+    "range": "সম্ভবত {low}–{high} (৮০% পরিসর)",
+    "horizon_title": "কত সপ্তাহ আগে",
+    "horizon_label": "পূর্বাভাসের সময়সীমা",
+    "plus_weeks": "+{h} সপ্তাহ",
+    "rain_title": "বৃষ্টি থেকে ঝুঁকি",
+    "rain_legend_rain": "বৃষ্টি, মিমি/সপ্তাহ",
+    "rain_legend_window": "প্রজননের সময়",
+    "rain_legend_unknown": "এখনও হয়নি",
+    "rain_legend_forecast": "পূর্বাভাসের সপ্তাহ",
+    "rain_aria": "পূর্বাভাসের আগের সাপ্তাহিক বৃষ্টি: {list}",
+    "why_title": "কেন এই পূর্বাভাস",
+    "why_sum": "গড় সপ্তাহ {ref} → এই ওয়ার্ড {pred}",
+    "why_avg": "গড় সপ্তাহ",
+    "why_this": "এই ওয়ার্ড",
+    "why_aria": "কারণসমূহ: গড় সপ্তাহে {ref} জন; {list}; এই ওয়ার্ডে {pred} জন।",
+    "inputs_title": "মডেলের তথ্য",
+    "in_rain4": "বৃষ্টি, গত ৪ সপ্তাহ",
+    "in_humidity": "আর্দ্রতা",
+    "in_temp": "গড় তাপমাত্রা",
+    "in_cases": "এই সপ্তাহের রোগী",
+    "in_waterlog": "জলাবদ্ধতা (০–১)",
+    "in_sanitation": "স্যানিটেশন (০–১)",
+    "in_density": "প্রতি বর্গকিমিতে মানুষ",
+    "mm": "মিমি"
+  },
+  "whatif": {
+    "title": "আবহাওয়া বদলালে কী হবে?",
+    "rain": "বৃষ্টি",
+    "rain_unit": "মিমি প্রতি সপ্তাহ",
+    "temp": "গড় তাপমাত্রা",
+    "temp_unit": "°সে",
+    "hum": "আর্দ্রতা",
+    "hum_unit": "%",
+    "weeks": "সাম্প্রতিক যত সপ্তাহ বদলাবে",
+    "weeks_n": "{n} সপ্তাহ",
+    "blank_hint": "আসল মান রাখতে ঘর ফাঁকা রাখুন।",
+    "run": "হিসাব করুন",
+    "running": "হিসাব হচ্ছে…",
+    "preset_dry": "শুকনো (০ মিমি)",
+    "preset_wet": "ভারী বৃষ্টি (২৫০ মিমি)",
+    "baseline": "আসল আবহাওয়া",
+    "scenario": "আপনার দৃশ্যপট",
+    "change": "{sign}{n} জন",
+    "tier_changed": "ঝুঁকি {from} থেকে {to} হয়।",
+    "tier_same": "ঝুঁকি {tier} থাকে।",
+    "replaced": "{from} থেকে {to} বদলানো হয়েছে (আসল গড় {mean} মিমি/সপ্তাহ)।",
+    "need_one": "অন্তত একটি মান দিন।"
+  },
+  "wards": {
+    "title": "সব ওয়ার্ড",
+    "subtitle": "{week} সপ্তাহের পূর্বাভাস",
+    "count_wards": "{n}টি ওয়ার্ড",
+    "rank": "#",
+    "ward": "ওয়ার্ড",
+    "cases": "রোগী",
+    "tier": "ঝুঁকি",
+    "range": "সম্ভাব্য পরিসর",
+    "heat": "+২ / +৩ / +৪ সপ্তাহ",
+    "heat_aria": "{ward}: ২ সপ্তাহে {a} জন, ৩ সপ্তাহে {b} জন, ৪ সপ্তাহে {c} জন",
+    "by_city": "শহর অনুযায়ী",
+    "csv": "CSV ডাউনলোড",
+    "open": "{ward} খুলুন",
+    "empty": "এই ফিল্টারে কোনো ওয়ার্ড নেই।"
+  },
+  "state": {
+    "loading": "লোড হচ্ছে…",
+    "offline": "পূর্বাভাস সার্ভারে পৌঁছানো যাচ্ছে না। সার্ভার চালু আছে কিনা দেখে আবার চেষ্টা করুন।",
+    "retry": "আবার চেষ্টা করুন",
+    "error_title": "কিছু একটা সমস্যা হয়েছে"
+  }
+}

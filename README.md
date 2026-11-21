@@ -28,7 +28,7 @@ pytest -q                # lag pipeline, leakage and interface tests
 
 ## Project structure
 ```
-api/                       JSON API + static web server (Starlette)
+api/                       JSON API + static web server (Flask)
 web/                       marketing page and dashboard (HTML/CSS/JS)
 src/features.py            data validation + per-ward lag features
 src/train.py               chronological split, model selection, tiers, conformal intervals

@@ -26,7 +26,7 @@ reports/metrics.json              validation + test metrics per horizon (source 
 reports/test_predictions_h{2,3,4}.csv   per-row test predictions (for the error tab)
 tests/                            pytest
 api/service.py                    JSON-ready views of the model (pure Python, tested)
-api/main.py                       Starlette app: /api/* routes + serves web/
+api/main.py                       Flask app: /api/* routes + serves web/
 web/index.html                    marketing page (C)
 web/app/index.html                dashboard (C)
 web/assets/                       css, js, fonts, images (C) — no CDN, no build step
@@ -49,6 +49,12 @@ risk_tier ("Low"|"Medium"|"High"|"Critical"), top_drivers [(plain-language label
 Contribution > 0 means the factor raises predicted cases, and < 0 means it lowers them (what-if occlusion against training averages).
 Bad input raises `ValueError` with a user-friendly message; the API returns it as a 400 and the UI shows it inline, never a traceback.
 `load_bundle()` is cached and retrains automatically if the model file can't be loaded.
+
+## Challenge brief (Hackathon_preli_nov21.pdf) — scoring
+Setup 10 · Lag pipeline 15 · Prediction engine 15 · UI 10 (needs driver breakdown) · ARCHITECTURE.md 10
+(1–2 pages, diagram + split + model rationale) · Compute/API cost 10 (documented caching/cost controls)
+· 3-min uncut video 20 · Git history + AI disclosure 10 · Bonus +5 (ward heatmap, confidence intervals,
+MAE/RMSE validation dashboard). Treat the code as Stage 1 of a production system (reused in the onsite final).
 
 ## Verified facts
 - Data: 31,320 rows = 60 wards × 522 weekly rows, 2016-01-04 → 2025-12-29, no gaps or missing values.
@@ -77,4 +83,5 @@ pip install -r requirements.txt
 python -m src.train          # retrain (~5 s)
 pytest -q
 python -m api                # http://127.0.0.1:8000  (dashboard: /app/)
+python -m scripts.measure_efficiency --train   # -> reports/efficiency.json
 ```

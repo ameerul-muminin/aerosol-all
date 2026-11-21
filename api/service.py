@@ -195,6 +195,15 @@ def forecast(ward_id: str, as_of: str, horizon: int) -> dict:
 
 
 # ---------------------------------------------------------------- /api/metrics
+def _model_type(h: int) -> dict:
+    """What is actually served at horizon h, read from the model bundle. metrics.json's "selected" is the
+    training slot name (hgb_poisson), which holds the ensemble or blend when one was adopted."""
+    m = load_bundle()["modes"]["weather"][h]
+    weights = m.get("ensemble_weights") or {}
+    return {"model_type": m.get("base_kind") or m.get("kind"),
+            "model_members": [k for k, w in weights.items() if w > 0] or None}
+
+
 @lru_cache(maxsize=1)
 def metrics() -> dict:
     m = json.loads(METRICS_PATH.read_text())
@@ -208,6 +217,7 @@ def metrics() -> dict:
         per_h.append({
             "horizon": h,
             "selected_model": m["horizons"][str(h)]["selected"],
+            **_model_type(h),
             "mae": _num(t["MAE"], 3), "rmse": _num(t["RMSE"], 3),
             "baseline_mae": _num(t["baseline_seasonal_naive"]["MAE"], 3),
             "baseline_rmse": _num(t["baseline_seasonal_naive"]["RMSE"], 3),

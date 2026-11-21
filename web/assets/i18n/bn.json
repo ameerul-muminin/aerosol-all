@@ -158,7 +158,10 @@
     "tip_actual": "রিপোর্ট: {n}",
     "tip_pred": "পূর্বাভাস: {n}",
     "tip_range": "সম্ভাব্য: {low}–{high}",
-    "lg_out": "সীমার বাইরে"
+    "lg_out": "সীমার বাইরে",
+    "model_weighted_ensemble": "{n}টি মডেলের ওজনযুক্ত সমন্বয়",
+    "model_blend_hgb_extra_trees": "২টি ট্রি মডেলের মিশ্রণ",
+    "model_hgb_poisson": "গ্রেডিয়েন্ট-বুস্টেড ট্রি"
   },
   "state": {
     "loading": "লোড হচ্ছে…",

@@ -33,7 +33,7 @@ Order matters; each step is demo-able on its own.
 ## Docs (morning)
 - [ ] ARCHITECTURE.md to 1–2 pages: 1,240 words now, target about 900. Nazifa trims ML sections; the diagram,
       split and model rationale stay.
-- [ ] `/api/metrics`: add the deployed model type next to `selected_model` (ensemble / blend / hgb) (Nazifa).
+- [x] `/api/metrics`: add the deployed model type next to `selected_model` (ensemble / blend / hgb) (Nazifa; done by Alif with her OK).
 - [ ] Deep-learning study: commit it under `experiments/deep_learning/` with its own requirements file (not
       the main one), so the documentation's claims can be checked. Or drop the claims (Nazifa).
 - [ ] README: screenshots, confirm AI table per member (Nazifa: Claude Code; Srijita: Antigravity + model).

@@ -55,3 +55,9 @@ def test_metrics_read_from_reports():
         assert h["mae"] == round(raw["horizons"][str(h["horizon"])]["test"]["MAE"], 3)
         base = raw["horizons"][str(h["horizon"])]["test"]["baseline_seasonal_naive"]
         assert h["baseline_rmse"] == round(base["RMSE"], 3)   # accuracy view compares RMSE too
+
+
+def test_metrics_report_the_deployed_model_type():
+    from src.predict import load_bundle
+    for h in service.metrics()["horizons"]:
+        assert h["model_type"] == load_bundle()["modes"]["weather"][h["horizon"]]["base_kind"]

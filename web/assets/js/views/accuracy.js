@@ -72,6 +72,9 @@ export async function render(root, { state: s, meta, set, retry }) {
   offResize = () => { window.removeEventListener("resize", onResize); offResize = null; };
 }
 
+/** Deployed model in plain words ("Weighted ensemble of 3 models"); falls back to the API name. */
+const modelName = (h) => t(`acc.model_${h.model_type}`, { n: num0((h.model_members || []).length) }, h.model_type || "");
+
 function better(model, base) {
   if (!(base > 0)) return "";
   const d = (base - model) / base;
@@ -90,7 +93,7 @@ function byHorizon(hs, sel) {
   const rows = hs.map((h, i) => `
     <div class="pair${h.horizon === sel ? " on" : ""}" role="img"
       aria-label="${esc(t("acc.pair_aria", { h: num0(h.horizon), mae: num2(h.mae), bmae: num2(h.baseline_mae), rmse: num2(h.rmse), brmse: num2(h.baseline_rmse) }))}">
-      <span class="hl">${esc(t("outlook.plus_weeks", { h: num0(h.horizon) }))}</span>
+      <span class="hl">${esc(t("outlook.plus_weeks", { h: num0(h.horizon) }))}<small>${esc(modelName(h))}</small></span>
       <div class="m"><em>${esc(t("acc.mae_short"))}</em><div class="b">${bar(h.mae, "mod", i)}</div><div class="b">${bar(h.baseline_mae, "base", i)}</div></div>
       <div class="m"><em>${esc(t("acc.rmse_short"))}</em><div class="b">${bar(h.rmse, "mod", i)}</div><div class="b">${bar(h.baseline_rmse, "base", i)}</div></div>
     </div>`).join("");

@@ -158,7 +158,10 @@
     "tip_actual": "Reported: {n}",
     "tip_pred": "Forecast: {n}",
     "tip_range": "Likely: {low}–{high}",
-    "lg_out": "Outside the range"
+    "lg_out": "Outside the range",
+    "model_weighted_ensemble": "Weighted ensemble of {n} models",
+    "model_blend_hgb_extra_trees": "Blend of 2 tree models",
+    "model_hgb_poisson": "Gradient-boosted trees"
   },
   "state": {
     "loading": "Loading…",

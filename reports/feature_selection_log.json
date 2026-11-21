@@ -1,0 +1,169 @@
+{
+  "rules": "D12: feature selection decided by time-ordered CV, with a kept/removed log.\n\nRules (fixed before running; TRAIN period only, validation/test never used):\n  1. Low variance: a feature that is constant on train is removed.\n  2. Near-duplicates: for every pair with |Pearson r| > 0.95 on train (strongest first), try\n     removing the member less correlated with the target; skip if its partner is already gone.\n  3. A removal is kept only if the CV mean Poisson deviance (same 5 expanding yearly folds,\n     same hyperparameters as the saved model) does NOT get worse. Ties favour the simpler set.",
+  "horizons": {
+    "2": {
+      "start_features": 37,
+      "corr_threshold": 0.95,
+      "low_variance_removed": [],
+      "correlated_pairs": [
+        {
+          "a": "week_cos",
+          "b": "temp_mean_0_3",
+          "r": 0.9819
+        },
+        {
+          "a": "temp_lag1",
+          "b": "temp_mean_0_3",
+          "r": 0.9641
+        },
+        {
+          "a": "temp_lag2",
+          "b": "temp_mean_0_3",
+          "r": 0.9639
+        },
+        {
+          "a": "week_cos",
+          "b": "temp_lag1",
+          "r": 0.9512
+        },
+        {
+          "a": "temp_lag0",
+          "b": "temp_mean_0_3",
+          "r": 0.9504
+        }
+      ],
+      "cv_poisdev_start": 0.9733039402896443,
+      "trials": [
+        {
+          "candidate": "temp_mean_0_3",
+          "partner": "week_cos",
+          "r": 0.9819,
+          "cv_before": 0.9733039402896443,
+          "cv_after": 0.9619527859198758,
+          "decision": "removed"
+        },
+        {
+          "candidate": "temp_lag1",
+          "partner": "week_cos",
+          "r": 0.9512,
+          "cv_before": 0.9619527859198758,
+          "cv_after": 0.9662110805224398,
+          "decision": "kept"
+        }
+      ],
+      "cv_poisdev_final": 0.9619527859198758,
+      "final_features": 36,
+      "removed": [
+        "temp_mean_0_3"
+      ]
+    },
+    "3": {
+      "start_features": 30,
+      "corr_threshold": 0.95,
+      "low_variance_removed": [],
+      "correlated_pairs": [
+        {
+          "a": "week_cos",
+          "b": "temp_mean_0_3",
+          "r": 0.9818
+        },
+        {
+          "a": "temp_lag1",
+          "b": "temp_mean_0_3",
+          "r": 0.9639
+        },
+        {
+          "a": "temp_lag2",
+          "b": "temp_mean_0_3",
+          "r": 0.9637
+        },
+        {
+          "a": "week_cos",
+          "b": "temp_lag1",
+          "r": 0.9509
+        },
+        {
+          "a": "temp_lag0",
+          "b": "temp_mean_0_3",
+          "r": 0.95
+        }
+      ],
+      "cv_poisdev_start": 1.1414487406200908,
+      "trials": [
+        {
+          "candidate": "temp_mean_0_3",
+          "partner": "week_cos",
+          "r": 0.9818,
+          "cv_before": 1.1414487406200908,
+          "cv_after": 1.1355321377988372,
+          "decision": "removed"
+        },
+        {
+          "candidate": "temp_lag1",
+          "partner": "week_cos",
+          "r": 0.9509,
+          "cv_before": 1.1355321377988372,
+          "cv_after": 1.1395754330198993,
+          "decision": "kept"
+        }
+      ],
+      "cv_poisdev_final": 1.1355321377988372,
+      "final_features": 29,
+      "removed": [
+        "temp_mean_0_3"
+      ]
+    },
+    "4": {
+      "start_features": 30,
+      "corr_threshold": 0.95,
+      "low_variance_removed": [],
+      "correlated_pairs": [
+        {
+          "a": "week_cos",
+          "b": "temp_mean_0_3",
+          "r": 0.9817
+        },
+        {
+          "a": "temp_lag1",
+          "b": "temp_mean_0_3",
+          "r": 0.9637
+        },
+        {
+          "a": "temp_lag2",
+          "b": "temp_mean_0_3",
+          "r": 0.9635
+        },
+        {
+          "a": "week_cos",
+          "b": "temp_lag1",
+          "r": 0.9506
+        }
+      ],
+      "cv_poisdev_start": 1.3374633868191397,
+      "trials": [
+        {
+          "candidate": "temp_mean_0_3",
+          "partner": "week_cos",
+          "r": 0.9817,
+          "cv_before": 1.3374633868191397,
+          "cv_after": 1.3289420366298685,
+          "decision": "removed"
+        },
+        {
+          "candidate": "temp_lag1",
+          "partner": "week_cos",
+          "r": 0.9506,
+          "cv_before": 1.3289420366298685,
+          "cv_after": 1.3134849164819387,
+          "decision": "removed"
+        }
+      ],
+      "cv_poisdev_final": 1.3134849164819387,
+      "final_features": 28,
+      "removed": [
+        "temp_mean_0_3",
+        "temp_lag1"
+      ]
+    }
+  }
+}

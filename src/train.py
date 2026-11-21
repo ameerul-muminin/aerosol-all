@@ -14,7 +14,8 @@ import time
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.ensemble import ExtraTreesRegressor, HistGradientBoostingRegressor
+from sklearn.impute import SimpleImputer
 from sklearn.linear_model import PoissonRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -28,6 +29,7 @@ SEED = 42
 BUNDLE = ROOT / "models" / "dengue_model.joblib"
 METRICS = ROOT / "reports" / "metrics.json"
 SELECTED = ROOT / "models" / "selected_features.json"   # written by src/feature_selection.py (CV-based)
+HYPERPARAMS = ROOT / "models" / "hyperparameters.json"  # written by src/tuning.py (CV-based), if adopted
 FEATURE_LIST = ROOT / "reports" / "feature_list.json"   # final ordered inputs per mode/horizon
 
 
@@ -51,13 +53,14 @@ CV_YEARS = (2017, 2018, 2019, 2020, 2021)   # validation year of each expanding-
 HGB_GRID = [{"max_iter": n, "max_leaf_nodes": l} for n in (150, 300) for l in (7, 15)]
 
 
-def hgb(max_iter=300, max_leaf_nodes=15, loss="poisson", **kw):
+def hgb(max_iter=300, max_leaf_nodes=15, learning_rate=0.05, min_samples_leaf=40,
+        l2_regularization=1.0, max_features=1.0, loss="poisson", **kw):
     # early_stopping=False: sklearn's default early stopping holds out a RANDOM 10% of rows,
     # which would shuffle time inside training. Tree count is chosen by time-ordered CV instead.
-    return HistGradientBoostingRegressor(loss=loss, max_iter=max_iter, learning_rate=0.05,
-                                         max_leaf_nodes=max_leaf_nodes, min_samples_leaf=40,
-                                         l2_regularization=1.0, early_stopping=False,
-                                         random_state=SEED, **kw)
+    return HistGradientBoostingRegressor(loss=loss, max_iter=max_iter, learning_rate=learning_rate,
+                                         max_leaf_nodes=max_leaf_nodes, min_samples_leaf=min_samples_leaf,
+                                         l2_regularization=l2_regularization, max_features=max_features,
+                                         early_stopping=False, random_state=SEED, **kw)
 
 
 def time_folds(tr):
@@ -80,11 +83,41 @@ class HGB:
         # scikit-learn 1.6 tolerates them but newer versions raise, so they are skipped at fit and
         # at predict. Results are unchanged on 1.6.1 (verified fold by fold).
         self.used_ = [f for f in self.feats if X[f].notna().any()]
-        self.m = hgb(**self.params).fit(X[self.used_], d["target"])
+        params = dict(self.params)
+        w, thr = params.pop("outbreak_weight", None), params.pop("outbreak_threshold", None)
+        # optional (G5): weight outbreak weeks (target >= threshold, a training percentile) more
+        sw = np.where(d["target"].to_numpy() >= thr, w, 1.0) if w and thr is not None else None
+        self.m = hgb(**params).fit(X[self.used_], d["target"], sample_weight=sw)
         return self
 
     def predict(self, d):
         return self.m.predict(d[getattr(self, "used_", self.feats)])
+
+
+class Blend:
+    """Optional (G5): average of HistGradientBoosting and extra trees (median imputer fitted on
+    the training data only, because extra trees cannot take NaN)."""
+    def __init__(self, feats, **params):
+        self.feats, self.params = feats, params
+
+    def fit(self, d):
+        self.hgb = HGB(self.feats, **self.params).fit(d)
+        self.used_ = self.hgb.used_
+        self.imp = SimpleImputer(strategy="median").fit(d[self.used_])
+        self.et = ExtraTreesRegressor(n_estimators=200, min_samples_leaf=20, max_features=0.5,
+                                      n_jobs=-1, random_state=SEED).fit(self.imp.transform(d[self.used_]), d["target"])
+        return self
+
+    def predict(self, d):
+        et = np.clip(self.et.predict(self.imp.transform(d[self.used_])), 0, None)
+        return 0.5 * (np.clip(self.hgb.predict(d), 0, None) + et)
+
+
+def deployed_model(m):
+    """Fresh, unfitted model of the same kind, features and settings as a saved bundle entry
+    (plain HistGradientBoosting, possibly outbreak-weighted, or the HGB + extra-trees blend)."""
+    cls = Blend if m.get("kind") == "blend_hgb_extra_trees" else HGB
+    return cls(list(m["features"]), **m["hyperparameters"])
 
 
 class GLM:
@@ -197,6 +230,14 @@ def test_metrics(te, p_te, conf_q, actual_cuts, cuts, baseline=None):
     return out, lo, hi
 
 
+def load_hyperparameters():
+    """Per-horizon settings adopted by src/tuning.py under its pre-set rules, if present:
+    {h: {"hgb": {...}, "blend": bool}}."""
+    if HYPERPARAMS.exists():
+        return {int(h): v for h, v in json.loads(HYPERPARAMS.read_text()).items()}
+    return None
+
+
 def load_selected():
     """Per-horizon feature lists chosen by time-ordered CV (src/feature_selection.py), if present."""
     if SELECTED.exists():
@@ -214,6 +255,7 @@ def write_feature_list(bundle):
 def main():
     feats = feature_columns()
     selected = load_selected()
+    tuned = load_hyperparameters()
     bundle = {"tier_names": TIER_NAMES, "modes": {m: {} for m in MODES}}
     report = {"split": {"train": "target<=2021-12-31", "val": "2022-01..2023-12", "test": "2024-01..2025-12",
                         "cv": f"expanding window inside train, validation years {list(CV_YEARS)}"},
@@ -230,10 +272,15 @@ def main():
         # With a CV-selected feature list (D12) the grid runs on it and the anomaly decision is
         # already encoded in it; otherwise the base list is tuned and anomaly decided here.
         base = selected[h] if selected else feats
-        hgb_cv = {f"{c['max_iter']}x{c['max_leaf_nodes']}": cross_validate(lambda c=c: HGB(base, **c), tr)
-                  for c in HGB_GRID}
-        best_cfg_key = min(hgb_cv, key=lambda k: hgb_cv[k]["mean"]["PoissonDev"])
-        best_cfg = next(c for c in HGB_GRID if f"{c['max_iter']}x{c['max_leaf_nodes']}" == best_cfg_key)
+        if tuned:   # settings adopted by src/tuning.py (random search on the same time folds)
+            best_cfg, best_cfg_key = dict(tuned[h]["hgb"]), "tuned"
+            hgb_cv = {"tuned": cross_validate(lambda: HGB(base, **best_cfg), tr)}
+        else:
+            hgb_cv = {f"{c['max_iter']}x{c['max_leaf_nodes']}": cross_validate(lambda c=c: HGB(base, **c), tr)
+                      for c in HGB_GRID}
+            best_cfg_key = min(hgb_cv, key=lambda k: hgb_cv[k]["mean"]["PoissonDev"])
+            best_cfg = next(c for c in HGB_GRID if f"{c['max_iter']}x{c['max_leaf_nodes']}" == best_cfg_key)
+        use_blend = bool(tuned and tuned[h].get("blend"))
         if selected:
             cv_anom = None
             use_anomaly = any(c.startswith("rain_anom") for c in base)
@@ -245,10 +292,12 @@ def main():
             use_anomaly = cv_anom["mean"]["PoissonDev"] < hgb_cv[best_cfg_key]["mean"]["PoissonDev"]
             feats_h = feats_anom if use_anomaly else feats
         makers = {"seasonal_naive": SeasonalNaive, "poisson_glm": lambda: GLM(feats),
-                  "hgb_poisson": lambda: HGB(feats_h, **best_cfg)}
+                  "hgb_poisson": (lambda: Blend(feats_h, **best_cfg)) if use_blend
+                                 else (lambda: HGB(feats_h, **best_cfg))}
         cv = {"seasonal_naive": cross_validate(makers["seasonal_naive"], tr),
               "poisson_glm": cross_validate(makers["poisson_glm"], tr),
-              "hgb_poisson": cv_anom if (use_anomaly and cv_anom) else hgb_cv[best_cfg_key]}
+              "hgb_poisson": cross_validate(makers["hgb_poisson"], tr) if use_blend
+                             else (cv_anom if (use_anomaly and cv_anom) else hgb_cv[best_cfg_key])}
         best = min(cv, key=lambda n: cv[n]["mean"]["PoissonDev"])
 
         # --- held-out VALIDATION: confirm choice, calibrate tiers + intervals (train-only models) ---
@@ -271,7 +320,8 @@ def main():
 
         feats_final = feats_h if best == "hgb_poisson" else feats
         bundle["modes"]["weather"][h] = {"model": final, "conformal_q": conf_q, "tier_cuts": cuts,
-                                         "tier_actual_cuts": actual_cuts, "kind": best,
+                                         "tier_actual_cuts": actual_cuts,
+                                         "kind": "blend_hgb_extra_trees" if use_blend and best == "hgb_poisson" else best,
                                          "hyperparameters": best_cfg, "features": feats_final}
         report["horizons"][h] = {"selected": best, "hyperparameters": best_cfg, "cv": cv,
                                  "feature_source": "models/selected_features.json (CV selection)" if selected

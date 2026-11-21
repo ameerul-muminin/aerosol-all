@@ -5,53 +5,53 @@
       "validation": {
         "all_weeks": {
           "n": 6240,
-          "MAE": 1.243111014219318,
-          "RMSE": 2.5163225658975836,
-          "mean_bias_pred_minus_actual": -0.44513377281726496
+          "MAE": 1.250054001595168,
+          "RMSE": 2.481945344645638,
+          "mean_bias_pred_minus_actual": -0.14524189208142796
         },
         "jul_oct": {
           "n": 2160,
-          "MAE": 2.752963750853092,
-          "RMSE": 3.9008494994977037,
-          "mean_bias_pred_minus_actual": -0.8974663798951682
+          "MAE": 2.7769706274923203,
+          "RMSE": 3.840592374997435,
+          "mean_bias_pred_minus_actual": -0.07205268809866049
         },
         "outbreak_high_plus": {
           "n": 988,
-          "MAE": 4.430827079440296,
-          "RMSE": 5.499272623096996,
-          "mean_bias_pred_minus_actual": -3.783784678347251
+          "MAE": 3.8875947299169553,
+          "RMSE": 4.999645265986821,
+          "mean_bias_pred_minus_actual": -2.965414614649162
         },
         "outbreak_critical": {
           "n": 350,
-          "MAE": 6.722375474552075,
-          "RMSE": 7.661824101358743,
-          "mean_bias_pred_minus_actual": -6.380401702940734
+          "MAE": 6.210703882810776,
+          "RMSE": 7.1433021541112645,
+          "mean_bias_pred_minus_actual": -5.881958553694429
         }
       },
       "test": {
         "all_weeks": {
           "n": 6300,
-          "MAE": 1.0749424327763222,
-          "RMSE": 2.20091728115784,
-          "mean_bias_pred_minus_actual": 0.13516060900267118
+          "MAE": 1.1817965062890867,
+          "RMSE": 2.367847111468201,
+          "mean_bias_pred_minus_actual": 0.47455798138466426
         },
         "jul_oct": {
           "n": 2100,
-          "MAE": 2.467375793491503,
-          "RMSE": 3.475735534919827,
-          "mean_bias_pred_minus_actual": 0.5690229803450737
+          "MAE": 2.7931998832754092,
+          "RMSE": 3.8191306229576085,
+          "mean_bias_pred_minus_actual": 1.560247094383424
         },
         "outbreak_high_plus": {
           "n": 567,
-          "MAE": 3.7994168976949707,
-          "RMSE": 4.693323264413027,
-          "mean_bias_pred_minus_actual": -3.0517792075989933
+          "MAE": 3.0971981276688467,
+          "RMSE": 4.018564781960162,
+          "mean_bias_pred_minus_actual": -1.9395454504800267
         },
         "outbreak_critical": {
           "n": 111,
-          "MAE": 6.402812492117678,
-          "RMSE": 7.079487641816217,
-          "mean_bias_pred_minus_actual": -6.307960413649267
+          "MAE": 5.369910657509794,
+          "RMSE": 6.078571091505813,
+          "mean_bias_pred_minus_actual": -5.325154330446946
         }
       }
     },
@@ -59,53 +59,53 @@
       "validation": {
         "all_weeks": {
           "n": 6240,
-          "MAE": 1.3226554850859158,
-          "RMSE": 2.7150093150163914,
-          "mean_bias_pred_minus_actual": -0.5537239053589308
+          "MAE": 1.2742528209307318,
+          "RMSE": 2.573347758911062,
+          "mean_bias_pred_minus_actual": -0.4421438527969555
         },
         "jul_oct": {
           "n": 2160,
-          "MAE": 2.855728907354676,
-          "RMSE": 4.043730060978454,
-          "mean_bias_pred_minus_actual": -1.088644134048867
+          "MAE": 2.7431557357719796,
+          "RMSE": 3.8446042312244884,
+          "mean_bias_pred_minus_actual": -0.8047013251145547
         },
         "outbreak_high_plus": {
           "n": 988,
-          "MAE": 4.828499353448072,
-          "RMSE": 6.0171734113527044,
-          "mean_bias_pred_minus_actual": -4.276823550210782
+          "MAE": 4.481139238442454,
+          "RMSE": 5.652036038647294,
+          "mean_bias_pred_minus_actual": -4.09364122115277
         },
         "outbreak_critical": {
           "n": 350,
-          "MAE": 7.415605915798059,
-          "RMSE": 8.450072854337945,
-          "mean_bias_pred_minus_actual": -7.286182481862896
+          "MAE": 7.309716176181155,
+          "RMSE": 8.191486237581751,
+          "mean_bias_pred_minus_actual": -7.210111899668041
         }
       },
       "test": {
         "all_weeks": {
           "n": 6300,
-          "MAE": 1.1080646004473396,
-          "RMSE": 2.230947146685337,
-          "mean_bias_pred_minus_actual": 0.12791704370305854
+          "MAE": 1.0822768201405688,
+          "RMSE": 2.126106516194504,
+          "mean_bias_pred_minus_actual": 0.15452324375949128
         },
         "jul_oct": {
           "n": 2100,
-          "MAE": 2.50456338819022,
-          "RMSE": 3.4450814417859994,
-          "mean_bias_pred_minus_actual": 0.6775570684428981
+          "MAE": 2.4503198354327482,
+          "RMSE": 3.2834457800472148,
+          "mean_bias_pred_minus_actual": 0.7182314495197057
         },
         "outbreak_high_plus": {
           "n": 567,
-          "MAE": 4.077115310726376,
-          "RMSE": 4.968698288583501,
-          "mean_bias_pred_minus_actual": -2.8832319442364818
+          "MAE": 3.7922525998386463,
+          "RMSE": 4.668133021874842,
+          "mean_bias_pred_minus_actual": -3.039421733973227
         },
         "outbreak_critical": {
           "n": 111,
-          "MAE": 6.726044043836779,
-          "RMSE": 7.511692856394277,
-          "mean_bias_pred_minus_actual": -6.416922057729073
+          "MAE": 6.709324948904554,
+          "RMSE": 7.403180572550649,
+          "mean_bias_pred_minus_actual": -6.649632845751726
         }
       }
     },
@@ -113,53 +113,53 @@
       "validation": {
         "all_weeks": {
           "n": 6240,
-          "MAE": 1.528938616323457,
-          "RMSE": 3.18928684817221,
-          "mean_bias_pred_minus_actual": -0.6105570701658499
+          "MAE": 1.5140445963169555,
+          "RMSE": 3.107556425190741,
+          "mean_bias_pred_minus_actual": -0.5662983401479681
         },
         "jul_oct": {
           "n": 2160,
-          "MAE": 3.2769740791173194,
-          "RMSE": 4.664403939688442,
-          "mean_bias_pred_minus_actual": -1.1055849762483445
+          "MAE": 3.2396721201920062,
+          "RMSE": 4.564675725327399,
+          "mean_bias_pred_minus_actual": -1.0053171219593584
         },
         "outbreak_high_plus": {
           "n": 988,
-          "MAE": 5.683037079927618,
-          "RMSE": 7.180999472205382,
-          "mean_bias_pred_minus_actual": -5.290040254917693
+          "MAE": 5.503535199400315,
+          "RMSE": 6.92461063120124,
+          "mean_bias_pred_minus_actual": -5.096976745769092
         },
         "outbreak_critical": {
           "n": 350,
-          "MAE": 9.20917834231611,
-          "RMSE": 10.346596432056074,
-          "mean_bias_pred_minus_actual": -9.12965996838215
+          "MAE": 8.921190552533288,
+          "RMSE": 9.98219315802621,
+          "mean_bias_pred_minus_actual": -8.85982119483968
         }
       },
       "test": {
         "all_weeks": {
           "n": 6300,
-          "MAE": 1.2753078097665422,
-          "RMSE": 2.5483168063486867,
-          "mean_bias_pred_minus_actual": 0.25766554295330163
+          "MAE": 1.2524668987034024,
+          "RMSE": 2.487649563592526,
+          "mean_bias_pred_minus_actual": 0.2625864272627164
         },
         "jul_oct": {
           "n": 2100,
-          "MAE": 2.834934404523675,
-          "RMSE": 3.824097973775478,
-          "mean_bias_pred_minus_actual": 1.0941524866086327
+          "MAE": 2.76474118162119,
+          "RMSE": 3.7236811772620158,
+          "mean_bias_pred_minus_actual": 1.0971912228513458
         },
         "outbreak_high_plus": {
           "n": 567,
-          "MAE": 4.749159213466173,
-          "RMSE": 5.902795274364259,
-          "mean_bias_pred_minus_actual": -3.262809695747974
+          "MAE": 4.535505177071561,
+          "RMSE": 5.668849489188979,
+          "mean_bias_pred_minus_actual": -3.1386259880411216
         },
         "outbreak_critical": {
           "n": 111,
-          "MAE": 8.645649923175482,
-          "RMSE": 9.428361019383983,
-          "mean_bias_pred_minus_actual": -8.264982937544675
+          "MAE": 8.254416964973139,
+          "RMSE": 9.087402884496992,
+          "mean_bias_pred_minus_actual": -7.974788292661648
         }
       }
     }

@@ -7,7 +7,7 @@ Owner, check. Tick `[x]` in the commit that finishes a task.
 - [x] API incl. `POST /api/what_if`, efficiency script with tests (Alif + Nazifa)
 - [x] PR #13 closed (duplicate of #12)
 
-## Critical path: frontend (night direction, `build-ui` skill, prototype artboards Night A/B/C)
+## Critical path: frontend (warm paper "Jute" direction, `build-ui` skill, prototypes in `web/proto/`)
 Nothing in `web/` is real yet. UI = 10 points + 5 bonus, and the video (20) shows it.
 Order matters; each step is demo-able on its own.
 - [ ] **F1 Shell (Alif):** `web/app/index.html`, `assets/css/base.css` + `components.css`, `assets/js/api.js`,
@@ -22,10 +22,10 @@ Order matters; each step is demo-able on its own.
 - [ ] **F4 All wards (Alif):** tier counts, ranking with +2/+3/+4 heat strip (bonus: heatmap), by-city bars, CSV.
 - [ ] **F5 Model accuracy (Nazifa):** MAE/RMSE per horizon vs seasonal baseline, by city, `/api/history`
       chart with 80% band (bonus: confidence intervals + validation dashboard).
-- [ ] **F6 Marketing page (Srijita):** `web/index.html` + `landing.css` + `landing.js` from Night A.
+- [ ] **F6 Marketing page (Srijita):** `web/index.html` + `landing.css` + `landing.js` from `web/proto/hero-a.html`.
       Live card from `/api/forecast`, accuracy from `/api/metrics`. No login/register pages: the app has no
       accounts, and a page that doesn't work reads as mock UI.
-- [ ] **F7 Fonts + screenshots (Srijita):** Outfit 400/500/600 woff2 into `web/assets/fonts/`; screenshots of
+- [ ] **F7 Screenshots (Srijita):** fonts are vendored (Anton + Hind Siliguri); screenshots of
       each view into `docs/screenshots/`, linked from README.
 - [ ] **F8 Polish (Alif):** widths 360/768/1440, keyboard, error states (stop the server and reload),
       no console errors, `verify` skill.

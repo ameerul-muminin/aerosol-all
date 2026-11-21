@@ -43,3 +43,19 @@ def test_feature_list_matches_saved_models():
     for mode, hs in bundle["modes"].items():
         for h, m in hs.items():
             assert listed[mode][str(h)]["features"] == list(m["features"]) == list(m["model"].feats)
+
+
+def test_hgb_wrapper_skips_columns_empty_in_training():
+    """A CV fold trained on 2016 alone has all-NaN rain-anomaly columns; newer scikit-learn
+    rejects those, so the wrapper must skip them at fit and predict."""
+    import numpy as np
+    from src.features import feature_columns
+    from src.train import HGB
+    d = build_dataset(2)
+    early = d[d["target_date"].dt.year < 2017]
+    feats = feature_columns(anomaly=True)
+    assert early["rain_anom_lag0"].isna().all()
+    m = HGB(feats, max_iter=20, max_leaf_nodes=7).fit(early)
+    assert not any(f.startswith("rain_anom") for f in m.used_)
+    p = m.predict(d[d["target_date"].dt.year == 2017])
+    assert np.isfinite(p).all() and (p >= 0).all()

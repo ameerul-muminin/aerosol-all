@@ -74,11 +74,17 @@ class HGB:
         self.feats, self.params = feats, params
 
     def fit(self, d):
-        self.m = hgb(**self.params).fit(d[self.feats], d["target"])
+        X = d[self.feats]
+        # Columns with no observed value in this training set carry no information. This happens
+        # for the rain-anomaly columns when a CV fold trains on 2016 alone (no prior-year history).
+        # scikit-learn 1.6 tolerates them but newer versions raise, so they are skipped at fit and
+        # at predict. Results are unchanged on 1.6.1 (verified fold by fold).
+        self.used_ = [f for f in self.feats if X[f].notna().any()]
+        self.m = hgb(**self.params).fit(X[self.used_], d["target"])
         return self
 
     def predict(self, d):
-        return self.m.predict(d[self.feats])
+        return self.m.predict(d[getattr(self, "used_", self.feats)])
 
 
 class GLM:

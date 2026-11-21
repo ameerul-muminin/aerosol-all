@@ -36,8 +36,8 @@ button, input, select { font: inherit; color: inherit; }
 /* ---- shell: light sidebar + main ------------------------------------------------ */
 .shell { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; background: linear-gradient(to right, var(--sunk) 248px, transparent 248px); }
 .side { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 28px; padding: 24px 20px; border-right: 1px solid var(--line); overflow-y: auto; }
-.brand { font: 400 24px/1 var(--display); text-transform: uppercase; letter-spacing: .01em; text-decoration: none; }
-:root[lang="bn"] .brand { font: 700 20px/1.2 var(--font); text-transform: none; }
+.brand { font: 400 26px/1 var(--display); letter-spacing: .01em; text-decoration: none; }   /* the name is lowercase "aerosol-all": no uppercase */
+:root[lang="bn"] .brand { font: 400 26px/1 var(--display); }   /* Latin brand name, keep Anton */
 .tabs { display: grid; gap: 2px; margin: 0 -8px; }
 .tabs a { display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; text-decoration: none; color: var(--ink-2); font-weight: 500; transition: background-color var(--t-press) var(--ease-out), color var(--t-press) var(--ease-out); }
 .tabs a:hover { color: var(--ink); background: color-mix(in srgb, var(--paper) 60%, transparent); }

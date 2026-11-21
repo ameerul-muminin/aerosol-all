@@ -10,7 +10,7 @@
   /* sidebar */
   .shell { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; background: linear-gradient(to right, var(--sunk) 248px, transparent 248px); }
   aside { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 28px; padding: 24px 20px; background: var(--sunk); border-right: 1px solid var(--line); }
-  .brand { font: 400 24px/1 var(--display); text-transform: uppercase; letter-spacing: .01em; }
+  .brand { font: 400 26px/1 var(--display); letter-spacing: .01em; }
   .tabs { display: grid; gap: 2px; margin: 0 -8px; }
   .tabs a { display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; text-decoration: none; color: var(--ink-2); font-weight: 500; transition: background-color 160ms var(--ease-out), color 160ms var(--ease-out); }
   .tabs a:hover { color: var(--ink); background: color-mix(in srgb, var(--paper) 60%, transparent); }
@@ -117,7 +117,7 @@
 <body>
 <div class="shell">
 <aside>
-  <span class="brand">Dengue Outlook</span>
+  <span class="brand">aerosol-all</span>
   <nav class="tabs"><a href="#" aria-current="page">Ward outlook</a><a href="#">All wards</a><a href="#">Model accuracy</a></nav>
   <div class="side-ctl">
     <label>Ward<select id="ward"></select></label>

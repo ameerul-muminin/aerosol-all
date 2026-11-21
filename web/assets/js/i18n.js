@@ -2,7 +2,7 @@
 // Keys are "section.key"; only the FIRST dot splits, so API labels with dots/brackets can be keys
 // (e.g. t("driver.Rainfall (lags 0-8 weeks).detail")).
 export const LANGS = ["en", "bn"];
-const STORE_KEY = "dengue-outlook.lang";
+const STORE_KEY = "aerosol-all.lang";
 let lang = "en";
 let dict = {};
 const loaded = {};

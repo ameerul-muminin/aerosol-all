@@ -37,7 +37,7 @@ body { background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--font);
 a { color: inherit; }
 .display { font-family: var(--display); font-weight: 400; text-transform: uppercase; letter-spacing: -0.01em; line-height: 0.86; margin: 0; }
 .nav { display: flex; align-items: center; justify-content: space-between; padding: 18px clamp(16px, 3vw, 40px); font-weight: 600; font-size: 14px; }
-.nav .brand { font-family: var(--display); font-size: 26px; letter-spacing: 0.01em; text-transform: uppercase; }
+.nav .brand { font-family: var(--display); font-size: 28px; letter-spacing: 0.01em; }
 .nav .links { display: flex; gap: 22px; align-items: center; }
 .nav .links a { text-decoration: none; }
 .btn { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 20px; border-radius: var(--r-pill); border: 1.5px solid var(--ink); background: transparent; color: var(--ink); font: 600 15px var(--font); text-decoration: none; cursor: pointer; transition: transform 160ms var(--ease-out); }

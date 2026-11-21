@@ -23,6 +23,11 @@ One process serves the marketing page (`/`), the dashboard (`/app/`) and the JSO
 Try a weather scenario (typed weekly values replace the last 4 weeks, then the same lag pipeline runs):
 `curl -X POST http://127.0.0.1:8000/api/what_if -H "Content-Type: application/json" -d '{"ward_id": "DSCC_Ward_04", "as_of": "2025-07-21", "horizon": 3, "rainfall_mm": 200}'`
 → baseline vs scenario forecast, tier change and drivers.
+Inputs: `ward_id` (required), `as_of` (YYYY-MM-DD Monday), `horizon` (2/3/4), and at least one of `rainfall_mm` (0–400 per week),
+`avg_temp_c` (10–45), `relative_humidity_pct` (0–100); `weeks` (1–8, default 4) = how many recent weeks the typed values replace.
+The **baseline** uses the dataset's recorded weather; the **scenario** uses your typed weather. Values outside the
+training range (rain above 268.8 mm, temperature outside 17.2–37.5 °C, humidity below 41.8 %) return a warning, because the
+model cannot extrapolate beyond what it has seen.
 
 ## Retrain (one command)
 ```bash

@@ -92,6 +92,9 @@ were first seen on test, then confirmed on validation. Test rows are hash-locked
   while it exercises every endpoint and records `external_api_calls` (0) and `llm_calls` (0) in `reports/efficiency.json`.
 - **Serialized model, loaded once.** `models/dengue_model.joblib` holds all three horizon models and is
   loaded at startup (`load_bundle()`, cached). Lag features for all wards are built once and reused.
+- **Weather what-if (`POST /api/what_if`).** Typed weekly rain / temperature / humidity replace the last 1–8 weeks
+  of the ward's recorded weather, then the same lag pipeline and model run (a test proves real values reproduce the
+  baseline). Baselines always use recorded weather; inputs outside the training range return a warning.
 - **Response caching.** Each API response depends only on its query, so `forecast` and `ranking` are
   memoised with bounded LRU caches. The responses carry `Cache-Control: max-age=3600`, so browsers and any
   CDN can reuse them.

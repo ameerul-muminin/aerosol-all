@@ -263,6 +263,18 @@ def parse_horizon(value) -> int:
     return int(value)
 
 
+@lru_cache(maxsize=1)
+def training_weather_range() -> dict:
+    """Min/max of each what-if input over the TRAINING years (target weeks <= TRAIN_END). Tree models
+    cannot extrapolate: beyond these values their response flattens, so the API warns instead of
+    silently returning a capped answer."""
+    from src.predict import _raw
+    from src.train import TRAIN_END
+    r = _raw()
+    r = r[r["date"] <= TRAIN_END]
+    return {k: (float(r[k].min()), float(r[k].max())) for k in WHAT_IF_RANGES}
+
+
 def _require_ward(ward_id: str) -> None:
     if not ward_id:
         raise ValueError("ward_id is required.")
@@ -337,6 +349,13 @@ def what_if(body: dict) -> dict:
                        for k in overrides}
     base_eff = {d["label"]: d["effect"] for d in baseline["top_drivers"]}
     scen_eff = {d["label"]: d["effect"] for d in scenario["top_drivers"]}
+    warnings = []
+    for k, v in overrides.items():
+        lo, hi = training_weather_range()[k]
+        if not lo <= v <= hi:
+            warnings.append(f"{_LABEL[k]} {v:g} is outside the range seen in training data ({lo:.1f} to {hi:.1f} "
+                            f"{WHAT_IF_UNITS[k].split(' (')[0]}); the model cannot extrapolate, so the effect of "
+                            f"values beyond it levels off.")
     driver_change = sorted(((lbl, _num(scen_eff.get(lbl, 0) - base_eff.get(lbl, 0), 3)) for lbl in set(base_eff) | set(scen_eff)),
                            key=lambda kv: -abs(kv[1]))
     return {
@@ -350,4 +369,5 @@ def what_if(body: dict) -> dict:
         "applied": {"overrides": overrides, "weeks": weeks, "weeks_replaced": {"from": first, "to": as_of},
                     "replaced_actual": replaced_actual},
         "units": {k: WHAT_IF_UNITS[k] for k in (*overrides, "weeks")},
+        "warnings": warnings,
     }

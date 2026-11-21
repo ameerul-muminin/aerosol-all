@@ -15,9 +15,10 @@ cd aerosol-all
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-streamlit run app.py               # opens http://localhost:8501
+python -m api                      # open http://127.0.0.1:8000
 ```
 Tested with Python 3.11–3.13. The trained model is committed, so no training is needed to launch.
+One process serves the marketing page (`/`), the dashboard (`/app/`) and the JSON API (`/api/...`). No Node.js needed.
 
 ## Retrain (one command)
 ```bash
@@ -27,14 +28,16 @@ pytest -q                # lag pipeline, leakage and interface tests
 
 ## Project structure
 ```
-app.py                     Streamlit dashboard
+api/                       JSON API + static web server (Starlette)
+web/                       marketing page and dashboard (HTML/CSS/JS)
 src/features.py            data validation + per-ward lag features
 src/train.py               chronological split, model selection, tiers, conformal intervals
-src/predict.py             inference API used by the app (predict_risk / predict_all)
+src/predict.py             model inference (predict_risk / predict_all)
 models/dengue_model.joblib serialized models (one per horizon)
 reports/metrics.json       validation and test metrics
 tests/                     pytest suite
 ARCHITECTURE.md            data flow, validation split, model rationale, efficiency
+docs/frontend/             frontend guide for the web/ build
 ```
 
 ## Dataset
@@ -52,7 +55,7 @@ See `ARCHITECTURE.md` and `reports/metrics.json`. Every number shown in the app 
 | Claude Code | A, B, C | Writing and refactoring code in the repo under each member's direction |
 | _add any other tool here (ChatGPT, Copilot, Gemini…)_ | | |
 
-**External APIs at runtime: none.** All inference runs locally from the serialized model, so
+**External APIs at runtime: none.** The app calls only its own local `/api` endpoints. All inference runs locally from the serialized model, so
 there are no API calls, tokens or usage costs.
 
 ## Team

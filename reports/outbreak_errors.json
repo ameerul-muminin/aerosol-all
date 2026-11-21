@@ -12,14 +12,14 @@
         "jul_oct": {
           "n": 2160,
           "MAE": 2.7159352499903533,
-          "RMSE": 3.7754497546533092,
+          "RMSE": 3.775449754653309,
           "mean_bias_pred_minus_actual": -0.3183909283472538
         },
         "outbreak_high_plus": {
           "n": 988,
           "MAE": 3.9684594739512113,
           "RMSE": 5.0477144559213105,
-          "mean_bias_pred_minus_actual": -3.221261284818507
+          "mean_bias_pred_minus_actual": -3.2212612848185067
         },
         "outbreak_critical": {
           "n": 350,
@@ -37,9 +37,9 @@
         },
         "jul_oct": {
           "n": 2100,
-          "MAE": 2.6174592991822943,
-          "RMSE": 3.5757092775441364,
-          "mean_bias_pred_minus_actual": 1.1800141554925652
+          "MAE": 2.6174592991822947,
+          "RMSE": 3.575709277544137,
+          "mean_bias_pred_minus_actual": 1.180014155492565
         },
         "outbreak_high_plus": {
           "n": 567,
@@ -59,53 +59,53 @@
       "validation": {
         "all_weeks": {
           "n": 6240,
-          "MAE": 1.2742528209307318,
-          "RMSE": 2.573347758911062,
-          "mean_bias_pred_minus_actual": -0.4421438527969555
+          "MAE": 1.287295043237772,
+          "RMSE": 2.5764541141524595,
+          "mean_bias_pred_minus_actual": -0.29116857921140915
         },
         "jul_oct": {
           "n": 2160,
-          "MAE": 2.7431557357719796,
-          "RMSE": 3.844604231224489,
-          "mean_bias_pred_minus_actual": -0.8047013251145547
+          "MAE": 2.7687154582781868,
+          "RMSE": 3.8134924957094416,
+          "mean_bias_pred_minus_actual": -0.3635193190539462
         },
         "outbreak_high_plus": {
           "n": 988,
-          "MAE": 4.481139238442454,
-          "RMSE": 5.652036038647293,
-          "mean_bias_pred_minus_actual": -4.09364122115277
+          "MAE": 4.2054359940030395,
+          "RMSE": 5.459948798191841,
+          "mean_bias_pred_minus_actual": -3.6748515648938156
         },
         "outbreak_critical": {
           "n": 350,
-          "MAE": 7.309716176181155,
-          "RMSE": 8.191486237581751,
-          "mean_bias_pred_minus_actual": -7.210111899668041
+          "MAE": 7.021173331732421,
+          "RMSE": 8.002880377568674,
+          "mean_bias_pred_minus_actual": -6.929921462099528
         }
       },
       "test": {
         "all_weeks": {
           "n": 6300,
-          "MAE": 1.0822768201405686,
-          "RMSE": 2.126106516194504,
-          "mean_bias_pred_minus_actual": 0.15452324375949128
+          "MAE": 1.1241603663058686,
+          "RMSE": 2.1873024238619534,
+          "mean_bias_pred_minus_actual": 0.3124639450325396
         },
         "jul_oct": {
           "n": 2100,
-          "MAE": 2.4503198354327482,
-          "RMSE": 3.2834457800472143,
-          "mean_bias_pred_minus_actual": 0.7182314495197057
+          "MAE": 2.5670254591102646,
+          "RMSE": 3.3922202241934203,
+          "mean_bias_pred_minus_actual": 1.187682146373009
         },
         "outbreak_high_plus": {
           "n": 567,
-          "MAE": 3.7922525998386463,
-          "RMSE": 4.668133021874842,
-          "mean_bias_pred_minus_actual": -3.039421733973227
+          "MAE": 3.466577016690175,
+          "RMSE": 4.399392641723189,
+          "mean_bias_pred_minus_actual": -2.5341880195039286
         },
         "outbreak_critical": {
           "n": 111,
-          "MAE": 6.709324948904554,
-          "RMSE": 7.403180572550649,
-          "mean_bias_pred_minus_actual": -6.649632845751726
+          "MAE": 6.432778089493539,
+          "RMSE": 7.164033848506234,
+          "mean_bias_pred_minus_actual": -6.393817583720615
         }
       }
     },

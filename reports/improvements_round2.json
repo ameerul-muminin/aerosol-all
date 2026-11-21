@@ -1,0 +1,238 @@
+{
+  "rules": "Improvement round 2: four ideas, each adopted only if it passes a rule fixed BEFORE running.\nThe test set (2024-25) is never used here.\n\nModel-side (sequential: each step starts from whatever the previous step adopted):\n  1. Weighting + blend: outbreak weights 2 / 4 on the h=3 blend; outbreak weights 2 / 3 at h=4.\n     Rule: CV MAE on outbreak weeks (target >= High threshold) improves >= 10% AND overall CV\n     Poisson deviance worsens <= 2% (best passing weight wins).\n  2. Recent-year weights: linear ramp, newest training year weighted 1 + r, r in {1, 2}.\n     Rule: CV deviance improves >= 1% AND validation deviance is not worse.\nPost-processing (on the model after steps 1-2):\n  3. Outbreak under-prediction fix: isotonic recalibration fitted on out-of-fold training\n     predictions. Rule: validation MAE on outbreak weeks improves >= 10% AND validation deviance\n     worsens <= 2%.\n  4. Season-aware 80% ranges: calibrate per (prediction bin, Jul-Oct vs rest). Checked by\n     calibrating on 2022 and measuring coverage on 2023 (both validation years).\n     Rule (all horizons together): Jul-Oct coverage moves closer to 0.80 on average AND overall\n     coverage stays within 0.75-0.85 for every horizon.",
+  "horizons": {
+    "2": {
+      "start": {
+        "settings": {
+          "max_iter": 300,
+          "max_leaf_nodes": 7,
+          "outbreak_weight": 4.0,
+          "outbreak_threshold": 9.0
+        },
+        "blend": false
+      },
+      "reference_cv": {
+        "cv_poisdev": 0.9404165465950574,
+        "cv_outbreak_mae": 3.7094545455386636
+      },
+      "1_weighting": {
+        "trials": {},
+        "adopted": []
+      },
+      "2_recency": {
+        "reference_val": {
+          "val_poisdev": 0.9662599737217359,
+          "val_outbreak_mae": 3.9684594739512113,
+          "val_mae": 1.2276454115419115
+        },
+        "trials": {
+          "1.0": {
+            "cv_poisdev": 0.9498324923324972,
+            "cv_outbreak_mae": 3.761932233946326,
+            "val_poisdev": 0.9816087436600631,
+            "val_outbreak_mae": 3.964900270473015,
+            "val_mae": 1.228903413320047,
+            "passes": false
+          },
+          "2.0": {
+            "cv_poisdev": 0.9551798447499904,
+            "cv_outbreak_mae": 3.76932434766087,
+            "val_poisdev": 0.9665631739662754,
+            "val_outbreak_mae": 3.920224832396386,
+            "val_mae": 1.2214633072400023,
+            "passes": false
+          }
+        },
+        "adopted": false
+      },
+      "3_isotonic": {
+        "without": {
+          "val_poisdev": 0.9662599737217359,
+          "val_outbreak_mae": 3.9684594739512113,
+          "val_mae": 1.2276454115419115
+        },
+        "with": {
+          "val_poisdev": 0.9802755349017904,
+          "val_outbreak_mae": 3.980788764793182,
+          "val_mae": 1.2196642556229633
+        },
+        "adopted": false
+      }
+    },
+    "3": {
+      "start": {
+        "settings": {
+          "max_iter": 300,
+          "max_leaf_nodes": 7
+        },
+        "blend": true
+      },
+      "reference_cv": {
+        "cv_poisdev": 1.0785035009613502,
+        "cv_outbreak_mae": 4.200668786889259
+      },
+      "1_weighting": {
+        "trials": {
+          "2.0": {
+            "cv_poisdev": 1.0871374391754431,
+            "cv_outbreak_mae": 3.760269781909657,
+            "passes": true
+          },
+          "4.0": {
+            "cv_poisdev": 1.1288206430155552,
+            "cv_outbreak_mae": 3.415277933179546,
+            "passes": false
+          }
+        },
+        "adopted": 2.0
+      },
+      "2_recency": {
+        "reference_val": {
+          "val_poisdev": 1.1116317039746146,
+          "val_outbreak_mae": 4.2054359940030395,
+          "val_mae": 1.287295043237772
+        },
+        "trials": {
+          "1.0": {
+            "cv_poisdev": 1.0817289626422215,
+            "cv_outbreak_mae": 3.777776124099135,
+            "val_poisdev": 1.117193282926482,
+            "val_outbreak_mae": 4.207693154722065,
+            "val_mae": 1.2890596359290751,
+            "passes": false
+          },
+          "2.0": {
+            "cv_poisdev": 1.0899644280288292,
+            "cv_outbreak_mae": 3.749794753944064,
+            "val_poisdev": 1.1128204945319302,
+            "val_outbreak_mae": 4.182227214108233,
+            "val_mae": 1.290456063874376,
+            "passes": false
+          }
+        },
+        "adopted": false
+      },
+      "3_isotonic": {
+        "without": {
+          "val_poisdev": 1.1116317039746146,
+          "val_outbreak_mae": 4.2054359940030395,
+          "val_mae": 1.287295043237772
+        },
+        "with": {
+          "val_poisdev": 1.1550466993210917,
+          "val_outbreak_mae": 4.461309306432668,
+          "val_mae": 1.2747724243196257
+        },
+        "adopted": false
+      }
+    },
+    "4": {
+      "start": {
+        "settings": {
+          "min_samples_leaf": 160,
+          "max_leaf_nodes": 7,
+          "max_iter": 150,
+          "max_features": 0.5,
+          "learning_rate": 0.05,
+          "l2_regularization": 3.0
+        },
+        "blend": false
+      },
+      "reference_cv": {
+        "cv_poisdev": 1.2754022792334934,
+        "cv_outbreak_mae": 4.5805658140222585
+      },
+      "1_weighting": {
+        "trials": {
+          "2.0": {
+            "cv_poisdev": 1.316492657311428,
+            "cv_outbreak_mae": 4.314063927341727,
+            "passes": false
+          },
+          "3.0": {
+            "cv_poisdev": 1.3303950414152035,
+            "cv_outbreak_mae": 4.056638479007602,
+            "passes": false
+          }
+        },
+        "adopted": []
+      },
+      "2_recency": {
+        "reference_val": {
+          "val_poisdev": 1.580267414658086,
+          "val_outbreak_mae": 5.503535199400315,
+          "val_mae": 1.5140445963169555
+        },
+        "trials": {
+          "1.0": {
+            "cv_poisdev": 1.272395774173152,
+            "cv_outbreak_mae": 4.580404694679727,
+            "val_poisdev": 1.6223103044462348,
+            "val_outbreak_mae": 5.576071566079383,
+            "val_mae": 1.5381882866531622,
+            "passes": false
+          },
+          "2.0": {
+            "cv_poisdev": 1.2855891842149396,
+            "cv_outbreak_mae": 4.557508934306375,
+            "val_poisdev": 1.579073722291106,
+            "val_outbreak_mae": 5.5038229013614695,
+            "val_mae": 1.5315861627393004,
+            "passes": false
+          }
+        },
+        "adopted": false
+      },
+      "3_isotonic": {
+        "without": {
+          "val_poisdev": 1.580267414658086,
+          "val_outbreak_mae": 5.503535199400315,
+          "val_mae": 1.5140445963169555
+        },
+        "with": {
+          "val_poisdev": 1.58518915928853,
+          "val_outbreak_mae": 5.770408470927804,
+          "val_mae": 1.5361629432724104
+        },
+        "adopted": false
+      }
+    }
+  },
+  "4_season_intervals": {
+    "per_horizon_2023_coverage": {
+      "2": {
+        "bin_only": {
+          "all": 0.8144230769230769,
+          "jul_oct": 0.7694444444444445
+        },
+        "season_aware": {
+          "all": 0.7971153846153847,
+          "jul_oct": 0.7611111111111111
+        }
+      },
+      "3": {
+        "bin_only": {
+          "all": 0.8625,
+          "jul_oct": 0.8555555555555555
+        },
+        "season_aware": {
+          "all": 0.8208333333333333,
+          "jul_oct": 0.799074074074074
+        }
+      },
+      "4": {
+        "bin_only": {
+          "all": 0.8086538461538462,
+          "jul_oct": 0.7546296296296297
+        },
+        "season_aware": {
+          "all": 0.7762820512820513,
+          "jul_oct": 0.7444444444444445
+        }
+      }
+    },
+    "mean_jul_oct_gap_bin_only": 0.04382716049382714,
+    "mean_jul_oct_gap_season_aware": 0.031790123456790186,
+    "adopted": true
+  }
+}

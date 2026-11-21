@@ -117,7 +117,7 @@ def _score(rows: pd.DataFrame, horizon: int, mode: str = "weather", explain: boo
     rows = rows.dropna(subset=required_columns(cases=mode == "weather_cases"))
     rows = rows.assign(target_date=rows["date"] + pd.Timedelta(weeks=horizon))
     p = _model_predict(m, rows)
-    lo, hi = conformal_interval(p, m["conformal_q"])
+    lo, hi = conformal_interval(p, m["conformal_q"], months=rows["target_date"].dt.month.to_numpy())
     out = rows[["ward_id", "city", "date", "target_date"]].assign(
         horizon_weeks=horizon, mode=mode, predicted_cases=p, lower_80=lo, upper_80=hi,
         risk_tier=[TIER_NAMES[i] for i in to_tier(p, m["tier_cuts"])])
@@ -269,7 +269,8 @@ def predict_all(feat_df: pd.DataFrame, as_of_date, horizon: int, with_drivers: b
     d = feat_df[feat_df["date"] == as_of].dropna(subset=required_columns(cases=mode == "weather_cases"))
     X = d[feats]
     p = _model_predict(m, X)
-    lo, hi = conformal_interval(p, m["conformal_q"])
+    target_month = (as_of + pd.Timedelta(weeks=horizon)).month
+    lo, hi = conformal_interval(p, m["conformal_q"], months=np.full(len(p), target_month))
     out = pd.DataFrame({
         "ward_id": d["ward_id"].values,
         "city": d["city"].values,

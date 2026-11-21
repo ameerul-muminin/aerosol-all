@@ -1,0 +1,136 @@
+{
+  "app": {
+    "name": "Dengue Outlook",
+    "title": "Dengue Outlook · ward forecasts",
+    "skip": "Skip to content"
+  },
+  "nav": {
+    "label": "Views",
+    "outlook": "Ward outlook",
+    "wards": "All wards"
+  },
+  "lang": {
+    "label": "Language",
+    "en": "EN",
+    "bn": "বাংলা"
+  },
+  "ctl": {
+    "ward": "Ward",
+    "as_of": "As of",
+    "city_all": "All cities",
+    "city": "City"
+  },
+  "city": {
+    "Chattogram": "Chattogram",
+    "Dhaka North": "Dhaka North",
+    "Dhaka South": "Dhaka South",
+    "Gazipur": "Gazipur",
+    "Narayanganj": "Narayanganj"
+  },
+  "ward": {
+    "name": "Ward {n}",
+    "full": "{city} · Ward {n}"
+  },
+  "tier": {
+    "Low": "Low",
+    "Medium": "Medium",
+    "High": "High",
+    "Critical": "Critical",
+    "risk": "{tier} risk"
+  },
+  "action": {
+    "Low": "Routine checks.",
+    "Medium": "Check for standing water and brief local teams.",
+    "High": "Schedule cleanup and larvicide within the week.",
+    "Critical": "Prioritise cleanup, larvicide and hospital readiness now."
+  },
+  "driver": {
+    "Rainfall (lags 0-8 weeks)": "Recent rain",
+    "Rainfall (lags 0-8 weeks).detail": "Rain over the last 8 weeks",
+    "Temperature (last 4 weeks)": "Temperature",
+    "Temperature (last 4 weeks).detail": "Average over the last 4 weeks",
+    "Humidity (last 4 weeks)": "Humidity",
+    "Humidity (last 4 weeks).detail": "Average over the last 4 weeks",
+    "Time of year": "Time of year",
+    "Time of year.detail": "Dengue peaks July to October",
+    "Ward vulnerability (drainage, crowding, sanitation)": "Ward conditions",
+    "Ward vulnerability (drainage, crowding, sanitation).detail": "Drainage, crowding and sanitation",
+    "Recent cases": "Recent cases",
+    "Recent cases.detail": "Cases reported in the last weeks",
+    "other": "Everything else",
+    "other.detail": "Smaller effects combined"
+  },
+  "outlook": {
+    "subtitle": "{city} · forecast for the week of {week}",
+    "expected": "Expected cases",
+    "range": "Likely {low}–{high} (80% range)",
+    "horizon_title": "By horizon",
+    "horizon_label": "Forecast horizon",
+    "plus_weeks": "+{h} weeks",
+    "rain_title": "Rain to risk",
+    "rain_legend_rain": "Rain, mm/week",
+    "rain_legend_window": "Breeding window",
+    "rain_legend_unknown": "Not yet",
+    "rain_legend_forecast": "Forecast week",
+    "rain_aria": "Weekly rainfall before the forecast week: {list}",
+    "why_title": "Why this forecast",
+    "why_sum": "Average week {ref} → this ward {pred}",
+    "why_avg": "Average week",
+    "why_this": "This ward",
+    "why_aria": "Drivers: average week {ref} cases; {list}; this ward {pred} cases.",
+    "inputs_title": "Model inputs",
+    "in_rain4": "Rain, last 4 weeks",
+    "in_humidity": "Humidity",
+    "in_temp": "Average temperature",
+    "in_cases": "Cases this week",
+    "in_waterlog": "Water-logging (0–1)",
+    "in_sanitation": "Sanitation (0–1)",
+    "in_density": "People per km²",
+    "mm": "mm"
+  },
+  "whatif": {
+    "title": "What if the weather changes?",
+    "rain": "Rainfall",
+    "rain_unit": "mm per week",
+    "temp": "Average temperature",
+    "temp_unit": "°C",
+    "hum": "Humidity",
+    "hum_unit": "%",
+    "weeks": "Recent weeks to replace",
+    "weeks_n": "{n} weeks",
+    "blank_hint": "Leave a box empty to keep the real value.",
+    "run": "Run what-if",
+    "running": "Running…",
+    "preset_dry": "Dry spell (0 mm)",
+    "preset_wet": "Heavy rain (250 mm)",
+    "baseline": "Actual weather",
+    "scenario": "Your scenario",
+    "change": "{sign}{n} cases",
+    "tier_changed": "Risk moves from {from} to {to}.",
+    "tier_same": "Risk stays {tier}.",
+    "replaced": "Replaced {from} to {to} (real average {mean} mm/week).",
+    "need_one": "Enter at least one value."
+  },
+  "wards": {
+    "title": "All wards",
+    "subtitle": "Forecast for the week of {week}",
+    "count_wards": "{n} wards",
+    "rank": "#",
+    "ward": "Ward",
+    "cases": "Cases",
+    "tier": "Risk",
+    "range": "Likely range",
+    "heat": "+2 / +3 / +4 weeks",
+    "heat_aria": "{ward}: {a} cases in 2 weeks, {b} in 3 weeks, {c} in 4 weeks",
+    "by_city": "By city",
+    "csv": "Download CSV",
+    "open": "Open {ward}",
+    "empty": "No wards match this filter."
+  },
+  "state": {
+    "loading": "Loading…",
+    "offline": "Can't reach the forecast server. Check that it is running, then try again.",
+    "retry": "Try again",
+    "error_title": "Something went wrong"
+  }
+}

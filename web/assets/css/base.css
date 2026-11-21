@@ -1,0 +1,94 @@
+/* Base: fonts, reset, typography, shell (sidebar + main), buttons, focus, states.
+   Import order: tokens.css -> base.css -> components.css */
+
+/* Fonts (vendored, OFL). Hind Siliguri is split by script with unicode-range so Latin pages skip the Bangla file. */
+@font-face { font-family: "Anton"; src: url("../fonts/anton-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Hind Siliguri"; src: url("../fonts/hind-siliguri-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2190-21FF, U+2212; }
+@font-face { font-family: "Hind Siliguri"; src: url("../fonts/hind-siliguri-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2190-21FF, U+2212; }
+@font-face { font-family: "Hind Siliguri"; src: url("../fonts/hind-siliguri-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2190-21FF, U+2212; }
+@font-face { font-family: "Hind Siliguri"; src: url("../fonts/hind-siliguri-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2190-21FF, U+2212; }
+@font-face { font-family: "Hind Siliguri"; src: url("../fonts/hind-siliguri-bengali-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0-1CF9, U+200C-200D, U+25CC, U+A8F1; }
+@font-face { font-family: "Hind Siliguri"; src: url("../fonts/hind-siliguri-bengali-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0-1CF9, U+200C-200D, U+25CC, U+A8F1; }
+@font-face { font-family: "Hind Siliguri"; src: url("../fonts/hind-siliguri-bengali-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0-1CF9, U+200C-200D, U+25CC, U+A8F1; }
+@font-face { font-family: "Hind Siliguri"; src: url("../fonts/hind-siliguri-bengali-700-normal.woff2") format("woff2"); font-weight: 700; font-display: swap; unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0-1CF9, U+200C-200D, U+25CC, U+A8F1; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 var(--fs-body)/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+a { color: inherit; }
+button, input, select { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+.num { font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.display { font-family: var(--display); font-weight: 400; text-transform: uppercase; line-height: .98; letter-spacing: 0; }
+/* Anton has no Bangla glyphs: use Hind Siliguri bold, sentence case, taller line height */
+:root[lang="bn"] .display { font-family: var(--font); font-weight: 700; text-transform: none; line-height: 1.15; }
+:root[lang="bn"] body { line-height: 1.6; }
+
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; box-shadow: 0 0 0 5px var(--accent-soft); border-radius: 4px; }
+
+.skip { position: absolute; left: 12px; top: -60px; z-index: 100; background: var(--ink); color: var(--on-dark); padding: 8px 14px; border-radius: 8px; }
+.skip:focus { top: 12px; }
+
+/* ---- shell: light sidebar + main ------------------------------------------------ */
+.shell { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; background: linear-gradient(to right, var(--sunk) 248px, transparent 248px); }
+.side { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 28px; padding: 24px 20px; border-right: 1px solid var(--line); overflow-y: auto; }
+.brand { font: 400 24px/1 var(--display); text-transform: uppercase; letter-spacing: .01em; text-decoration: none; }
+:root[lang="bn"] .brand { font: 700 20px/1.2 var(--font); text-transform: none; }
+.tabs { display: grid; gap: 2px; margin: 0 -8px; }
+.tabs a { display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; text-decoration: none; color: var(--ink-2); font-weight: 500; transition: background-color var(--t-press) var(--ease-out), color var(--t-press) var(--ease-out); }
+.tabs a:hover { color: var(--ink); background: color-mix(in srgb, var(--paper) 60%, transparent); }
+.tabs a[aria-current="page"] { color: var(--ink); font-weight: 600; background: var(--paper); box-shadow: var(--shadow-sm); }
+.side-ctl { display: grid; gap: 16px; padding-top: 24px; border-top: 1px solid var(--line-strong); }
+.field { display: grid; gap: 6px; font-size: var(--fs-small); font-weight: 500; color: var(--ink-2); }
+.lang { margin-top: auto; align-self: start; display: inline-flex; border-radius: var(--r-pill); box-shadow: 0 0 0 1px var(--line-strong); padding: 3px; }
+.lang button { min-height: 36px; min-width: 44px; padding: 0 12px; border: 0; border-radius: var(--r-pill); background: none; font-size: var(--fs-small); font-weight: 500; color: var(--ink-2); cursor: pointer; transition: transform var(--t-press) var(--ease-out); }
+.lang button:active { transform: scale(.97); }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--on-dark); }
+
+.main { width: 100%; max-width: 1120px; padding: 32px 32px 96px; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; margin-bottom: 20px; }
+.head h1 { font-size: var(--fs-display); }
+.head p { color: var(--ink-2); }
+
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; background: none; }
+  .side { position: relative; height: auto; gap: 14px; padding: 14px 16px 16px; background: var(--sunk); border-right: 0; border-bottom: 1px solid var(--line); overflow: visible; }
+  .tabs { grid-auto-flow: column; justify-content: start; margin: 0; }
+  .side-ctl { padding-top: 0; border-top: 0; grid-template-columns: 1fr 1fr; }
+  .lang { position: absolute; top: 10px; right: 16px; margin: 0; }
+  .main { padding: 20px 16px 80px; }
+}
+
+/* ---- controls --------------------------------------------------------------------- */
+select, input[type="number"] { min-height: 44px; width: 100%; border: 0; border-radius: var(--r-ctl); background-color: var(--paper); box-shadow: var(--shadow-sm); font-size: 15px; font-weight: 500; color: var(--ink); transition: box-shadow var(--t-press) var(--ease-out); }
+select { appearance: none; padding: 0 40px 0 14px; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235C5249' stroke-width='1.6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+input[type="number"] { padding: 0 14px; font-variant-numeric: tabular-nums; }
+select:hover, input[type="number"]:hover { box-shadow: 0 0 0 1px var(--line-strong); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 0; border-radius: var(--r-pill); background: var(--paper); box-shadow: 0 0 0 1px var(--line-strong); font-weight: 600; font-size: 15px; color: var(--ink); text-decoration: none; cursor: pointer; transition: transform var(--t-press) var(--ease-out), background-color var(--t-press) var(--ease-out); }
+.btn:hover { background: var(--bg); }
+.btn:active { transform: scale(.97); }
+.btn.primary { background: var(--accent); box-shadow: none; color: var(--accent-ink); }
+.btn.primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); }
+.btn.small { min-height: 36px; padding: 0 14px; font-size: var(--fs-small); }
+.btn[disabled] { opacity: .6; cursor: progress; }
+
+/* segmented control: one sliding thumb (translateX) */
+.seg { position: relative; display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--sunk-2); border-radius: var(--r-ctl); padding: 3px; }
+.seg button { position: relative; z-index: 1; min-height: 38px; min-width: 88px; padding: 0 12px; border: 0; background: none; font-size: 14px; font-weight: 500; color: var(--ink-2); cursor: pointer; transition: color var(--t-press) var(--ease-out); }
+.seg button[aria-pressed="true"] { color: var(--ink); font-weight: 600; }
+.seg .thumb { position: absolute; top: 3px; left: 3px; height: calc(100% - 6px); background: var(--paper); border-radius: 8px; box-shadow: 0 1px 2px rgba(43, 37, 32, .12); transition: transform var(--t-move) var(--ease-out); }
+.no-anim .seg .thumb { transition: none; }
+
+/* ---- states ----------------------------------------------------------------------- */
+.skel { display: inline-block; min-width: 3ch; border-radius: 6px; color: transparent !important; background: linear-gradient(90deg, var(--sunk), var(--paper), var(--sunk)); background-size: 200% 100%; animation: skel 1.2s linear infinite; }
+@keyframes skel { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+.state { display: grid; justify-items: start; gap: 12px; padding: 24px; border-radius: var(--r-card); background: var(--paper); box-shadow: var(--shadow-sm); }
+.state h2 { font-size: 17px; }
+.state p { color: var(--ink-2); max-width: 60ch; }
+.inline-error { color: var(--tier-critical); font-weight: 600; }

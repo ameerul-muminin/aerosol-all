@@ -10,7 +10,7 @@ Owner, check. Tick `[x]` in the commit that finishes a task.
 ## Critical path: frontend (warm paper "Jute" direction, `build-ui` skill, prototypes in `web/proto/`)
 Nothing in `web/` is real yet. UI = 10 points + 5 bonus, and the video (20) shows it.
 Order matters; each step is demo-able on its own.
-- [ ] **F1 Shell (Alif):** `web/app/index.html`, `assets/css/base.css` + `components.css`, `assets/js/api.js`,
+- [x] **F1 Shell (Alif):** `web/app/index.html`, `assets/css/base.css` + `components.css`, `assets/js/api.js`,
       `format.js`, `app.js` (hash router `#outlook #wards #accuracy`, URL state, inputs from `/api/meta`).
 - [ ] **F2 Ward outlook (Alif):** verdict card (cases, tier glyph+colour+word, likely range), rain-to-risk bars,
       2/3/4 segmented control, drivers with "average week X → this ward Y", model inputs.

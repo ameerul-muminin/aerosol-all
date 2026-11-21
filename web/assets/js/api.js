@@ -48,6 +48,7 @@ export const api = {
   forecast: (ward_id, as_of, horizon) => get("/api/forecast", { ward_id, as_of, horizon }),
   ranking: (as_of, horizon, city) => get("/api/ranking", { as_of, horizon, city }),
   metrics: () => get("/api/metrics"),
+  lagProfile: (city) => get("/api/lag_profile", { city }),
   history: (ward_id, horizon) => get("/api/history", { ward_id, horizon }),
   whatIf: (body) => post("/api/what_if", body),
 };

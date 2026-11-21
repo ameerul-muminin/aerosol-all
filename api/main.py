@@ -88,6 +88,10 @@ def create_app() -> Flask:
     def metrics():
         return jsonify(service.metrics())
 
+    @app.get("/api/lag_profile")
+    def lag_profile():
+        return jsonify(service.lag_profile(request.args.get("city") or None))
+
     @app.get("/api/history")
     def history():
         return jsonify(service.ward_history(request.args.get("ward_id", ""), _horizon()))

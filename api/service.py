@@ -228,6 +228,38 @@ def metrics() -> dict:
     return {"split": m["split"], "horizons": per_h}
 
 
+# ---------------------------------------------------------------- /api/lag_profile
+LAG_WEEKS = 12
+
+
+@lru_cache(maxsize=8)   # one entry per city (+ all cities); computed once from the raw data
+def lag_profile(city: str | None = None) -> dict:
+    """The "breeding clock" in the data: correlation between rain k weeks ago and cases now, k = 0..12.
+    Both series are taken as anomalies (minus that ward's average for the same week of the year), so the
+    shared monsoon season cannot create the link on its own. Descriptive only; the model does not use it."""
+    from src.predict import _raw
+    r = _raw().sort_values(["ward_id", "date"])
+    if city:
+        if city not in set(r["city"]):
+            raise ValueError(f"Unknown city: {city}")
+    woy = r["date"].dt.isocalendar().week.astype(int)
+    key = [r["ward_id"], woy]
+    cases = r["dengue_cases"] - r.groupby(key)["dengue_cases"].transform("mean")
+    lags = []
+    for k in range(LAG_WEEKS + 1):
+        rain = r.groupby("ward_id")["rainfall_mm"].shift(k)
+        rain = rain - rain.groupby(key).transform("mean")
+        sel = (r["city"] == city) if city else slice(None)
+        lags.append({"weeks": k, "corr": _num(cases[sel].corr(rain[sel]), 3)})
+    peak = max(lags, key=lambda x: x["corr"])
+    first, last = r["date"].min(), r["date"].max()
+    return {"city": city, "lags": lags, "peak_weeks": peak["weeks"], "peak_corr": peak["corr"],
+            "period": {"from": _date(first), "to": _date(last)},
+            "n_rows": int(((r["city"] == city) if city else r["city"].notna()).sum()),
+            "method": "Pearson correlation of rainfall k weeks earlier with cases now, both minus the "
+                      "ward's average for that week of the year."}
+
+
 def ward_history(ward_id: str, horizon: int) -> dict:
     """Predicted vs actual with 80% band over the test period, for one ward."""
     if not ward_id:

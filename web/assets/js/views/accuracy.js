@@ -7,6 +7,8 @@ import { num0, num1, num2, dateLong, cityName, wardFull, esc } from "../format.j
 import { showError, ticket, segment } from "../ui.js";
 
 const pct = (x) => `${num0(x * 100)}%`;
+/** A year without digit grouping ("2024", "২০২৪"), from "2024" or "2024-01-01". */
+const year = (v) => new Intl.NumberFormat(getLang() === "bn" ? "bn-BD" : "en-GB", { useGrouping: false }).format(Number(String(v).slice(0, 4)));
 let offResize = null;   // the history chart re-draws to its card width
 
 export async function render(root, { state: s, meta, set, retry }) {
@@ -15,10 +17,10 @@ export async function render(root, { state: s, meta, set, retry }) {
     root.innerHTML = `<div class="head"><h1 class="display">${esc(t("acc.title"))}</h1><p><span class="skel">${esc(t("state.loading"))}</span></p></div>
       <div class="grid" aria-busy="true"><section class="card span-12"><span class="skel" style="height:320px;width:100%"></span></section></div>`;
   }
-  let m, hist, city;
+  let m, hist, city, lag;
   try {
     city = meta.cities.find((c) => c.wards.includes(s.ward)).city;
-    [m, hist] = await Promise.all([api.metrics(), api.history(s.ward, s.h)]);
+    [m, hist, lag] = await Promise.all([api.metrics(), api.history(s.ward, s.h), api.lagProfile(s.city)]);
   } catch (err) {
     if (current()) showError(root, err, retry);
     return;
@@ -27,8 +29,7 @@ export async function render(root, { state: s, meta, set, retry }) {
 
   const hz = m.horizons.find((x) => x.horizon === s.h) || m.horizons[0];
   const years = (m.split.test.match(/\d{4}/g) || []);
-  const yr = (y) => new Intl.NumberFormat(getLang() === "bn" ? "bn-BD" : "en-GB", { useGrouping: false }).format(y);
-  const period = years.length ? `${yr(years[0])}–${yr(years[years.length - 1])}` : m.split.test;
+  const period = years.length ? `${year(years[0])}–${year(years[years.length - 1])}` : m.split.test;
   const pts = hist.points;
   const inside = pts.filter((p) => p.actual >= p.low && p.actual <= p.high).length;
 
@@ -60,9 +61,11 @@ export async function render(root, { state: s, meta, set, retry }) {
       <div class="hist" role="img" aria-label="${esc(t("acc.hist_aria", { n: num0(pts.length), inside: num0(inside) }))}"></div>
       <p class="hist-sum">${esc(t("acc.hist_sum", { inside: num0(inside), n: num0(pts.length), p: pct(pts.length ? inside / pts.length : 0) }))}</p>
     </section>
+    <section class="card span-12">${clock(lag, meta, s)}</section>
   </div>`;
 
   segment(root.querySelector(".seg"), s.h, (v) => set({ h: Number(v) }));
+  root.querySelector("#clk-city").onchange = (e) => set({ city: e.target.value });
   const box = root.querySelector(".hist");
   drawHistory(box, pts);
   if (offResize) offResize();
@@ -111,6 +114,34 @@ function byCity(rows) {
       <td class="bt"><i style="width:${(r.mae / max) * 100}%;animation-delay:${i * 30}ms"></i></td>
       <td class="c">${num2(r.mae)}</td><td class="c">${num2(r.rmse)}</td></tr>`).join("")}
   </tbody></table><p class="acc-note">${esc(t("acc.city_note"))}</p>`;
+}
+
+/** Breeding clock: how strongly rain k weeks ago tracks cases now (from /api/lag_profile).
+ *  The 2–4 week window is the brief's breeding lag; the bars are whatever the data says. */
+const WINDOW = [2, 4];
+function clock(lag, meta, s) {
+  const max = Math.max(...lag.lags.map((x) => x.corr), 0.01);
+  const bars = lag.lags.map((x, i) => {
+    const inWin = x.weeks >= WINDOW[0] && x.weeks <= WINDOW[1];
+    const pk = x.weeks === lag.peak_weeks;
+    const hgt = (Math.max(0, x.corr) / max) * 70;   // labels take ~26% of the column height
+    return `<div class="c${inWin ? " bw" : ""}${pk ? " pk" : ""}"><span class="mm">${num2(Math.abs(x.corr) < 0.005 ? 0 : x.corr)}</span>
+      <i style="height:${hgt}%;animation-delay:${i * 20}ms"></i><em>${num0(x.weeks)}</em></div>`;
+  }).join("");
+  const aria = t("acc.clock_aria", { list: lag.lags.map((x) => `${num0(x.weeks)}: ${num2(x.corr)}`).join(", ") });
+  return `<div class="clk-head"><h2>${esc(t("acc.clock_title"))}</h2>
+      <label class="field"><span>${esc(t("ctl.city"))}</span><select id="clk-city">
+        <option value="">${esc(t("ctl.city_all"))}</option>
+        ${meta.cities.map((c) => `<option value="${esc(c.city)}"${c.city === s.city ? " selected" : ""}>${esc(cityName(c.city))}</option>`).join("")}
+      </select></label></div>
+    <p class="clk-sum">${esc(t("acc.clock_sum", { w: num0(lag.peak_weeks), c: num2(lag.peak_corr) }))}</p>
+    <div class="legend">
+      <span><i style="background:var(--accent)"></i>${esc(t("acc.clock_window"))}</span>
+      <span><i style="background:var(--bar)"></i>${esc(t("acc.clock_other"))}</span>
+    </div>
+    <div class="rain clk" style="--n:${lag.lags.length}" role="img" aria-label="${esc(aria)}">${bars}</div>
+    <p class="clk-axis">${esc(t("acc.clock_axis"))}</p>
+    <p class="acc-note">${esc(t("acc.clock_note", { from: year(lag.period.from), to: year(lag.period.to) }))}</p>`;
 }
 
 /** SVG line chart sized to its box: 80% band, predicted line, actual dots, hover readout. */

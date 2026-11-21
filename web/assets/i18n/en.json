@@ -161,7 +161,14 @@
     "lg_out": "Outside the range",
     "model_weighted_ensemble": "Weighted ensemble of {n} models",
     "model_blend_hgb_extra_trees": "Blend of 2 tree models",
-    "model_hgb_poisson": "Gradient-boosted trees"
+    "model_hgb_poisson": "Gradient-boosted trees",
+    "clock_title": "Breeding clock: rain N weeks ago vs cases now",
+    "clock_sum": "Above-normal rain shows up as above-normal cases about {w} weeks later (correlation {c}).",
+    "clock_window": "Breeding window, 2–4 weeks",
+    "clock_other": "Other delays",
+    "clock_axis": "Weeks between the rain and the cases",
+    "clock_note": "Correlation from 0 (no link) to 1, {from}–{to}. Rain and cases are each compared with that ward's usual level for the time of year, so the monsoon alone does not count.",
+    "clock_aria": "Correlation between rain and later cases, by weeks of delay: {list}"
   },
   "state": {
     "loading": "Loading…",

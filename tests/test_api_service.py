@@ -61,3 +61,13 @@ def test_metrics_report_the_deployed_model_type():
     from src.predict import load_bundle
     for h in service.metrics()["horizons"]:
         assert h["model_type"] == load_bundle()["modes"]["weather"][h["horizon"]]["base_kind"]
+
+
+def test_lag_profile_peaks_inside_the_breeding_window():
+    """The data's rain-to-cases link should peak 2-4 weeks later (the brief's breeding clock)."""
+    lp = service.lag_profile()
+    assert [x["weeks"] for x in lp["lags"]] == list(range(13))
+    assert 2 <= lp["peak_weeks"] <= 4
+    assert service.lag_profile("Gazipur")["n_rows"] == 5 * 522
+    with pytest.raises(ValueError):
+        service.lag_profile("Atlantis")

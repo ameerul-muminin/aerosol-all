@@ -6,3 +6,6 @@ __pycache__/
 .env
 .DS_Store
 data/dataset_cache.csv
+
+# Local Claude Code settings
+.claude/settings.local.json

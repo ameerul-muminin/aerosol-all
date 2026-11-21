@@ -1,0 +1,167 @@
+{
+  "note": "pred - actual; outbreak = actual >= High / Critical case thresholds",
+  "horizons": {
+    "2": {
+      "validation": {
+        "all_weeks": {
+          "n": 6240,
+          "MAE": 1.243111014219318,
+          "RMSE": 2.5163225658975836,
+          "mean_bias_pred_minus_actual": -0.44513377281726496
+        },
+        "jul_oct": {
+          "n": 2160,
+          "MAE": 2.752963750853092,
+          "RMSE": 3.9008494994977037,
+          "mean_bias_pred_minus_actual": -0.8974663798951682
+        },
+        "outbreak_high_plus": {
+          "n": 988,
+          "MAE": 4.430827079440296,
+          "RMSE": 5.499272623096996,
+          "mean_bias_pred_minus_actual": -3.783784678347251
+        },
+        "outbreak_critical": {
+          "n": 350,
+          "MAE": 6.722375474552075,
+          "RMSE": 7.661824101358743,
+          "mean_bias_pred_minus_actual": -6.380401702940734
+        }
+      },
+      "test": {
+        "all_weeks": {
+          "n": 6300,
+          "MAE": 1.0749424327763222,
+          "RMSE": 2.20091728115784,
+          "mean_bias_pred_minus_actual": 0.13516060900267118
+        },
+        "jul_oct": {
+          "n": 2100,
+          "MAE": 2.467375793491503,
+          "RMSE": 3.475735534919827,
+          "mean_bias_pred_minus_actual": 0.5690229803450737
+        },
+        "outbreak_high_plus": {
+          "n": 567,
+          "MAE": 3.7994168976949707,
+          "RMSE": 4.693323264413027,
+          "mean_bias_pred_minus_actual": -3.0517792075989933
+        },
+        "outbreak_critical": {
+          "n": 111,
+          "MAE": 6.402812492117678,
+          "RMSE": 7.079487641816217,
+          "mean_bias_pred_minus_actual": -6.307960413649267
+        }
+      }
+    },
+    "3": {
+      "validation": {
+        "all_weeks": {
+          "n": 6240,
+          "MAE": 1.3226554850859158,
+          "RMSE": 2.7150093150163914,
+          "mean_bias_pred_minus_actual": -0.5537239053589308
+        },
+        "jul_oct": {
+          "n": 2160,
+          "MAE": 2.855728907354676,
+          "RMSE": 4.043730060978454,
+          "mean_bias_pred_minus_actual": -1.088644134048867
+        },
+        "outbreak_high_plus": {
+          "n": 988,
+          "MAE": 4.828499353448072,
+          "RMSE": 6.0171734113527044,
+          "mean_bias_pred_minus_actual": -4.276823550210782
+        },
+        "outbreak_critical": {
+          "n": 350,
+          "MAE": 7.415605915798059,
+          "RMSE": 8.450072854337945,
+          "mean_bias_pred_minus_actual": -7.286182481862896
+        }
+      },
+      "test": {
+        "all_weeks": {
+          "n": 6300,
+          "MAE": 1.1080646004473396,
+          "RMSE": 2.230947146685337,
+          "mean_bias_pred_minus_actual": 0.12791704370305854
+        },
+        "jul_oct": {
+          "n": 2100,
+          "MAE": 2.50456338819022,
+          "RMSE": 3.4450814417859994,
+          "mean_bias_pred_minus_actual": 0.6775570684428981
+        },
+        "outbreak_high_plus": {
+          "n": 567,
+          "MAE": 4.077115310726376,
+          "RMSE": 4.968698288583501,
+          "mean_bias_pred_minus_actual": -2.8832319442364818
+        },
+        "outbreak_critical": {
+          "n": 111,
+          "MAE": 6.726044043836779,
+          "RMSE": 7.511692856394277,
+          "mean_bias_pred_minus_actual": -6.416922057729073
+        }
+      }
+    },
+    "4": {
+      "validation": {
+        "all_weeks": {
+          "n": 6240,
+          "MAE": 1.528938616323457,
+          "RMSE": 3.18928684817221,
+          "mean_bias_pred_minus_actual": -0.6105570701658499
+        },
+        "jul_oct": {
+          "n": 2160,
+          "MAE": 3.2769740791173194,
+          "RMSE": 4.664403939688442,
+          "mean_bias_pred_minus_actual": -1.1055849762483445
+        },
+        "outbreak_high_plus": {
+          "n": 988,
+          "MAE": 5.683037079927618,
+          "RMSE": 7.180999472205382,
+          "mean_bias_pred_minus_actual": -5.290040254917693
+        },
+        "outbreak_critical": {
+          "n": 350,
+          "MAE": 9.20917834231611,
+          "RMSE": 10.346596432056074,
+          "mean_bias_pred_minus_actual": -9.12965996838215
+        }
+      },
+      "test": {
+        "all_weeks": {
+          "n": 6300,
+          "MAE": 1.2753078097665422,
+          "RMSE": 2.5483168063486867,
+          "mean_bias_pred_minus_actual": 0.25766554295330163
+        },
+        "jul_oct": {
+          "n": 2100,
+          "MAE": 2.834934404523675,
+          "RMSE": 3.824097973775478,
+          "mean_bias_pred_minus_actual": 1.0941524866086327
+        },
+        "outbreak_high_plus": {
+          "n": 567,
+          "MAE": 4.749159213466173,
+          "RMSE": 5.902795274364259,
+          "mean_bias_pred_minus_actual": -3.262809695747974
+        },
+        "outbreak_critical": {
+          "n": 111,
+          "MAE": 8.645649923175482,
+          "RMSE": 9.428361019383983,
+          "mean_bias_pred_minus_actual": -8.264982937544675
+        }
+      }
+    }
+  }
+}

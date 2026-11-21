@@ -2,77 +2,77 @@
   "method": "grouped permutation on validation, train-only model, 5 repeats",
   "horizons": {
     "2": {
-      "baseline_poisson_deviance": 1.03998483423895,
+      "baseline_poisson_deviance": 1.026619864250778,
       "groups": {
         "Rainfall": {
-          "deviance_increase_mean": 8.662301876304053,
-          "deviance_increase_std": 0.07091780815242353
+          "deviance_increase_mean": 8.75222405910451,
+          "deviance_increase_std": 0.07465888654266672
         },
         "Temperature": {
-          "deviance_increase_mean": 0.1528071024634992,
-          "deviance_increase_std": 0.013605700102325811
+          "deviance_increase_mean": 0.13900735882072418,
+          "deviance_increase_std": 0.012728804475793458
         },
         "Humidity": {
-          "deviance_increase_mean": 3.8357540079217807,
-          "deviance_increase_std": 0.10337980471036971
+          "deviance_increase_mean": 3.95127054895545,
+          "deviance_increase_std": 0.10358017296828499
         },
         "Season": {
-          "deviance_increase_mean": 1.8886899851151526,
-          "deviance_increase_std": 0.01811170526101081
+          "deviance_increase_mean": 1.8855197331143814,
+          "deviance_increase_std": 0.01802102816197369
         },
         "Ward vulnerability": {
-          "deviance_increase_mean": 0.44257719555373054,
-          "deviance_increase_std": 0.0055519240161941525
+          "deviance_increase_mean": 0.44470722707424376,
+          "deviance_increase_std": 0.006319245732234258
         }
       }
     },
     "3": {
-      "baseline_poisson_deviance": 1.2157292777071442,
+      "baseline_poisson_deviance": 1.2048080041917537,
       "groups": {
         "Rainfall": {
-          "deviance_increase_mean": 7.710129601073939,
-          "deviance_increase_std": 0.07610874858885056
+          "deviance_increase_mean": 7.903848426706034,
+          "deviance_increase_std": 0.07490465570418212
         },
         "Temperature": {
-          "deviance_increase_mean": 0.9030554004799665,
-          "deviance_increase_std": 0.0337166239133915
+          "deviance_increase_mean": 0.8747499723066235,
+          "deviance_increase_std": 0.036999679483589835
         },
         "Humidity": {
-          "deviance_increase_mean": 0.09587885032167516,
-          "deviance_increase_std": 0.006030703490576055
+          "deviance_increase_mean": 0.1065427757295562,
+          "deviance_increase_std": 0.00678700892498465
         },
         "Season": {
-          "deviance_increase_mean": 7.068666319035219,
-          "deviance_increase_std": 0.06127811466828335
+          "deviance_increase_mean": 7.530847683969074,
+          "deviance_increase_std": 0.06342376113798809
         },
         "Ward vulnerability": {
-          "deviance_increase_mean": 0.44472211107640885,
-          "deviance_increase_std": 0.00519946813908092
+          "deviance_increase_mean": 0.44573787414250143,
+          "deviance_increase_std": 0.004386154495043387
         }
       }
     },
     "4": {
-      "baseline_poisson_deviance": 1.711473733708669,
+      "baseline_poisson_deviance": 1.6962229583217063,
       "groups": {
         "Rainfall": {
-          "deviance_increase_mean": 1.0567894580890909,
-          "deviance_increase_std": 0.022300955818946765
+          "deviance_increase_mean": 1.1692106075328068,
+          "deviance_increase_std": 0.02493847860702653
         },
         "Temperature": {
-          "deviance_increase_mean": 0.10940918837791336,
-          "deviance_increase_std": 0.00897713027404665
+          "deviance_increase_mean": 0.10237167750272391,
+          "deviance_increase_std": 0.010193549496413552
         },
         "Humidity": {
-          "deviance_increase_mean": 0.2703175370739701,
-          "deviance_increase_std": 0.01373867378723513
+          "deviance_increase_mean": 0.2841988302598572,
+          "deviance_increase_std": 0.012911403018240527
         },
         "Season": {
-          "deviance_increase_mean": 13.414510073348154,
-          "deviance_increase_std": 0.0893575887827647
+          "deviance_increase_mean": 13.745414103719312,
+          "deviance_increase_std": 0.0932352124847638
         },
         "Ward vulnerability": {
-          "deviance_increase_mean": 0.39600487470317625,
-          "deviance_increase_std": 0.0041233456737211835
+          "deviance_increase_mean": 0.40046649266941114,
+          "deviance_increase_std": 0.0034512138721125734
         }
       }
     }

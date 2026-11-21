@@ -105,3 +105,50 @@ if __name__ == "__main__":
     print(f"Origin {date}, +{h} weeks. Average-week reference = {out['base_cases'].iloc[0]:.2f} cases\n")
     for _, r in out.head(5).iterrows():
         print(f"{r['ward_id']:<13} {r['predicted_cases']:5.1f} cases [{r['risk_tier']}]  {describe(r)}")
+
+
+# ---------------------------------------------------------------- global explanations (G8)
+
+def global_contributions(model, rows: pd.DataFrame, cases: bool = False) -> dict:
+    """Mean |contribution| and mean signed contribution per driver group over many ward-weeks."""
+    c = contributions(model, rows, cases=cases)
+    cols = [k for k in c.columns if k.startswith("driver_")]
+    return {k[7:]: {"mean_abs_cases": float(c[k].abs().mean()), "mean_signed_cases": float(c[k].mean())}
+            for k in sorted(cols, key=lambda k: -c[k].abs().mean())}
+
+
+# Partial-dependence targets: name -> how to set the inputs for a value v (keeps linked columns consistent)
+def _set_breeding_rain(X, v):
+    X[["rain_lag2", "rain_lag3", "rain_lag4"]] = v / 3.0
+    X["rain_sum_2_4"] = v
+    return X
+
+
+PDP_TARGETS = {
+    "Rain 2-4 weeks ago, total mm (breeding window)": (["rain_lag2", "rain_lag3", "rain_lag4", "rain_sum_2_4"],
+                                                       "rain_sum_2_4", _set_breeding_rain),
+    "Humidity, 4-week mean %": (["hum_mean_0_3"], "hum_mean_0_3", None),
+    "Ward water-logging risk index": (["water_logging_risk_index"], "water_logging_risk_index", None),
+    "Ward sanitation score": (["sanitation_score"], "sanitation_score", None),
+    "Ward population density per km2": (["population_density_sqkm"], "population_density_sqkm", None),
+}
+
+
+def partial_dependence(model, rows: pd.DataFrame, n_grid: int = 15, max_rows: int = 2000, seed: int = 0) -> dict:
+    """Brute-force partial dependence (model-agnostic): set the input(s) to each grid value for a
+    sample of real ward-weeks and average the predictions. Grid spans the 5th-95th percentile."""
+    feats = set(model.feats)
+    sample = rows.sample(min(max_rows, len(rows)), random_state=seed)
+    out = {}
+    for label, (needed, axis_col, setter) in PDP_TARGETS.items():
+        if not set(needed) <= feats:
+            continue
+        lo, hi = np.nanpercentile(rows[axis_col], [5, 95])
+        grid = np.unique(np.round(np.linspace(lo, hi, n_grid), 4))
+        curve = []
+        for v in grid:
+            X = sample.copy()
+            X = setter(X, v) if setter else X.assign(**{axis_col: v})
+            curve.append({"value": float(v), "mean_predicted_cases": float(np.mean(model.predict(X)))})
+        out[label] = curve
+    return out

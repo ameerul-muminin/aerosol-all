@@ -6,13 +6,14 @@ validation (2022-23). The test set is NOT used to compare models.
 
 Baselines (E1-E3): naive (next = this week's cases), same week last year, ward x week-of-year
 mean, Ridge. Models (F2, scikit-learn only, no new dependencies): Lasso, ElasticNet, Poisson GLM,
-decision tree, random forest, extra trees, gradient boosting, HistGradientBoosting (deployed).
+decision tree, random forest, extra trees, gradient boosting, HistGradientBoosting, deployed model.
 Non-HGB models get a median imputer + scaler fitted on each training fold only (rain-anomaly
 columns are empty in the first year).
 
-Deployment rule, fixed BEFORE running: the deployed HistGradientBoosting is replaced only if
-another model's CV Poisson deviance is more than 2% lower AND its saved size is < 20 MB AND it
-scores all 60 wards in < 0.5 s. Writes reports/model_comparison.json.
+Deployment rule, fixed BEFORE running: the deployed model (built exactly as saved: HGB, outbreak-
+weighted HGB, or the HGB + extra-trees blend adopted by src/tuning.py) is replaced only if another
+model's CV Poisson deviance is more than 2% lower AND its saved size is < 20 MB AND it scores all
+60 wards in < 0.5 s. Writes reports/model_comparison.json.
 Run: python -m src.compare_models
 """
 from __future__ import annotations
@@ -31,7 +32,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 
 from src.features import ROOT, HORIZONS, build_dataset, add_lag_features, load_raw
-from src.train import BUNDLE, HGB, SEED, SeasonalNaive, split, time_folds, scores
+from src.train import BUNDLE, HGB, SEED, SeasonalNaive, deployed_model, split, time_folds, scores
 
 OUT = ROOT / "reports" / "model_comparison.json"
 SIZE_LIMIT_MB, LATENCY_LIMIT_S, MIN_GAIN = 20.0, 0.5, 0.02
@@ -77,7 +78,7 @@ class Sk:
         return np.clip(self.m.predict(d[self.feats]), 0, None)
 
 
-def candidates(feats, cfg, raw):
+def candidates(feats, cfg, raw, deployed=None):
     return {
         # baselines
         "naive_last_week": (lambda: Naive(), "baseline"),
@@ -101,7 +102,9 @@ def candidates(feats, cfg, raw):
         "gradient_boosting": (lambda: Sk(feats, GradientBoostingRegressor(n_estimators=200, max_depth=3,
                                                                            learning_rate=0.05, random_state=SEED),
                                          scale=False), "model"),
-        "hist_gradient_boosting (deployed)": (lambda: HGB(feats, **cfg), "deployed"),
+        "hist_gradient_boosting": (lambda: HGB(feats, **{k: v for k, v in cfg.items()
+                                                         if not k.startswith("outbreak_")}), "model"),
+        "deployed": (lambda: deployed_model(deployed), "deployed"),
     }
 
 
@@ -147,7 +150,7 @@ def main():
         d = build_dataset(h, featurized, featurized=True, cases=True)
         tr, va, _ = split(d)
         res = {}
-        for name, (make, kind) in candidates(feats, cfg, raw).items():
+        for name, (make, kind) in candidates(feats, cfg, raw, mdl).items():
             t0 = time.time()
             res[name] = {"kind": kind, **evaluate(make, tr, va)}
             print(f"  h={h} {name:<34} CV dev {res[name]['cv_mean']['PoissonDev']:.3f}  "
@@ -155,7 +158,7 @@ def main():
                   f"gap {(res[name]['overfit'] or {}).get('mean_fold_gap_val_minus_train', float('nan')):+.3f}  "
                   f"{res[name]['size_mb']:.1f} MB  ({time.time() - t0:.0f}s)", flush=True)
         ranking = sorted(res, key=lambda n: res[n]["cv_mean"]["PoissonDev"])
-        dep = "hist_gradient_boosting (deployed)"
+        dep = "deployed"
         base = res[dep]["cv_mean"]["PoissonDev"]
         challengers = [n for n in ranking if n != dep and res[n]["kind"] != "baseline"
                        and res[n]["cv_mean"]["PoissonDev"] < base * (1 - MIN_GAIN)
@@ -168,7 +171,7 @@ def main():
             "deployed_beats_all_baselines_cv": all(base < res[n]["cv_mean"]["PoissonDev"]
                                                    for n in res if res[n]["kind"] == "baseline"),
             "decision": (f"replace with {challengers[0]}" if challengers else
-                         "keep deployed HistGradientBoosting (no model clears the +2% CV / size / speed rule)"),
+                         f"keep deployed model ({mdl.get('kind')}): no model clears the +2% CV / size / speed rule"),
         }
         print(f"h={h}w ranking: {ranking[:4]} | best baseline: {best_baseline} | "
               f"decision: {report['horizons'][h]['decision']}", flush=True)

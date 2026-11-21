@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 
 from src.features import ROOT, HORIZONS, build_dataset, feature_columns
-from src.train import BUNDLE, TRAIN_END, VAL_END, HGB, scores, tier_thresholds, to_tier, calibrate_pred_cuts
+from src.train import BUNDLE, TRAIN_END, VAL_END, deployed_model, scores, tier_thresholds, to_tier, calibrate_pred_cuts
 
 OUT = ROOT / "reports" / "region_holdout.json"
 
@@ -46,18 +46,18 @@ def main():
         feats = bundle["horizons"][h].get("features") or feature_columns()
         d = build_dataset(h)
         past, future = d[d["target_date"] <= VAL_END], d[d["target_date"] > VAL_END]
-        in_dist = HGB(feats, **cfg).fit(past)
+        in_dist = deployed_model(bundle["horizons"][h]).fit(past)
         actual_cuts = tier_thresholds(past["target"])
         rows = {}
         for city in sorted(d["city"].unique()):
             fit = past[past["city"] != city]
             ev = future[future["city"] == city]
-            m = HGB(feats, **cfg).fit(fit)
+            m = deployed_model(bundle["horizons"][h]).fit(fit)
             p_hold, p_in = m.predict(ev), in_dist.predict(ev)
             # tier mapping calibrated the same way as train.py, using only the other cities:
             # fit on target years <= 2021, calibrate on their 2022-2023 predictions
             early, late = fit[fit["target_date"] <= TRAIN_END], fit[fit["target_date"] > TRAIN_END]
-            pred_cuts = calibrate_pred_cuts(HGB(feats, **cfg).fit(early).predict(late), late["target"], actual_cuts)
+            pred_cuts = calibrate_pred_cuts(deployed_model(bundle["horizons"][h]).fit(early).predict(late), late["target"], actual_cuts)
             pred_cuts_in = bundle["horizons"][h]["tier_cuts"]
             y = ev["target"]
             rows[city] = {

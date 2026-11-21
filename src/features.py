@@ -17,6 +17,8 @@ STATIC = ["population_density_sqkm", "water_logging_risk_index", "sanitation_sco
 WEATHER = ["avg_temp_c", "max_temp_c", "min_temp_c", "rainfall_mm", "relative_humidity_pct"]
 RAIN_LAGS = range(0, 9)       # rainfall at t-0 .. t-8 weeks
 TEMP_HUM_LAGS = range(0, 5)   # temp / humidity at t-0 .. t-4 weeks
+ANOM_LAGS = range(0, 5)       # rain anomaly at t-0 .. t-4 weeks
+CASE_LAGS = range(0, 5)       # reported cases at t-0 .. t-4 weeks (optional mode)
 
 
 def load_raw(path: Path = DATA_XLSX) -> pd.DataFrame:
@@ -72,15 +74,51 @@ def add_lag_features(df: pd.DataFrame) -> pd.DataFrame:
     woy = out["date"].dt.isocalendar().week.astype(int)
     out["week_sin"] = np.sin(2 * np.pi * woy / 52.18)
     out["week_cos"] = np.cos(2 * np.pi * woy / 52.18)
-    return out
+
+    # Rain anomaly = rain minus this ward's normal rain for the same ISO week, where "normal"
+    # is the mean over PREVIOUS YEARS ONLY (expanding mean, shifted one year). Nothing is
+    # fitted, so it cannot leak; the first year has no history and stays NaN (HGB handles NaN).
+    clim = (out.groupby(["ward_id", woy], sort=False)["rainfall_mm"]
+               .transform(lambda s: s.shift(1).expanding().mean()))
+    anom = out["rainfall_mm"] - clim
+    ga = anom.groupby(out["ward_id"], sort=False)
+    extra = {f"rain_anom_lag{k}": ga.shift(k) for k in ANOM_LAGS}
+    # Reported cases up to the origin week (known at time t; target is >= 2 weeks later)
+    gc = out.groupby("ward_id", sort=False)["dengue_cases"]
+    extra.update({f"cases_lag{k}": gc.shift(k) for k in CASE_LAGS})
+    extra = pd.DataFrame(extra, index=out.index)
+    extra["rain_anom_sum_2_4"] = extra[[f"rain_anom_lag{k}" for k in (2, 3, 4)]].sum(axis=1, skipna=False)
+    extra["rain_anom_sum_0_3"] = extra[[f"rain_anom_lag{k}" for k in range(4)]].sum(axis=1, skipna=False)
+    extra["cases_sum_0_3"] = extra[[f"cases_lag{k}" for k in range(4)]].sum(axis=1, skipna=False)
+    return pd.concat([out, extra], axis=1)
 
 
-def feature_columns() -> list[str]:
+def anomaly_columns() -> list[str]:
+    return [f"rain_anom_lag{k}" for k in ANOM_LAGS] + ["rain_anom_sum_2_4", "rain_anom_sum_0_3"]
+
+
+def case_columns() -> list[str]:
+    return [f"cases_lag{k}" for k in CASE_LAGS] + ["cases_sum_0_3"]
+
+
+def feature_columns(anomaly: bool = False, cases: bool = False) -> list[str]:
+    """Model inputs. Default = weather + ward attributes + season. `anomaly` adds rain
+    anomalies; `cases` adds reported-case history (optional weather+cases mode)."""
     cols = list(STATIC) + ["week_sin", "week_cos"]
     cols += [f"rain_lag{k}" for k in RAIN_LAGS]
     cols += [f"{s}_lag{k}" for s in ("temp", "hum") for k in TEMP_HUM_LAGS]
     cols += ["rain_sum_0_1", "rain_sum_2_4", "rain_sum_0_3", "rain_sum_0_8", "temp_mean_0_3", "hum_mean_0_3"]
+    if anomaly:
+        cols += anomaly_columns()
+    if cases:
+        cols += case_columns()
     return cols
+
+
+def required_columns(cases: bool = False) -> list[str]:
+    """Features that must be present for a row to be usable. Anomaly columns are allowed to
+    be NaN (first year of history); the model handles missing values natively."""
+    return feature_columns(cases=cases)
 
 
 def add_target(df: pd.DataFrame, horizon: int) -> pd.DataFrame:
@@ -91,8 +129,11 @@ def add_target(df: pd.DataFrame, horizon: int) -> pd.DataFrame:
     return df
 
 
-def build_dataset(horizon: int, df: pd.DataFrame | None = None) -> pd.DataFrame:
-    """Rows with complete features and a known target for `horizon`, plus target_date."""
-    df = add_lag_features(load_raw() if df is None else df)
+def build_dataset(horizon: int, df: pd.DataFrame | None = None, featurized: bool = False,
+                  cases: bool = False) -> pd.DataFrame:
+    """Rows with complete features and a known target for `horizon`, plus target_date.
+    Pass featurized=True with the output of add_lag_features() to skip recomputing lags."""
+    if not featurized:
+        df = add_lag_features(load_raw() if df is None else df)
     df = add_target(df, horizon)
-    return df.dropna(subset=feature_columns() + ["target"]).reset_index(drop=True)
+    return df.dropna(subset=required_columns(cases) + ["target"]).reset_index(drop=True)

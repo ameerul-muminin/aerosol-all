@@ -77,6 +77,14 @@ def main():
     _, res["seconds"]["ranking_60_wards_cached_median"] = timed(lambda: get(rank), repeat=20)
     _, res["seconds"]["forecast_one_ward_cached_median"] = timed(lambda: get(fc), repeat=20)
 
+    def post_what_if(rain):
+        r = client.post("/api/what_if", json={"ward_id": "CCC_Ward_01", "as_of": week, "horizon": 3,
+                                              "rainfall_mm": rain, "weeks": 4})
+        assert r.status_code == 200, (r.status_code, r.data[:200])
+        return r
+    _, res["seconds"]["what_if_new_scenario"] = timed(lambda: post_what_if(150.0))
+    _, res["seconds"]["what_if_repeat_scenario_median"] = timed(lambda: post_what_if(150.0), repeat=20)
+
     other = "2024-08-05"
     _, res["seconds"]["forecast_new_week_all_horizons_first_request"] = timed(
         lambda: get(f"/api/forecast?ward_id=DNCC_Ward_05&as_of={other}&horizon=4"))

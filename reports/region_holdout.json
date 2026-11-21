@@ -1,0 +1,374 @@
+{
+  "design": "fit on 4 cities (target<=2023), test on held-out city (2024-2025)",
+  "horizons": {
+    "2": {
+      "cities": {
+        "Chattogram": {
+          "n_test": 1050,
+          "n_wards": 10,
+          "held_out": {
+            "MAE": 0.9499196401898636,
+            "RMSE": 1.9088273069524415,
+            "PoissonDev": 0.7989221083261843,
+            "critical_flagged": 0.8666666666666667
+          },
+          "in_distribution": {
+            "MAE": 0.9361186029853583,
+            "RMSE": 1.883950484817816,
+            "PoissonDev": 0.7817059827724738,
+            "critical_flagged": 1.0
+          },
+          "regional_naive": {
+            "MAE": 1.3300421768707482,
+            "RMSE": 2.5507295517862505,
+            "PoissonDev": 1.2570664230834672
+          }
+        },
+        "Dhaka North": {
+          "n_test": 2100,
+          "n_wards": 20,
+          "held_out": {
+            "MAE": 0.9995199610257913,
+            "RMSE": 1.9873071812130376,
+            "PoissonDev": 0.8569492096446046,
+            "critical_flagged": 0.8888888888888888
+          },
+          "in_distribution": {
+            "MAE": 0.9943363860653893,
+            "RMSE": 1.9974864669001866,
+            "PoissonDev": 0.853518132800075,
+            "critical_flagged": 0.9629629629629629
+          },
+          "regional_naive": {
+            "MAE": 1.3644749149659865,
+            "RMSE": 2.6011871901199686,
+            "PoissonDev": 1.3193960868200294
+          }
+        },
+        "Dhaka South": {
+          "n_test": 2100,
+          "n_wards": 20,
+          "held_out": {
+            "MAE": 0.996211097634552,
+            "RMSE": 1.9808018482406182,
+            "PoissonDev": 0.7960124846218144,
+            "critical_flagged": 0.9473684210526315
+          },
+          "in_distribution": {
+            "MAE": 0.9890664114264313,
+            "RMSE": 1.9566587806648612,
+            "PoissonDev": 0.7963995335594402,
+            "critical_flagged": 0.9473684210526315
+          },
+          "regional_naive": {
+            "MAE": 1.3133656462585033,
+            "RMSE": 2.4601401141759283,
+            "PoissonDev": 1.2068624280709603
+          }
+        },
+        "Gazipur": {
+          "n_test": 525,
+          "n_wards": 5,
+          "held_out": {
+            "MAE": 1.135620018882434,
+            "RMSE": 2.3141973037571213,
+            "PoissonDev": 0.9294612504670403,
+            "critical_flagged": 1.0
+          },
+          "in_distribution": {
+            "MAE": 1.1534653940144561,
+            "RMSE": 2.356558829728876,
+            "PoissonDev": 0.936267740134511,
+            "critical_flagged": 1.0
+          },
+          "regional_naive": {
+            "MAE": 1.310551638837353,
+            "RMSE": 2.694737618274834,
+            "PoissonDev": 1.2489954687876137
+          }
+        },
+        "Narayanganj": {
+          "n_test": 525,
+          "n_wards": 5,
+          "held_out": {
+            "MAE": 0.9379065698643658,
+            "RMSE": 1.8322390911513255,
+            "PoissonDev": 0.7570058352462041,
+            "critical_flagged": 1.0
+          },
+          "in_distribution": {
+            "MAE": 0.9353751128007837,
+            "RMSE": 1.8115476072423329,
+            "PoissonDev": 0.7516259032877636,
+            "critical_flagged": 1.0
+          },
+          "regional_naive": {
+            "MAE": 1.327713048855906,
+            "RMSE": 2.50696617694209,
+            "PoissonDev": 1.226265276235025
+          }
+        }
+      },
+      "mean": {
+        "held_out": {
+          "MAE": 1.0038354575194013,
+          "RMSE": 2.004674546262909
+        },
+        "in_distribution": {
+          "MAE": 1.0016723814584838,
+          "RMSE": 2.0012404338708145
+        },
+        "regional_naive": {
+          "MAE": 1.3292294851576996,
+          "RMSE": 2.562752130259814
+        }
+      }
+    },
+    "3": {
+      "cities": {
+        "Chattogram": {
+          "n_test": 1050,
+          "n_wards": 10,
+          "held_out": {
+            "MAE": 0.9755544316204404,
+            "RMSE": 1.9146887255063192,
+            "PoissonDev": 0.8477500717832032,
+            "critical_flagged": 0.9333333333333333
+          },
+          "in_distribution": {
+            "MAE": 0.9631589344249644,
+            "RMSE": 1.9066940458303643,
+            "PoissonDev": 0.8325823668743754,
+            "critical_flagged": 1.0
+          },
+          "regional_naive": {
+            "MAE": 1.330117006802721,
+            "RMSE": 2.550730416170371,
+            "PoissonDev": 1.2572160829474128
+          }
+        },
+        "Dhaka North": {
+          "n_test": 2100,
+          "n_wards": 20,
+          "held_out": {
+            "MAE": 1.0044726585767858,
+            "RMSE": 1.9990989533205754,
+            "PoissonDev": 0.8815816033879446,
+            "critical_flagged": 1.0
+          },
+          "in_distribution": {
+            "MAE": 1.0270835506143081,
+            "RMSE": 2.0446047226436566,
+            "PoissonDev": 0.8981658582175359,
+            "critical_flagged": 1.0
+          },
+          "regional_naive": {
+            "MAE": 1.364593962585034,
+            "RMSE": 2.6011893354307185,
+            "PoissonDev": 1.3196341820581248
+          }
+        },
+        "Dhaka South": {
+          "n_test": 2100,
+          "n_wards": 20,
+          "held_out": {
+            "MAE": 1.022059683505995,
+            "RMSE": 2.0153003451028293,
+            "PoissonDev": 0.8601769975104446,
+            "critical_flagged": 0.9473684210526315
+          },
+          "in_distribution": {
+            "MAE": 1.0237206343279828,
+            "RMSE": 2.0286629325784875,
+            "PoissonDev": 0.8659422543388772,
+            "critical_flagged": 1.0
+          },
+          "regional_naive": {
+            "MAE": 1.3134787414965987,
+            "RMSE": 2.460138753190352,
+            "PoissonDev": 1.2067190050444143
+          }
+        },
+        "Gazipur": {
+          "n_test": 525,
+          "n_wards": 5,
+          "held_out": {
+            "MAE": 1.129307559365954,
+            "RMSE": 2.208612369749031,
+            "PoissonDev": 0.9349130674809922,
+            "critical_flagged": 1.0
+          },
+          "in_distribution": {
+            "MAE": 1.1529769365577527,
+            "RMSE": 2.235827985719479,
+            "PoissonDev": 0.9450425971993675,
+            "critical_flagged": 1.0
+          },
+          "regional_naive": {
+            "MAE": 1.3106110080395794,
+            "RMSE": 2.694731705042893,
+            "PoissonDev": 1.2481759840893243
+          }
+        },
+        "Narayanganj": {
+          "n_test": 525,
+          "n_wards": 5,
+          "held_out": {
+            "MAE": 0.9986345914217453,
+            "RMSE": 1.9078840589059851,
+            "PoissonDev": 0.8576976483024339,
+            "critical_flagged": 1.0
+          },
+          "in_distribution": {
+            "MAE": 0.9892751639572946,
+            "RMSE": 1.889094160231082,
+            "PoissonDev": 0.8488457504414706,
+            "critical_flagged": 1.0
+          },
+          "regional_naive": {
+            "MAE": 1.3278181818181818,
+            "RMSE": 2.5069679129421854,
+            "PoissonDev": 1.2264755421595765
+          }
+        }
+      },
+      "mean": {
+        "held_out": {
+          "MAE": 1.026005784898184,
+          "RMSE": 2.0091168905169483
+        },
+        "in_distribution": {
+          "MAE": 1.0312430439764606,
+          "RMSE": 2.020976769400614
+        },
+        "regional_naive": {
+          "MAE": 1.329323780148423,
+          "RMSE": 2.562751624555304
+        }
+      }
+    },
+    "4": {
+      "cities": {
+        "Chattogram": {
+          "n_test": 1050,
+          "n_wards": 10,
+          "held_out": {
+            "MAE": 1.13159594827807,
+            "RMSE": 2.1969793059164435,
+            "PoissonDev": 1.0138817950088959,
+            "critical_flagged": 0.8
+          },
+          "in_distribution": {
+            "MAE": 1.14200485991837,
+            "RMSE": 2.2197560611401177,
+            "PoissonDev": 1.0128459357444393,
+            "critical_flagged": 0.8666666666666667
+          },
+          "regional_naive": {
+            "MAE": 1.3301442176870748,
+            "RMSE": 2.550731170541729,
+            "PoissonDev": 1.2572705047161203
+          }
+        },
+        "Dhaka North": {
+          "n_test": 2100,
+          "n_wards": 20,
+          "held_out": {
+            "MAE": 1.1713031153762972,
+            "RMSE": 2.2577552400214675,
+            "PoissonDev": 1.0797890247894784,
+            "critical_flagged": 0.8148148148148148
+          },
+          "in_distribution": {
+            "MAE": 1.1818637844482578,
+            "RMSE": 2.2785867446906587,
+            "PoissonDev": 1.0817107041201117,
+            "critical_flagged": 0.8148148148148148
+          },
+          "regional_naive": {
+            "MAE": 1.364639880952381,
+            "RMSE": 2.601189729467195,
+            "PoissonDev": 1.3196634205643176
+          }
+        },
+        "Dhaka South": {
+          "n_test": 2100,
+          "n_wards": 20,
+          "held_out": {
+            "MAE": 1.2068676095536044,
+            "RMSE": 2.343491643842292,
+            "PoissonDev": 1.0725944463802224,
+            "critical_flagged": 0.8421052631578947
+          },
+          "in_distribution": {
+            "MAE": 1.1897532168142733,
+            "RMSE": 2.3287107308656942,
+            "PoissonDev": 1.057123472118105,
+            "critical_flagged": 0.8421052631578947
+          },
+          "regional_naive": {
+            "MAE": 1.3135029761904762,
+            "RMSE": 2.460139375818201,
+            "PoissonDev": 1.2067550270173695
+          }
+        },
+        "Gazipur": {
+          "n_test": 525,
+          "n_wards": 5,
+          "held_out": {
+            "MAE": 1.3396300625920066,
+            "RMSE": 2.666827532672352,
+            "PoissonDev": 1.1960643306049257,
+            "critical_flagged": 1.0
+          },
+          "in_distribution": {
+            "MAE": 1.3457768776274874,
+            "RMSE": 2.6620431492782286,
+            "PoissonDev": 1.188962005245236,
+            "critical_flagged": 1.0
+          },
+          "regional_naive": {
+            "MAE": 1.3106233766233766,
+            "RMSE": 2.694732061208188,
+            "PoissonDev": 1.2482007212569184
+          }
+        },
+        "Narayanganj": {
+          "n_test": 525,
+          "n_wards": 5,
+          "held_out": {
+            "MAE": 1.1771121810870377,
+            "RMSE": 2.214385082369476,
+            "PoissonDev": 1.049676386109398,
+            "critical_flagged": 0.75
+          },
+          "in_distribution": {
+            "MAE": 1.1770005139873385,
+            "RMSE": 2.2297297982479463,
+            "PoissonDev": 1.048434080792128,
+            "critical_flagged": 0.75
+          },
+          "regional_naive": {
+            "MAE": 1.3278491032776747,
+            "RMSE": 2.5069689601481207,
+            "PoissonDev": 1.2265373850785624
+          }
+        }
+      },
+      "mean": {
+        "held_out": {
+          "MAE": 1.2053017833774031,
+          "RMSE": 2.3358877609644066
+        },
+        "in_distribution": {
+          "MAE": 1.2072798505591453,
+          "RMSE": 2.3437652968445293
+        },
+        "regional_naive": {
+          "MAE": 1.3293519109461966,
+          "RMSE": 2.5627522594366865
+        }
+      }
+    }
+  }
+}

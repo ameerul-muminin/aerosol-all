@@ -53,3 +53,5 @@ def test_metrics_read_from_reports():
     raw = json.loads(service.METRICS_PATH.read_text())
     for h in m["horizons"]:
         assert h["mae"] == round(raw["horizons"][str(h["horizon"])]["test"]["MAE"], 3)
+        base = raw["horizons"][str(h["horizon"])]["test"]["baseline_seasonal_naive"]
+        assert h["baseline_rmse"] == round(base["RMSE"], 3)   # accuracy view compares RMSE too

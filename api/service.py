@@ -210,6 +210,7 @@ def metrics() -> dict:
             "selected_model": m["horizons"][str(h)]["selected"],
             "mae": _num(t["MAE"], 3), "rmse": _num(t["RMSE"], 3),
             "baseline_mae": _num(t["baseline_seasonal_naive"]["MAE"], 3),
+            "baseline_rmse": _num(t["baseline_seasonal_naive"]["RMSE"], 3),
             "interval80_coverage": _num(t["interval80_coverage"], 3),
             "critical_flagged_high_or_above": _num(t.get("critical_recall"), 3),
             "by_city": [{"city": c, "mae": _num(r["mae"], 3), "rmse": _num(r["rmse"], 3)} for c, r in city.iterrows()],

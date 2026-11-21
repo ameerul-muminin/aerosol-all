@@ -1,6 +1,29 @@
 # Architecture
 
-> ML sections (A). The data-flow diagram, serving and cost sections are maintained by B/C.
+> ML sections (features, split, model selection) by A; data flow, serving, cost and Phase 2 by B/C.
+
+## System data flow
+
+```mermaid
+flowchart LR
+  A["hackathon_preli_dataset.xlsx<br/>60 wards × 522 weeks"] --> B["validate() + CSV cache<br/>src/features.py"]
+  B --> C["Lag features per ward_id<br/>rain lags 0–8 wk, temp/humidity 0–4 wk,<br/>rolling rain sums, season, ward profile"]
+  C --> D["Chronological split by target week<br/>train ≤2021 · val 2022–23 · test 2024–25"]
+  D --> E["HistGradientBoosting (Poisson)<br/>settings chosen by time-ordered CV<br/>one model per horizon: 2, 3, 4 weeks"]
+  E --> F["models/dengue_model.joblib<br/>+ tier cut points + 80% conformal band"]
+  E --> G["reports/metrics.json<br/>test_predictions_h*.csv"]
+  F --> H["src/predict.py + src/explain.py<br/>predictions, tiers, 80% range,<br/>exact grouped-Shapley drivers"]
+  C --> H
+  H --> I["api/service.py<br/>JSON views, LRU-cached"]
+  G --> I
+  I --> J["api/main.py (Flask)<br/>/api/forecast · /api/ranking · /api/metrics<br/>gzip + Cache-Control"]
+  J --> K["web/ (HTML/CSS/JS)<br/>marketing page · dashboard"]
+  K --> L["Public health officer<br/>tier, likely range, drivers,<br/>ward ranking, accuracy"]
+```
+
+Offline (once): data → features → training → serialized model and metrics. Online (per click):
+the browser calls the local API, which reuses the loaded model and cached features. No step calls
+an external service.
 
 ## Features and leakage control
 Each forecast is made at origin week *t* for week *t + h*, where h = 2, 3 or 4, using only data up
@@ -49,3 +72,43 @@ gives the same MAE as seen cities (1.00).
 calibrated on validation. **Intervals:** conformal, per prediction level. **Drivers:** exact grouped
 Shapley values (`src/explain.py`). The tier and interval issues were first seen on test, then
 confirmed on validation alone.
+
+## Serving, compute and API cost efficiency
+
+- **No LLMs and no external APIs.** Inference runs locally from the serialized model, so there are no
+  per-request fees, token costs or rate limits. `scripts/measure_efficiency.py` blocks outbound network
+  while it exercises every endpoint and records `external_network_calls` in `reports/efficiency.json`.
+- **Serialized model, loaded once.** `models/dengue_model.joblib` holds all three horizon models and is
+  loaded at startup (`load_bundle()`, cached). Lag features for all wards are built once and reused.
+- **Response caching.** Each API response depends only on its query, so `forecast` and `ranking` are
+  memoised with bounded LRU caches. The responses carry `Cache-Control: max-age=3600`, so browsers and any
+  CDN can reuse them.
+- **Vectorised inference.** One `predict_all` call scores all 60 wards in a single model pass. The
+  Shapley drivers need 32 batched calls for all 60 wards together, not separate calls per ward.
+- **Small payloads.** JSON responses over 1 KB are gzip-compressed.
+- **Minimal dependencies.** Python only (scikit-learn, pandas, Flask). There's no Node build or GPU,
+  and it runs on a basic office laptop.
+
+Measured with `python -m scripts.measure_efficiency --train` (copy the values from `reports/efficiency.json`):
+
+| Measure | Value |
+|---|---|
+| Model file size | TBD |
+| Model load at startup | TBD |
+| Lag features for all 60 wards | TBD |
+| Ranking of 60 wards, first request / cached | TBD / TBD |
+| One-ward forecast, cached | TBD |
+| Ranking payload, raw / gzip | TBD / TBD |
+| Full retrain, 3 horizons | TBD |
+| External network calls during the run | TBD |
+
+## Path to a live system (Phase 2)
+
+The split into model → `api/service.py` → `api/main.py` → `web/` keeps each layer replaceable:
+
+- **Live data.** Append new weekly weather and case rows, re-run `validate()` and refresh the caches. The
+  lag pipeline and API contract don't change.
+- **Scale out.** The API is stateless, so several workers can run behind a load balancer (for example
+  gunicorn), with the static `web/` folder on a CDN.
+- **Retraining.** `python -m src.train` rebuilds every artifact in seconds. Metrics are versioned next to
+  the model in `reports/`.

@@ -6,6 +6,8 @@ All numbers come from the trained model (src/predict.py) or reports/ files.
 from __future__ import annotations
 
 import json
+import math
+import re
 from functools import lru_cache
 
 import numpy as np
@@ -142,9 +144,8 @@ def ranking(as_of: str, horizon: int, city: str | None = None) -> dict:
 # ---------------------------------------------------------------- /api/forecast
 @lru_cache(maxsize=4096)
 def forecast(ward_id: str, as_of: str, horizon: int) -> dict:
+    _require_ward(ward_id)
     f = features()
-    if ward_id not in set(f["ward_id"]):
-        raise ValueError(f"Unknown ward: {ward_id}")
     df = _ranking_df(as_of, horizon)
     hit = df[df["ward_id"] == ward_id]
     if hit.empty:
@@ -218,6 +219,8 @@ def metrics() -> dict:
 
 def ward_history(ward_id: str, horizon: int) -> dict:
     """Predicted vs actual with 80% band over the test period, for one ward."""
+    if not ward_id:
+        raise ValueError("ward_id is required.")
     tp = pd.read_csv(ROOT / "reports" / f"test_predictions_h{horizon}.csv")
     one = tp[tp["ward_id"] == ward_id]
     if one.empty:
@@ -225,3 +228,126 @@ def ward_history(ward_id: str, horizon: int) -> dict:
     return {"ward_id": ward_id, "horizon": horizon,
             "points": [{"week": r.target_date, "actual": _num(r.actual), "predicted": _num(r.pred),
                         "low": _num(r.lo), "high": _num(r.hi)} for r in one.itertuples()]}
+
+
+# ---------------------------------------------------------------- /api/what_if
+# Typed weekly weather replaces the most recent `weeks` weeks BEFORE lag/rolling features are built
+# (src.predict.predict_from_weather -> add_lag_features, the same path as build_features()).
+WHAT_IF_RANGES = {"rainfall_mm": (0.0, 400.0), "avg_temp_c": (10.0, 45.0), "relative_humidity_pct": (0.0, 100.0)}
+WHAT_IF_UNITS = {"rainfall_mm": "mm per week", "avg_temp_c": "degrees C (weekly mean)",
+                 "relative_humidity_pct": "% (weekly mean)", "weeks": "most recent weeks replaced"}
+WEEKS_DEFAULT, WEEKS_RANGE = 4, (1, 8)
+_LABEL = {"rainfall_mm": "Rainfall", "avg_temp_c": "Average temperature", "relative_humidity_pct": "Humidity"}
+
+
+WHAT_IF_KEYS = ("ward_id", "as_of", "horizon", "weeks", *WHAT_IF_RANGES)
+_ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def parse_as_of(value) -> str:
+    """Strict YYYY-MM-DD (ambiguous forms like 07/08/2025 are rejected); returns the normalised date."""
+    v = str(value).strip()
+    if not _ISO_DATE.match(v):
+        raise ValueError("as_of must be a date in YYYY-MM-DD format, e.g. 2025-07-21.")
+    try:
+        return pd.Timestamp(v).date().isoformat()
+    except ValueError:
+        raise ValueError("as_of must be a real calendar date in YYYY-MM-DD format, e.g. 2025-07-21.") from None
+
+
+def parse_horizon(value) -> int:
+    """Whole number 2, 3 or 4 (an int, or a string of digits); 3.7 or true are rejected, never rounded."""
+    ok = (isinstance(value, int) and not isinstance(value, bool)) or (isinstance(value, str) and value.strip().isdigit())
+    if not ok or int(value) not in HORIZONS:
+        raise ValueError("Horizon must be one of (2, 3, 4) weeks.")
+    return int(value)
+
+
+def _require_ward(ward_id: str) -> None:
+    if not ward_id:
+        raise ValueError("ward_id is required.")
+    if ward_id not in set(features()["ward_id"]):
+        raise ValueError(f"Unknown ward: {ward_id}")
+
+
+def validate_what_if(body: dict) -> tuple[dict, int]:
+    """Plain-English checks for the typed weather. Returns (overrides, weeks)."""
+    overrides = {}
+    for k, (lo, hi) in WHAT_IF_RANGES.items():
+        if k not in body or body[k] is None:
+            continue
+        v = body[k]
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
+            raise ValueError(f"{_LABEL[k]} ({k}) must be a number.")
+        if not lo <= float(v) <= hi:
+            raise ValueError(f"{_LABEL[k]} ({k}) must be between {lo:g} and {hi:g} ({WHAT_IF_UNITS[k]}).")
+        overrides[k] = round(float(v), 2)
+    if not overrides:
+        raise ValueError("Give at least one weather value to change: rainfall_mm, avg_temp_c or relative_humidity_pct.")
+    weeks = body.get("weeks", WEEKS_DEFAULT)
+    if isinstance(weeks, bool) or not isinstance(weeks, int) or not WEEKS_RANGE[0] <= weeks <= WEEKS_RANGE[1]:
+        raise ValueError(f"weeks must be a whole number from {WEEKS_RANGE[0]} to {WEEKS_RANGE[1]}.")
+    return overrides, weeks
+
+
+def _scenario_row(r) -> dict:
+    """Same fields as a forecast row, from src.predict output with Shapley driver columns."""
+    cols = [c for c in r.index if c.startswith("driver_")]
+    names = {c: next(g for g in DRIVER_LABELS if "driver_" + g.lower().replace(" ", "_") == c) for c in cols}
+    drivers = sorted(((DRIVER_LABELS[names[c]], float(r[c])) for c in cols), key=lambda kv: -abs(kv[1]))
+    return {"predicted_cases": _num(r["predicted_cases"]), "range_low": _num(r["lower_80"]),
+            "range_high": _num(r["upper_80"]), "risk_tier": r["risk_tier"],
+            "top_drivers": [{"label": k, "effect": _num(v, 3)} for k, v in drivers],
+            "driver_reference_cases": _num(r.get("base_cases"))}
+
+
+@lru_cache(maxsize=2048)   # key = every input (ward, week, horizon, overrides, weeks)
+def _scenario(ward_id: str, as_of: str, horizon: int, overrides: tuple, weeks: int) -> dict:
+    from src.features import WEATHER
+    from src.predict import _raw, predict_from_weather
+
+    raw = _raw()
+    a = pd.Timestamp(as_of)
+    w = raw[(raw["ward_id"] == ward_id) & (raw["date"] <= a)].sort_values("date").tail(weeks)
+    rows = w[["date", "ward_id", *WEATHER]].assign(**dict(overrides))
+    res = predict_from_weather(rows, horizon, explain=True)
+    return _scenario_row(res.iloc[0])
+
+
+def what_if(body: dict) -> dict:
+    """POST /api/what_if: baseline (normal forecast) vs scenario (typed weather for the last `weeks` weeks)."""
+    unknown = sorted(set(body) - set(WHAT_IF_KEYS))
+    if unknown:                                   # typos must not be silently ignored
+        raise ValueError(f"Unknown field(s): {', '.join(unknown)}. Allowed: {', '.join(WHAT_IF_KEYS)}.")
+    ward_id = str(body.get("ward_id") or "")
+    _require_ward(ward_id)
+    horizon = parse_horizon(body.get("horizon", 3))
+    as_of = parse_as_of(body.get("as_of") or meta()["as_of"]["default"])
+    overrides, weeks = validate_what_if(body)
+    baseline_full = forecast(ward_id, as_of, horizon)      # cached; validates the date and history
+    keys = ("predicted_cases", "range_low", "range_high", "risk_tier", "top_drivers", "driver_reference_cases")
+    baseline = {k: baseline_full[k] for k in keys}
+    scenario = _scenario(ward_id, as_of, horizon, tuple(sorted(overrides.items())), weeks)
+    first = (pd.Timestamp(as_of) - pd.Timedelta(weeks=weeks - 1)).date().isoformat()
+    from src.predict import _raw
+    raw = _raw()
+    replaced = raw[(raw["ward_id"] == ward_id) & (raw["date"] >= pd.Timestamp(first))
+                   & (raw["date"] <= pd.Timestamp(as_of))].sort_values("date")
+    replaced_actual = {k: {"mean": _num(replaced[k].mean(), 1), "per_week": [_num(x, 1) for x in replaced[k]]}
+                       for k in overrides}
+    base_eff = {d["label"]: d["effect"] for d in baseline["top_drivers"]}
+    scen_eff = {d["label"]: d["effect"] for d in scenario["top_drivers"]}
+    driver_change = sorted(((lbl, _num(scen_eff.get(lbl, 0) - base_eff.get(lbl, 0), 3)) for lbl in set(base_eff) | set(scen_eff)),
+                           key=lambda kv: -abs(kv[1]))
+    return {
+        "ward_id": ward_id, "city": baseline_full["city"], "as_of": as_of, "horizon": horizon,
+        "forecast_week": baseline_full["forecast_week"],
+        "baseline": baseline,
+        "scenario": scenario,
+        "change": {"cases": _num(scenario["predicted_cases"] - baseline["predicted_cases"]),
+                   "tier_changed": scenario["risk_tier"] != baseline["risk_tier"],
+                   "drivers": [{"label": k, "effect_change": v} for k, v in driver_change]},
+        "applied": {"overrides": overrides, "weeks": weeks, "weeks_replaced": {"from": first, "to": as_of},
+                    "replaced_actual": replaced_actual},
+        "units": {k: WHAT_IF_UNITS[k] for k in (*overrides, "weeks")},
+    }

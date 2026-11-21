@@ -16,7 +16,7 @@ flowchart LR
   C --> H
   H --> I["api/service.py<br/>JSON views, LRU-cached"]
   G --> I
-  I --> J["api/main.py (Flask)<br/>/api/forecast · /api/ranking · /api/metrics<br/>gzip + Cache-Control"]
+  I --> J["api/main.py (Flask)<br/>/api/forecast · POST /api/what_if · /api/ranking · /api/metrics<br/>gzip + Cache-Control"]
   J --> K["web/ (HTML/CSS/JS)<br/>marketing page · dashboard"]
   K --> L["Public health officer<br/>tier, likely range, drivers,<br/>ward ranking, accuracy"]
 ```

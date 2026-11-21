@@ -20,6 +20,9 @@ python -m api                      # open http://127.0.0.1:8000
 Tested with Python 3.11, 3.12 and 3.13. **Python 3.14 is not supported** (no scikit-learn 1.6.1 build for it yet).
 The trained model is committed, so no training is needed to launch.
 One process serves the marketing page (`/`), the dashboard (`/app/`) and the JSON API (`/api/...`). No Node.js needed.
+Try a weather scenario (typed weekly values replace the last 4 weeks, then the same lag pipeline runs):
+`curl -X POST http://127.0.0.1:8000/api/what_if -H "Content-Type: application/json" -d '{"ward_id": "DSCC_Ward_04", "as_of": "2025-07-21", "horizon": 3, "rainfall_mm": 200}'`
+→ baseline vs scenario forecast, tier change and drivers.
 
 ## Retrain (one command)
 ```bash

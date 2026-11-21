@@ -101,20 +101,21 @@ were first seen on test, then confirmed on validation. Test rows are hash-locked
 - **Minimal dependencies.** Python only (scikit-learn, pandas, Flask). There's no Node build or GPU,
   and it runs on a basic office laptop.
 
-Measured with `python -m scripts.measure_efficiency --train` on a Windows 11 laptop (Python 3.12.10, 21 Nov 2026).
+Measured with `python -m scripts.measure_efficiency --train` on a MacBook (Apple silicon, Python 3.9, 21 Nov 2026).
 Source: `reports/efficiency.json`.
 
 | Measure | Value |
 |---|---|
-| Model file size (3 horizon models) | 0.56 MB |
-| Model load at startup | 0.37 s |
-| Lag features for all 60 wards × 522 weeks (once at startup) | 4.5 s |
-| App startup, including pre-computing the default week | 10.0 s |
-| Forecast for a new week (3 horizons, with drivers), first request | 0.88 s |
-| Ranking of 60 wards / one-ward forecast, cached | 0.004 s / 0.0009 s |
-| Ranking payload, raw → gzip | 31.7 KB → 3.4 KB |
-| Peak Python memory | 214 MB |
-| Full retrain, 3 horizons with time-ordered CV | 94 s |
+| Model file size (3 horizon models, incl. 2-week ensemble) | 11.4 MB |
+| Model load at startup | 0.41 s |
+| Lag features for all 60 wards × 522 weeks (once at startup) | 7.7 s |
+| App startup, including pre-computing the default week | 2.6 s |
+| Forecast for a new week (3 horizons, with drivers), first request | 0.70 s |
+| Ranking of 60 wards / one-ward forecast, cached | 0.002 s / 0.0006 s |
+| What-if scenario (POST /api/what_if, 4 weeks replaced): new / repeated | 0.36 s / 0.013 s |
+| Ranking payload, raw → gzip | 31.7 KB → 3.3 KB |
+| Peak Python memory | 234 MB |
+| Full retrain, 3 horizons with time-ordered CV | 89 s |
 | External network calls / LLM calls during the run | 0 / 0 |
 
 ## Path to a live system (Phase 2)

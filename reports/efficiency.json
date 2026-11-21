@@ -1,23 +1,25 @@
 {
-  "python": "3.12.10",
-  "platform": "Windows-11-10.0.26300-SP0",
+  "python": "3.9.6",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
   "seconds": {
-    "model_load_joblib": 0.3725,
-    "lag_features_build_all_wards": 4.5466,
-    "app_startup_warm": 10.024,
-    "ranking_60_wards_first_request": 0.0377,
-    "ranking_60_wards_cached_median": 0.004,
-    "forecast_one_ward_cached_median": 0.0009,
-    "forecast_new_week_all_horizons_first_request": 0.8774,
-    "full_retrain_3_horizons": 94.0361
+    "model_load_joblib": 0.41,
+    "lag_features_build_all_wards": 7.7239,
+    "app_startup_warm": 2.5674,
+    "ranking_60_wards_first_request": 0.0209,
+    "ranking_60_wards_cached_median": 0.0022,
+    "forecast_one_ward_cached_median": 0.0006,
+    "what_if_new_scenario": 0.3565,
+    "what_if_repeat_scenario_median": 0.0135,
+    "forecast_new_week_all_horizons_first_request": 0.7036,
+    "full_retrain_3_horizons": 89.2173
   },
   "bytes": {
-    "model_file": 556844,
-    "ranking_response_raw": 31745,
-    "ranking_response_gzip": 3395,
-    "python_heap_peak": 213586500
+    "model_file": 11401189,
+    "ranking_response_raw": 31732,
+    "ranking_response_gzip": 3318,
+    "python_heap_peak": 233937313
   },
   "external_network_calls": 0,
   "llm_calls": 0,
-  "measured_at": "2026-11-21 16:47:36"
+  "measured_at": "2026-11-21 22:21:26"
 }

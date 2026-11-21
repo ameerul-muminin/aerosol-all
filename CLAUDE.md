@@ -8,7 +8,7 @@ from lagged weather and ward attributes, so public health officers can target hi
 
 ## Team (each person runs their own Claude Code session, on their own branch)
 - **A (Nazifa): ML.** Owns `src/features.py`, `src/train.py`, models, metrics, and the ARCHITECTURE.md ML sections.
-- **B (Azman): repo and efficiency.** Owns requirements, README, AI disclosure, tests, timings, the git audit and the clean-clone test.
+- **B (Alif): repo and efficiency.** Owns requirements, README, AI disclosure, tests, timings, the git audit and the clean-clone test.
 - **C (Srijita): frontend engineer.** Owns `web/` (marketing page `web/index.html`, dashboard `web/app/`), the design, screenshots and the UI part of the video.
   B and A share `api/`, ARCHITECTURE.md and the rest of the video.
 
@@ -46,7 +46,8 @@ predict_all(feat, as_of_date, horizon) -> DataFrame       # all wards, sorted by
 ```
 Keys/columns: `ward_id, city, forecast_week, predicted_cases, range_low, range_high,
 risk_tier ("Low"|"Medium"|"High"|"Critical"), top_drivers [(plain-language label, contribution)]`.
-Contribution > 0 means the factor raises predicted cases, and < 0 means it lowers them (what-if occlusion against training averages).
+In the API, drivers are exact grouped-Shapley contributions from src/explain.py (they add up from
+`driver_reference_cases`, the average week, to the prediction). > 0 raises predicted cases, < 0 lowers them.
 Bad input raises `ValueError` with a user-friendly message; the API returns it as a 400 and the UI shows it inline, never a traceback.
 `load_bundle()` is cached and retrains automatically if the model file can't be loaded.
 

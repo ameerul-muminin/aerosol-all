@@ -14,7 +14,7 @@ Order matters; each step is demo-able on its own.
       `format.js`, `app.js` (hash router `#outlook #wards #accuracy`, URL state, inputs from `/api/meta`).
 - [x] **F2 Ward outlook (Alif):** verdict card (cases, tier glyph+colour+word, likely range), rain-to-risk bars,
       2/3/4 segmented control, drivers with "average week X → this ward Y", model inputs.
-- [ ] **F3 What-if panel (Alif, on the outlook view):** spec from Nazifa:
+- [x] **F3 What-if panel (Alif, on the outlook view):** spec from Nazifa:
       three number inputs (rainfall "mm per week", average temperature °C, humidity %), weeks selector (1–8,
       default 4), "Run what-if" button → `POST /api/what_if`. Baseline vs scenario side by side: tier badge
       (colour AND text), predicted cases, range, change (`change.cases`, `tier_changed`). Show `warnings[]`

@@ -7,7 +7,8 @@
   "nav": {
     "label": "Views",
     "outlook": "Ward outlook",
-    "wards": "All wards"
+    "wards": "All wards",
+    "accuracy": "Model accuracy"
   },
   "lang": {
     "label": "Language",
@@ -126,6 +127,38 @@
     "csv": "Download CSV",
     "open": "Open {ward}",
     "empty": "No wards match this filter."
+  },
+  "acc": {
+    "title": "Model accuracy",
+    "subtitle": "Tested on {period}, weeks the model never saw while training.",
+    "mae": "Typical error (MAE)",
+    "rmse": "Error on big weeks (RMSE)",
+    "vs_base": "Seasonal average: {n} cases",
+    "lower_by": "{p} lower",
+    "not_lower": "Not lower than the seasonal average",
+    "coverage": "Inside the likely range",
+    "coverage_note": "Of test weeks; the range aims for 80%",
+    "critical": "Critical weeks caught",
+    "critical_note": "Flagged High or Critical in advance",
+    "by_h_title": "Error by horizon, cases per ward-week",
+    "mae_short": "MAE",
+    "rmse_short": "RMSE",
+    "lg_model": "This model",
+    "lg_base": "Seasonal average (same week, past years)",
+    "lower_better": "Shorter is better.",
+    "by_city_title": "Error by city, +{h} weeks",
+    "city_note": "Cases per ward-week, test years.",
+    "hist_title": "{ward}: forecast vs what happened, +{h} weeks",
+    "lg_pred": "Forecast",
+    "lg_actual": "Reported cases",
+    "lg_band": "Likely range (80%)",
+    "hist_sum": "Reported cases fell inside the likely range in {inside} of {n} weeks ({p}).",
+    "hist_aria": "Forecast and reported cases over {n} test weeks; reported cases inside the likely range in {inside} weeks.",
+    "pair_aria": "+{h} weeks: MAE {mae} vs seasonal average {bmae}; RMSE {rmse} vs {brmse}.",
+    "tip_actual": "Reported: {n}",
+    "tip_pred": "Forecast: {n}",
+    "tip_range": "Likely: {low}–{high}",
+    "lg_out": "Outside the range"
   },
   "state": {
     "loading": "Loading…",

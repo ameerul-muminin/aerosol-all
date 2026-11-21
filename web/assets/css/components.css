@@ -138,3 +138,35 @@ table.rank { width: 100%; border-collapse: collapse; font-size: 14px; }
 .stack i { display: block; transform-origin: left; }
 .anim .stack i { animation: grow-x var(--t-bars) var(--ease-out) both; }
 .bg-Low { background: var(--tier-low); } .bg-Medium { background: var(--tier-medium); } .bg-High { background: var(--tier-high); } .bg-Critical { background: var(--tier-critical); }
+
+/* model accuracy */
+.tile .k { display: block; font-size: var(--fs-small); font-weight: 500; color: var(--ink-2); }
+.tile .gain { display: block; margin-top: 4px; font-size: var(--fs-small); font-weight: 600; color: var(--tier-low); }
+.acc-note { margin-top: 14px; font-size: var(--fs-small); color: var(--ink-3); }
+.pairs { display: grid; gap: 4px; }
+.pair { display: grid; grid-template-columns: 84px minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: center; padding: 12px; margin: 0 -12px; border-radius: 12px; }
+.pair.on { background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); }
+.pair .hl { font-weight: 600; font-size: 14px; }
+.pair .m { display: grid; gap: 4px; }
+.pair em { font-style: normal; font-size: 12px; color: var(--ink-3); }
+.pair .b { display: flex; align-items: center; gap: 8px; height: 14px; }
+.pair .b i { display: block; height: 100%; border-radius: 2px; transform-origin: left; }
+.pair .b span { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pair i.mod { background: var(--ink); } .pair i.base { background: var(--bar); }
+.anim .pair .b i, .anim .cerr .bt i { animation: grow-x var(--t-bars) var(--ease-out) both; }
+table.cerr { table-layout: fixed; }
+.cerr th:nth-child(2) { width: 34%; } .cerr th:nth-child(3), .cerr th:nth-child(4) { width: 64px; }
+.cerr .bt i { display: block; height: 10px; border-radius: 2px; background: var(--ink-2); transform-origin: left; }
+.hist { position: relative; min-height: 200px; }
+.hist svg { display: block; overflow: visible; touch-action: pan-y; }
+.hist text { font-size: 11px; fill: var(--ink-3); font-family: var(--font); font-variant-numeric: tabular-nums; }
+.hist .gl { stroke: var(--line); stroke-width: 1; }
+.hist .band { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; stroke-linejoin: round; }
+.hist .pl { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.hist circle { fill: var(--raises); }
+.hist circle.out { fill: var(--paper); stroke: var(--raises); stroke-width: 1.5; }
+.hist .cur { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 3 3; }
+.hist .tip { position: absolute; top: 0; left: 0; display: grid; gap: 2px; padding: 10px 12px; border-radius: var(--r-ctl); background: var(--paper); box-shadow: var(--shadow-md); font-size: var(--fs-small); color: var(--ink-2); pointer-events: none; white-space: nowrap; }
+.hist .tip b { color: var(--ink); font-weight: 600; }
+.hist-sum { margin-top: 12px; color: var(--ink-2); }
+@media (max-width: 600px) { .pair { grid-template-columns: 1fr 1fr; gap: 8px 16px; } .pair .hl { grid-column: 1 / -1; } .cerr th:nth-child(2), .cerr .bt { display: none; } }

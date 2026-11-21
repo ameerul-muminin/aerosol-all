@@ -1,4 +1,4 @@
-// App shell: state in the URL, hash router (#outlook, #wards), sidebar inputs from /api/meta, EN/বাংলা toggle.
+// App shell: state in the URL, hash router (#outlook, #wards, #accuracy), sidebar inputs from /api/meta, EN/বাংলা toggle.
 // URL shape: /app/?ward=CCC_Ward_01&as_of=2025-07-14&h=3&city=Gazipur#wards
 import { api } from "./api.js";
 import { initI18n, setLang, getLang } from "./i18n.js";
@@ -6,8 +6,9 @@ import { showError } from "./ui.js";
 import { cityName, wardName, dateLong, esc } from "./format.js";
 import * as outlook from "./views/outlook.js";
 import * as wards from "./views/wards.js";
+import * as accuracy from "./views/accuracy.js";
 
-const VIEWS = { outlook, wards };
+const VIEWS = { outlook, wards, accuracy };
 const $ = (id) => document.getElementById(id);
 const main = $("main");
 let meta;
@@ -56,7 +57,7 @@ function fillSidebar() {
 function syncSidebar() {
   $("ward").value = state.ward;
   $("asof").value = state.as_of;
-  $("f-ward").hidden = state.view !== "outlook";
+  $("f-ward").hidden = state.view === "wards";      // the ranking covers every ward
   document.querySelectorAll(".tabs a").forEach((a) => {
     if (a.dataset.view === state.view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
   });

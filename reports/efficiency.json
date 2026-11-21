@@ -1,0 +1,23 @@
+{
+  "python": "3.12.10",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "seconds": {
+    "model_load_joblib": 0.3725,
+    "lag_features_build_all_wards": 4.5466,
+    "app_startup_warm": 10.024,
+    "ranking_60_wards_first_request": 0.0377,
+    "ranking_60_wards_cached_median": 0.004,
+    "forecast_one_ward_cached_median": 0.0009,
+    "forecast_new_week_all_horizons_first_request": 0.8774,
+    "full_retrain_3_horizons": 94.0361
+  },
+  "bytes": {
+    "model_file": 556844,
+    "ranking_response_raw": 31745,
+    "ranking_response_gzip": 3395,
+    "python_heap_peak": 213586500
+  },
+  "external_network_calls": 0,
+  "llm_calls": 0,
+  "measured_at": "2026-11-21 16:47:36"
+}

@@ -80,7 +80,7 @@ MAE/RMSE validation dashboard). Treat the code as Stage 1 of a production system
 ```
 python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python -m src.train          # retrain (~70 s, time-ordered CV)
+python -m src.train          # retrain (~1.5 min, time-ordered CV)
 pytest -q
 python -m api                # http://127.0.0.1:8000  (dashboard: /app/)
 python -m scripts.measure_efficiency --train   # -> reports/efficiency.json

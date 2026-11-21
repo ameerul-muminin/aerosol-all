@@ -89,18 +89,21 @@ confirmed on validation alone.
 - **Minimal dependencies.** Python only (scikit-learn, pandas, Flask). There's no Node build or GPU,
   and it runs on a basic office laptop.
 
-Measured with `python -m scripts.measure_efficiency --train` (copy the values from `reports/efficiency.json`):
+Measured with `python -m scripts.measure_efficiency --train` on a Windows 11 laptop (Python 3.12.10, 21 Nov 2026).
+Source: `reports/efficiency.json`.
 
 | Measure | Value |
 |---|---|
-| Model file size | TBD |
-| Model load at startup | TBD |
-| Lag features for all 60 wards | TBD |
-| Ranking of 60 wards, first request / cached | TBD / TBD |
-| One-ward forecast, cached | TBD |
-| Ranking payload, raw / gzip | TBD / TBD |
-| Full retrain, 3 horizons | TBD |
-| External network calls during the run | TBD |
+| Model file size (3 horizon models) | 0.56 MB |
+| Model load at startup | 0.37 s |
+| Lag features for all 60 wards × 522 weeks (once at startup) | 4.5 s |
+| App startup, including pre-computing the default week | 10.0 s |
+| Forecast for a new week (3 horizons, with drivers), first request | 0.88 s |
+| Ranking of 60 wards / one-ward forecast, cached | 0.004 s / 0.0009 s |
+| Ranking payload, raw → gzip | 31.7 KB → 3.4 KB |
+| Peak Python memory | 214 MB |
+| Full retrain, 3 horizons with time-ordered CV | 94 s |
+| External network calls / LLM calls during the run | 0 / 0 |
 
 ## Path to a live system (Phase 2)
 
@@ -110,5 +113,5 @@ The split into model → `api/service.py` → `api/main.py` → `web/` keeps eac
   lag pipeline and API contract don't change.
 - **Scale out.** The API is stateless, so several workers can run behind a load balancer (for example
   gunicorn), with the static `web/` folder on a CDN.
-- **Retraining.** `python -m src.train` rebuilds every artifact in seconds. Metrics are versioned next to
+- **Retraining.** `python -m src.train` rebuilds every artifact in about 1.5 minutes (94 s measured). Metrics are versioned next to
   the model in `reports/`.

@@ -29,6 +29,22 @@ The **baseline** uses the dataset's recorded weather; the **scenario** uses your
 training range (rain above 268.8 mm, temperature outside 17.2–37.5 °C, humidity below 41.8 %) return a warning, because the
 model cannot extrapolate beyond what it has seen.
 
+## What is in the app
+| Where | What you get |
+|---|---|
+| `/` landing page | Live counts of Critical/High wards, accuracy per horizon, and **Check a ward**: pick a ward and a week (latest in the data or any earlier one), optionally type that week's rain, temperature and humidity, and get the forecast, risk tier, likely range and top reasons |
+| `/app/#outlook` Ward outlook | Expected cases, risk tier (colour + glyph + word), 80% likely range, rain-to-risk timeline, **"Why this forecast"** driver breakdown, and a what-if weather panel |
+| `/app/#wards` All wards | **Early warnings** (wards getting worse over the next 4 weeks), tier counts, ranking with a ward × horizon heat strip, by-city bars, CSV download |
+| `/app/#accuracy` Model accuracy | Test-year MAE/RMSE vs the seasonal average per horizon and per city, one ward's forecast vs reported cases with the 80% band, and the **breeding clock**: rain 0–12 weeks earlier vs cases now |
+| `/app/#cost` Cost & speed | Model size, cached vs fresh response times, response size, and live counters of how much work the caches save |
+
+Every view works in English and বাংলা. Screenshots: [docs/screenshots/](docs/screenshots/README.md)
+
+| | | |
+|---|---|---|
+| ![Ward outlook](docs/screenshots/outlook.png) | ![All wards with early warnings](docs/screenshots/early-warnings.png) | ![Model accuracy](docs/screenshots/accuracy.png) |
+| ![Check a ward](docs/screenshots/check-a-ward.png) | ![Cost and speed](docs/screenshots/cost.png) | ![Landing page](docs/screenshots/landing.png) |
+
 ## Retrain (one command)
 ```bash
 python -m src.train      # rebuilds models/dengue_model.joblib and reports/metrics.json (about 2 min)
@@ -55,8 +71,23 @@ docs/frontend/             frontend guide for the web/ build
 2016-01-04 to 2025-12-29. On first load it is validated and cached as `data/dataset_cache.csv`.
 
 ## Results
-See `ARCHITECTURE.md` and `reports/metrics.json`. Every number shown in the app is read from
-`reports/metrics.json`.
+Test years 2024–2025, never used for training or model choice (read from `reports/metrics.json`; cases per ward-week):
+
+| Horizon | Deployed model | MAE | Seasonal-average MAE | RMSE | Seasonal-average RMSE | Inside the 80% range |
+|---|---|---|---|---|---|---|
+| 2 weeks | weighted ensemble (boosted trees, random forest, Poisson GLM) | 1.12 | 1.26 | 2.23 | 2.53 | 78.5% |
+| 3 weeks | blend of boosted trees + extra trees | 1.12 | 1.26 | 2.19 | 2.53 | 78.4% |
+| 4 weeks | gradient-boosted trees (Poisson) | 1.25 | 1.26 | 2.49 | 2.53 | 78.5% |
+
+At 4 weeks the model is only slightly better than the seasonal average on MAE: forecasting further ahead is harder.
+In the data, rain that is above normal for the time of year is followed by above-normal cases about 3 weeks later
+(`/api/lag_profile`), inside the 2–4 week breeding window from the brief. See `ARCHITECTURE.md` for the split and model choice.
+Every number shown in the app is read from `reports/metrics.json` or `reports/efficiency.json`.
+
+## API
+`GET /api/meta` · `/api/forecast?ward_id&as_of&horizon` · `/api/ranking?as_of&horizon[&city]` · `/api/warnings?as_of[&city]` ·
+`/api/metrics` · `/api/history?ward_id&horizon` · `/api/lag_profile[?city]` · `/api/efficiency` · `/api/health` · `POST /api/what_if`.
+Bad input returns HTTP 400 with `{"error": "<plain message>"}`.
 
 ## AI Assistants and External APIs
 | Tool | Used by | What for |

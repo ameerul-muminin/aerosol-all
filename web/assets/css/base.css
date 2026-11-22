@@ -39,6 +39,8 @@ button, input, select { font: inherit; color: inherit; }
 .brand { display: inline-flex; align-items: center; gap: .3em; font: 400 26px/1 var(--display); letter-spacing: .01em; text-decoration: none; }
 .brand .mark { width: .78em; height: 1.2em; margin-top: -.12em; flex: none; fill: currentColor; }   /* tall insecticide aerosol can */
 .brand .mark .lbl, .brand .mark .mist { fill: var(--accent); }
+.brand .bug { width: 1.05em; height: .83em; flex: none; align-self: flex-end; margin: 0 .08em -.02em -.2em; background: currentColor;
+  -webkit-mask: url(../images/mosquito.png) center / contain no-repeat; mask: url(../images/mosquito.png) center / contain no-repeat; }   /* sprayed mosquito, ink-coloured mask */
 /* the name is lowercase "aerosol-all": no uppercase */
 :root[lang="bn"] .brand { font: 400 26px/1 var(--display); }   /* Latin brand name, keep Anton */
 .tabs { display: grid; gap: 2px; margin: 0 -8px; }

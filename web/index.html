@@ -1,1 +1,68 @@
-<!doctype html><title>Dengue outlook</title><p>Marketing page goes here (Srijita). <a href="/app/">Open the dashboard</a></p>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aerosol-all</title>
+<meta name="description" content="Ward-level dengue forecasts 2, 3 and 4 weeks ahead for Bangladeshi cities.">
+<link rel="preload" href="/assets/fonts/anton-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/hind-siliguri-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/tokens.css">
+<link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/components.css">
+<link rel="stylesheet" href="/assets/css/landing.css">
+<script type="module" src="/assets/js/landing.js"></script>
+</head>
+<body class="landing">
+<a class="skip" href="#main" data-i18n="app.skip">Skip to content</a>
+<nav class="nav" data-i18n-attr="aria-label:landing.nav_label">
+  <a class="brand" href="/" data-i18n="app.name">aerosol-all</a>
+  <span class="links">
+    <a href="#how" data-i18n="landing.nav_how">How it works</a>
+    <div class="lang" role="group" data-i18n-attr="aria-label:lang.label">
+      <button type="button" data-lang="en" lang="en">EN</button>
+      <button type="button" data-lang="bn" lang="bn">বাংলা</button>
+    </div>
+    <a class="btn" href="/app/" data-i18n="landing.nav_app">Open dashboard</a>
+  </span>
+</nav>
+
+<main id="main">
+  <header class="hero">
+    <h1 class="display" data-i18n="landing.headline">See the outbreak first</h1>
+    <div class="lede">
+      <div>
+        <p class="sub" id="sub"><span class="skel">&nbsp;</span></p>
+        <p class="live" id="live" aria-live="polite"></p>
+      </div>
+      <a class="btn primary" href="/app/" data-i18n="landing.cta">Open the ward outlook →</a>
+    </div>
+    <div class="stage">
+      <img src="/assets/images/hero.webp"
+           srcset="/assets/images/hero-900.webp 900w, /assets/images/hero.webp 1774w"
+           sizes="(max-width: 1300px) 94vw, 1240px" width="1774" height="887"
+           data-i18n-attr="alt:landing.hero_alt"
+           alt="A rainy Dhaka street: water collects in a tyre, a bucket and puddles beside a parked rickshaw.">
+      <div class="chips" id="chips">
+        <div class="chip c1"><div class="k skel">&nbsp;</div><div class="v skel">&nbsp;</div><div class="s skel">&nbsp;</div></div>
+        <div class="chip c2"><div class="k skel">&nbsp;</div><div class="v skel">&nbsp;</div><div class="s skel">&nbsp;</div></div>
+        <div class="chip c3"><div class="k skel">&nbsp;</div><div class="v skel">&nbsp;</div><div class="s skel">&nbsp;</div></div>
+        <div class="chip c4"><div class="k skel">&nbsp;</div><div class="v skel">&nbsp;</div><div class="s skel">&nbsp;</div></div>
+      </div>
+    </div>
+    <p class="inline-error" id="err" role="alert" hidden></p>
+  </header>
+
+  <section class="band" id="how" aria-labelledby="how-h">
+    <h2 class="display" id="how-h" data-i18n="landing.band_title">Rain today, cases in weeks</h2>
+    <p data-i18n="landing.band_text">Mosquitoes breed in standing water after rain. Cases follow weeks later. That gap is the time to act.</p>
+    <div class="facts">
+      <div><b data-i18n="landing.fact1_v">7–14 days</b><span data-i18n="landing.fact1_k">to breed</span></div>
+      <div><b data-i18n="landing.fact2_v">2–4 weeks</b><span data-i18n="landing.fact2_k">rain to cases</span></div>
+      <div><b data-i18n="landing.fact3_v">150,000+</b><span data-i18n="landing.fact3_k">hospitalised a year</span></div>
+    </div>
+    <small data-i18n="landing.source">Source: EDU AI Hackathon 2026 brief.</small>
+  </section>
+</main>
+</body>
+</html>

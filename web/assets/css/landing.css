@@ -1,0 +1,52 @@
+/* Marketing page (web/index.html). Layout from the locked prototype web/proto/hero-a.html.
+   Import order: tokens.css -> base.css -> components.css -> landing.css. Colours only from tokens. */
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px clamp(16px, 3vw, 40px); font-weight: 600; font-size: 14px; }
+.nav .links { display: flex; gap: 22px; align-items: center; }
+.nav .links > a:not(.btn) { text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
+.nav .lang { margin: 0; }
+
+.hero { position: relative; padding: 0 clamp(16px, 3vw, 40px) 48px; }
+.hero h1.display { font-size: clamp(56px, 10.2vw, 172px); white-space: nowrap; margin: 0; }
+:root[lang="bn"] .hero h1.display { font-size: clamp(40px, 7vw, 112px); }
+.lede { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 16px 32px; margin-top: 18px; }
+.sub { max-width: 34ch; font-size: 18px; margin: 0; color: var(--ink-2); }
+.sub .skel { min-width: 28ch; }
+.live { margin: 10px 0 0; font-size: var(--fs-small); color: var(--ink-2); display: inline-flex; align-items: center; gap: 8px; min-height: 1.5em; }
+.live:not(:empty)::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
+
+.stage { position: relative; margin: 24px auto 0; max-width: 1240px; }
+.stage img { display: block; width: 100%; height: auto; border-radius: var(--r-card); }
+.chip { position: absolute; z-index: 2; display: block; min-width: 168px; padding: 12px 16px; border-radius: 12px; background: var(--paper); box-shadow: var(--shadow-md); }
+.chip .k { font-size: 12px; font-weight: 500; color: var(--ink-2); }
+.chip .v { font: 400 32px/1 var(--display); margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
+:root[lang="bn"] .chip .v { font: 700 30px/1.1 var(--font); }   /* Anton has no Bangla digits */
+.chip .s { font-size: 12px; color: var(--ink-3); }
+.chip .skel { display: block; }
+.chip .k.skel, .chip .s.skel { width: 9ch; }
+.chip .v.skel { width: 4ch; height: 32px; }
+.c1 { left: 2%; top: 4%; }
+.c2 { left: 2%; top: 30%; }
+.c3 { right: 2%; top: 4%; }
+.c4 { right: 2%; top: 30%; }
+.hero .inline-error { margin: 16px 0 0; }
+
+.band { background: var(--band); color: var(--on-dark); padding: clamp(56px, 7vw, 104px) clamp(16px, 3vw, 40px); }
+.band h2 { font-size: clamp(40px, 6vw, 88px); color: var(--accent); max-width: 12ch; margin: 0 0 20px; }
+.band p { max-width: 44ch; color: var(--on-dark-2); margin: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 24px 40px; margin-top: 40px; }
+.facts b { display: block; font: 400 clamp(32px, 9vw, 44px)/1.05 var(--display); color: var(--on-dark); }
+:root[lang="bn"] .facts b { font: 700 36px/1.2 var(--font); }
+.facts span { color: var(--on-dark-2); }
+.band small { display: block; margin-top: 28px; font-size: 12px; color: var(--on-dark-2); }
+.band :focus-visible { outline-color: var(--accent); }
+
+@media (max-width: 760px) {
+  .hero h1.display { white-space: normal; }
+  .nav .links { gap: 10px; }
+  .nav .links > a:not(.btn) { display: none; }
+  .chip { position: static; min-width: 0; box-shadow: var(--shadow-sm); }
+  .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+}
+@media (max-width: 420px) {
+  .nav .btn { display: none; }   /* the hero button opens the same page */
+}

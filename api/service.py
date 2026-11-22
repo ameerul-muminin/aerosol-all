@@ -141,6 +141,45 @@ def ranking(as_of: str, horizon: int, city: str | None = None) -> dict:
     }
 
 
+# ---------------------------------------------------------------- /api/warnings
+@lru_cache(maxsize=512)
+def warnings(as_of: str, city: str | None = None) -> dict:
+    """Early warnings: wards getting worse over the next 4 weeks. A ward is listed when its risk tier
+    at +3 or +4 weeks is higher than at +2 weeks ("rising"), or when it is already High/Critical at
+    +2 weeks and its forecast cases go up at every step to +4 weeks ("escalating"). Reuses the cached
+    all-ward forecasts for each horizon, so it costs no extra model calls."""
+    by_h = {h: _ranking_df(as_of, h).set_index("ward_id") for h in HORIZONS}
+    first, last = HORIZONS[0], HORIZONS[-1]
+    base = by_h[first]
+    if city:
+        if city not in set(base["city"]):
+            raise ValueError(f"Unknown city: {city}")
+        base = base[base["city"] == city]
+    lvl = TIERS.index
+    rows = []
+    for w, r in base.iterrows():
+        steps = [{"horizon": h, "forecast_week": str(by_h[h].at[w, "forecast_week"]),
+                  "predicted_cases": _num(by_h[h].at[w, "predicted_cases"]),
+                  "risk_tier": by_h[h].at[w, "risk_tier"]} for h in HORIZONS]
+        start, later = lvl(steps[0]["risk_tier"]), max(lvl(s["risk_tier"]) for s in steps[1:])
+        cases = [s["predicted_cases"] for s in steps]
+        cases_up = all(b > a for a, b in zip(cases, cases[1:]))
+        if later > start:
+            reason = "rising"
+        elif start >= lvl("High") and cases_up:
+            reason = "escalating"
+        else:
+            continue
+        peak = max(steps, key=lambda s: (lvl(s["risk_tier"]), s["predicted_cases"]))
+        rows.append({"ward_id": w, "city": r["city"], "reason": reason, "steps": steps,
+                     "peak_tier": peak["risk_tier"], "peak_horizon": peak["horizon"]})
+    rows.sort(key=lambda x: (-lvl(x["peak_tier"]), -max(s["predicted_cases"] for s in x["steps"])))
+    return {"as_of": as_of, "city": city, "horizons": list(HORIZONS), "n_wards": int(len(base)),
+            "rule": f"Tier at +{HORIZONS[1]} or +{last} weeks higher than at +{first} weeks, or High/Critical "
+                    f"at +{first} weeks with forecast cases rising at every step to +{last} weeks.",
+            "wards": rows}
+
+
 # ---------------------------------------------------------------- /api/forecast
 @lru_cache(maxsize=4096)
 def forecast(ward_id: str, as_of: str, horizon: int) -> dict:
@@ -195,6 +234,15 @@ def forecast(ward_id: str, as_of: str, horizon: int) -> dict:
 
 
 # ---------------------------------------------------------------- /api/metrics
+def _model_type(h: int) -> dict:
+    """What is actually served at horizon h, read from the model bundle. metrics.json's "selected" is the
+    training slot name (hgb_poisson), which holds the ensemble or blend when one was adopted."""
+    m = load_bundle()["modes"]["weather"][h]
+    weights = m.get("ensemble_weights") or {}
+    return {"model_type": m.get("base_kind") or m.get("kind"),
+            "model_members": [k for k, w in weights.items() if w > 0] or None}
+
+
 @lru_cache(maxsize=1)
 def metrics() -> dict:
     m = json.loads(METRICS_PATH.read_text())
@@ -208,13 +256,47 @@ def metrics() -> dict:
         per_h.append({
             "horizon": h,
             "selected_model": m["horizons"][str(h)]["selected"],
+            **_model_type(h),
             "mae": _num(t["MAE"], 3), "rmse": _num(t["RMSE"], 3),
             "baseline_mae": _num(t["baseline_seasonal_naive"]["MAE"], 3),
+            "baseline_rmse": _num(t["baseline_seasonal_naive"]["RMSE"], 3),
             "interval80_coverage": _num(t["interval80_coverage"], 3),
             "critical_flagged_high_or_above": _num(t.get("critical_recall"), 3),
             "by_city": [{"city": c, "mae": _num(r["mae"], 3), "rmse": _num(r["rmse"], 3)} for c, r in city.iterrows()],
         })
     return {"split": m["split"], "horizons": per_h}
+
+
+# ---------------------------------------------------------------- /api/lag_profile
+LAG_WEEKS = 12
+
+
+@lru_cache(maxsize=8)   # one entry per city (+ all cities); computed once from the raw data
+def lag_profile(city: str | None = None) -> dict:
+    """The "breeding clock" in the data: correlation between rain k weeks ago and cases now, k = 0..12.
+    Both series are taken as anomalies (minus that ward's average for the same week of the year), so the
+    shared monsoon season cannot create the link on its own. Descriptive only; the model does not use it."""
+    from src.predict import _raw
+    r = _raw().sort_values(["ward_id", "date"])
+    if city:
+        if city not in set(r["city"]):
+            raise ValueError(f"Unknown city: {city}")
+    woy = r["date"].dt.isocalendar().week.astype(int)
+    key = [r["ward_id"], woy]
+    cases = r["dengue_cases"] - r.groupby(key)["dengue_cases"].transform("mean")
+    lags = []
+    for k in range(LAG_WEEKS + 1):
+        rain = r.groupby("ward_id")["rainfall_mm"].shift(k)
+        rain = rain - rain.groupby(key).transform("mean")
+        sel = (r["city"] == city) if city else slice(None)
+        lags.append({"weeks": k, "corr": _num(cases[sel].corr(rain[sel]), 3)})
+    peak = max(lags, key=lambda x: x["corr"])
+    first, last = r["date"].min(), r["date"].max()
+    return {"city": city, "lags": lags, "peak_weeks": peak["weeks"], "peak_corr": peak["corr"],
+            "period": {"from": _date(first), "to": _date(last)},
+            "n_rows": int(((r["city"] == city) if city else r["city"].notna()).sum()),
+            "method": "Pearson correlation of rainfall k weeks earlier with cases now, both minus the "
+                      "ward's average for that week of the year."}
 
 
 def ward_history(ward_id: str, horizon: int) -> dict:
@@ -371,3 +453,34 @@ def what_if(body: dict) -> dict:
         "units": {k: WHAT_IF_UNITS[k] for k in (*overrides, "weeks")},
         "warnings": warnings,
     }
+
+
+# ---------------------------------------------------------------- /api/efficiency
+EFFICIENCY_PATH = ROOT / "reports" / "efficiency.json"
+# request-level caches: one entry per distinct question (endpoint + inputs)
+_ANSWER_CACHES = {"forecast": "forecast", "ranking": "ranking", "warnings": "warnings",
+                  "what_if": "_scenario", "metrics": "metrics", "lag_profile": "lag_profile"}
+# where the model actually runs: all wards for one week/horizon, or one typed-weather scenario
+_MODEL_CACHES = ("_ranking_df", "_scenario")
+
+
+def efficiency() -> dict:
+    """Measured costs (reports/efficiency.json, from scripts/measure_efficiency.py) plus live cache
+    counters of this server process since it started. Not cached: the counters change per request."""
+    measured = json.loads(EFFICIENCY_PATH.read_text()) if EFFICIENCY_PATH.exists() else None
+    per = {}
+    for name, fn in _ANSWER_CACHES.items():
+        ci = globals()[fn].cache_info()
+        per[name] = {"from_cache": ci.hits, "computed": ci.misses}
+    hits = sum(v["from_cache"] for v in per.values())
+    misses = sum(v["computed"] for v in per.values())
+    model_runs = sum(globals()[fn].cache_info().misses for fn in _MODEL_CACHES)
+    return {"measured": measured,
+            "live": {"answers_from_cache": hits, "answers_computed": misses,
+                     "share_from_cache": _num(hits / (hits + misses), 3) if hits + misses else None,
+                     "model_runs": model_runs,
+                     # all-ward results reused by other questions (a ward's forecast, warnings, other horizons)
+                     "model_results_reused": _ranking_df.cache_info().hits,
+                     "model_results_needed": _ranking_df.cache_info().hits + _ranking_df.cache_info().misses,
+                     "by_endpoint": per}}
+

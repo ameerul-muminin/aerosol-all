@@ -1,5 +1,5 @@
-// F4 All wards: tier counts, ranking with +2/+3/+4 heat strip (ward × horizon heatmap), by-city bars, CSV.
-// Data: GET /api/ranking (one call per horizon/city; cached by api.js).
+// F4 All wards: early warnings, tier counts, ranking with +2/+3/+4 heat strip (ward × horizon heatmap),
+// by-city bars, CSV. Data: GET /api/ranking and /api/warnings (cached by api.js).
 import { api } from "../api.js";
 import { t } from "../i18n.js";
 import { num0, num1, dateLong, cityName, wardName, tierHTML, esc } from "../format.js";
@@ -16,9 +16,9 @@ export async function render(root, { state: s, meta, set, retry }) {
     root.innerHTML = `<div class="head"><h1 class="display">${esc(t("wards.title"))}</h1><p><span class="skel">${esc(t("state.loading"))}</span></p></div>
       <div class="grid" aria-busy="true"><section class="card span-12"><span class="skel" style="height:320px;width:100%"></span></section></div>`;
   }
-  let r;
+  let r, warn;
   try {
-    r = await api.ranking(s.as_of, s.h, s.city);
+    [r, warn] = await Promise.all([api.ranking(s.as_of, s.h, s.city), api.warnings(s.as_of, s.city)]);
   } catch (err) {
     if (current()) showError(root, err, retry);
     return;
@@ -43,6 +43,7 @@ export async function render(root, { state: s, meta, set, retry }) {
     <button type="button" class="btn small" id="w-csv">${esc(t("wards.csv"))}</button>
   </div>
   <div class="grid">
+    <section class="card span-12">${warnings(warn, s)}</section>
     ${TIERS.map((k) => `<section class="card tile span-3">${tierHTML(k)}<b>${num0(r.tier_counts[k])}</b>
       <span class="of">${esc(t("wards.count_wards", { n: num0(total) }))}</span></section>`).join("")}
     <section class="card span-8">${total ? table(r, s) : `<p>${esc(t("wards.empty"))}</p>`}</section>
@@ -52,11 +53,35 @@ export async function render(root, { state: s, meta, set, retry }) {
   segment(root.querySelector(".seg"), s.h, (v) => set({ h: Number(v) }));
   root.querySelector("#w-city").onchange = (e) => set({ city: e.target.value });
   root.querySelector("#w-csv").onclick = () => downloadCsv(r);
-  root.querySelectorAll(".rank a").forEach((a) => (a.onclick = (e) => {
+  const more = root.querySelector("#warn-more");
+  if (more) more.onclick = () => { root.querySelectorAll(".warn li[hidden]").forEach((li) => (li.hidden = false)); more.remove(); };
+  root.querySelectorAll(".rank a, .warn a").forEach((a) => (a.onclick = (e) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;   // let "open in new tab" work
     e.preventDefault();
-    set({ ward: a.dataset.ward, view: "outlook" });
+    set({ ward: a.dataset.ward, view: "outlook", ...(a.closest(".warn") ? { h: Number(new URLSearchParams(a.search).get("h")) } : {}) });
   }));
+}
+
+/** Wards getting worse over the next 4 weeks, worst first: tier and cases at +2 → +3 → +4, plus the action. */
+const WARN_SHOWN = 8;
+function warnings(w, s) {
+  const head = `<div class="warn-head"><h2>${esc(t("warn.title"))}</h2>
+    <span>${esc(t("warn.count", { n: num0(w.wards.length), total: num0(w.n_wards) }))}</span></div>`;
+  if (!w.wards.length) return `${head}<p class="warn-none">${esc(t("warn.none"))}</p>`;
+  const items = w.wards.map((x, i) => {
+    const name = wardName(x.ward_id);
+    const href = `?${new URLSearchParams({ ward: x.ward_id, as_of: s.as_of, h: x.peak_horizon })}#outlook`;
+    const steps = x.steps.map((st) => `<span class="st"><em>${esc(t("outlook.plus_weeks", { h: num0(st.horizon) }))}</em>
+      ${tierHTML(st.risk_tier)}<b>${esc(t("warn.cases", { n: num1(st.predicted_cases) }))}</b></span>`).join(`<span class="arr" aria-hidden="true">→</span>`);
+    return `<li${i >= WARN_SHOWN ? " hidden" : ""}>
+      <div class="who"><a href="${href}" data-ward="${x.ward_id}" aria-label="${esc(t("wards.open", { ward: `${name}, ${cityName(x.city)}` }))}">${esc(name)}</a>
+        <span class="city">${esc(cityName(x.city))} · ${esc(t(`warn.${x.reason}`))}</span></div>
+      <div class="steps">${steps}</div>
+      <p class="act">${esc(t(`action.${x.peak_tier}`))}</p></li>`;
+  }).join("");
+  const more = w.wards.length > WARN_SHOWN
+    ? `<button type="button" class="btn small" id="warn-more">${esc(t("warn.show_all", { n: num0(w.wards.length) }))}</button>` : "";
+  return `${head}<ol class="warn">${items}</ol>${more}<p class="acc-note">${esc(t("warn.rule"))}</p>`;
 }
 
 function table(r, s) {

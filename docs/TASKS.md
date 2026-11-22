@@ -20,27 +20,27 @@ Order matters; each step is demo-able on its own.
       (colour AND text), predicted cases, range, change (`change.cases`, `tier_changed`). Show `warnings[]`
       and any `error` message from the API inline. No new packages. Demo line: 0 → 250 mm.
 - [x] **F4 All wards (Alif):** tier counts, ranking with +2/+3/+4 heat strip (bonus: heatmap), by-city bars, CSV.
-- [ ] **F5 Model accuracy (Nazifa):** MAE/RMSE per horizon vs seasonal baseline, by city, `/api/history`
+- [x] **F5 Model accuracy (Nazifa; built by Alif with her OK):** MAE/RMSE per horizon vs seasonal baseline, by city, `/api/history`
       chart with 80% band (bonus: confidence intervals + validation dashboard).
 - [x] **F6 Marketing page (Srijita):** `web/index.html` + `landing.css` + `landing.js` from `web/proto/hero-a.html`.
       Live card from `/api/forecast`, accuracy from `/api/metrics`. No login/register pages: the app has no
       accounts, and a page that doesn't work reads as mock UI.
 - [x] **F7 Screenshots (Srijita):** fonts are vendored (Anton + Hind Siliguri); screenshots of
       each view into `docs/screenshots/` (index: `docs/screenshots/README.md`). Linking from the main README: Alif.
-- [ ] **F8 Polish (Alif):** widths 360/768/1440, keyboard, error states (stop the server and reload),
+- [x] **F8 Polish (Alif):** widths 360/768/1440, keyboard, error states (stop the server and reload),
       no console errors, `verify` skill.
 
 ## Docs (morning)
 - [ ] ARCHITECTURE.md to 1–2 pages: 1,240 words now, target about 900. Nazifa trims ML sections; the diagram,
       split and model rationale stay.
-- [ ] `/api/metrics`: add the deployed model type next to `selected_model` (ensemble / blend / hgb) (Nazifa).
+- [x] `/api/metrics`: add the deployed model type next to `selected_model` (ensemble / blend / hgb) (Nazifa; done by Alif with her OK).
 - [ ] Deep-learning study: commit it under `experiments/deep_learning/` with its own requirements file (not
       the main one), so the documentation's claims can be checked. Or drop the claims (Nazifa).
 - [ ] README: screenshots, confirm AI table per member (Nazifa: Claude Code; Srijita: Antigravity + model).
 - [ ] Re-run `python -m scripts.measure_efficiency --train` after the last model change; sync the cost table.
 
 ## Submission (Alif)
-- [ ] Git check: Srijita has 0 commits. F6/F7 must land from her own account, as her own work.
+- [x] Git check: Srijita has 0 commits. F6/F7 must land from her own account, as her own work. (Done: F6/F7 are her commits, PR #22.)
 - [ ] Clean-clone test on Windows: new folder + venv, README only, under 3 minutes.
 - [ ] Video: script (Nazifa drafts the ML part), two rehearsals, one uncut take of 3:00 or less, on localhost,
       voiceover, no slides.

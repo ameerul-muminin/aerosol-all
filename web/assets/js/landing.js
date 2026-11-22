@@ -1,9 +1,10 @@
-// Marketing page: live chips from /api (nothing typed into the HTML) + EN/বাংলা toggle.
+// Marketing page: live chips from /api (nothing typed into the HTML), "Check a ward" form (check.js) + EN/বাংলা toggle.
 // Chips: Critical and High ward counts and the highest ward from /api/ranking, the test-period error
 // against the seasonal baseline and the per-horizon accuracy cards from /api/metrics. The only hard-coded numbers are the three brief facts.
 import { initI18n, setLang, getLang, t } from "./i18n.js";
 import { api, get } from "./api.js";
 import { num0, num1, num2, dateLong, wardFull, tierHTML, esc } from "./format.js";
+import { renderCheck } from "./check.js";
 
 const HORIZON = 3;   // the middle of the 2–4 week window
 const $ = (id) => document.getElementById(id);
@@ -37,6 +38,7 @@ function render() {
     chip("c4", esc(t("landing.chip_err")), `${cut >= 0 ? "−" : "+"}${num0(Math.abs(cut))}%`, t("landing.chip_err_s", { years: testYears(m.split) })),
   ].join("");
   renderAccuracy(m);
+  renderCheck(meta);
 }
 
 /** One card per horizon: model MAE vs the seasonal baseline (bars on one shared scale), RMSE, 80% coverage. */

@@ -4,6 +4,8 @@
 import { t } from "./i18n.js";
 
 const cache = new Map();
+/** How many GET answers this browser reused from memory instead of asking the server (Cost & speed tab). */
+export const browserCache = { reused: 0, asked: 0 };
 
 export class ApiError extends Error {
   constructor(message, { offline = false, status = 0 } = {}) {
@@ -32,7 +34,9 @@ async function request(path, init) {
 export function get(path, params = {}) {
   const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ""));
   const url = qs.toString() ? `${path}?${qs}` : path;
-  if (!cache.has(url)) {
+  if (cache.has(url)) browserCache.reused += 1;
+  else {
+    browserCache.asked += 1;
     const p = request(url).catch((e) => { cache.delete(url); throw e; });   // never cache failures
     cache.set(url, p);
   }
@@ -47,5 +51,10 @@ export const api = {
   meta: () => get("/api/meta"),
   forecast: (ward_id, as_of, horizon) => get("/api/forecast", { ward_id, as_of, horizon }),
   ranking: (as_of, horizon, city) => get("/api/ranking", { as_of, horizon, city }),
+  warnings: (as_of, city) => get("/api/warnings", { as_of, city }),
+  efficiency: () => request("/api/efficiency"),   // live counters: never cached
+  metrics: () => get("/api/metrics"),
+  lagProfile: (city) => get("/api/lag_profile", { city }),
+  history: (ward_id, horizon) => get("/api/history", { ward_id, horizon }),
   whatIf: (body) => post("/api/what_if", body),
 };

@@ -53,3 +53,52 @@ def test_metrics_read_from_reports():
     raw = json.loads(service.METRICS_PATH.read_text())
     for h in m["horizons"]:
         assert h["mae"] == round(raw["horizons"][str(h["horizon"])]["test"]["MAE"], 3)
+        base = raw["horizons"][str(h["horizon"])]["test"]["baseline_seasonal_naive"]
+        assert h["baseline_rmse"] == round(base["RMSE"], 3)   # accuracy view compares RMSE too
+
+
+def test_metrics_report_the_deployed_model_type():
+    from src.predict import load_bundle
+    for h in service.metrics()["horizons"]:
+        assert h["model_type"] == load_bundle()["modes"]["weather"][h["horizon"]]["base_kind"]
+
+
+def test_lag_profile_peaks_inside_the_breeding_window():
+    """The data's rain-to-cases link should peak 2-4 weeks later (the brief's breeding clock)."""
+    lp = service.lag_profile()
+    assert [x["weeks"] for x in lp["lags"]] == list(range(13))
+    assert 2 <= lp["peak_weeks"] <= 4
+    assert service.lag_profile("Gazipur")["n_rows"] == 5 * 522
+    with pytest.raises(ValueError):
+        service.lag_profile("Atlantis")
+
+
+def test_warnings_follow_the_rule_and_match_the_ranking():
+    """Every listed ward really gets worse, and its numbers are the same forecasts /api/ranking serves."""
+    lvl = service.TIERS.index
+    w = service.warnings("2025-08-18")
+    assert w["wards"], "peak season should raise at least one warning"
+    for x in w["wards"]:
+        tiers = [lvl(s["risk_tier"]) for s in x["steps"]]
+        cases = [s["predicted_cases"] for s in x["steps"]]
+        assert max(tiers[1:]) > tiers[0] or (tiers[0] >= lvl("High") and cases[0] < cases[1] < cases[2])
+        for s in x["steps"]:
+            r = next(r for r in service.ranking("2025-08-18", s["horizon"])["wards"] if r["ward_id"] == x["ward_id"])
+            assert (r["predicted_cases"], r["risk_tier"]) == (s["predicted_cases"], s["risk_tier"])
+    peaks = [lvl(x["peak_tier"]) for x in w["wards"]]
+    assert peaks == sorted(peaks, reverse=True)
+    assert all(x["city"] == "Gazipur" for x in service.warnings("2025-08-18", "Gazipur")["wards"])
+    with pytest.raises(ValueError):
+        service.warnings("2025-08-18", "Atlantis")
+
+
+def test_efficiency_counts_cache_hits_live():
+    measured = json.loads(service.EFFICIENCY_PATH.read_text())
+    week = service.meta()["as_of"]["default"]
+    service.ranking(week, 3)                       # make sure the answer is cached
+    before = service.efficiency()
+    assert before["measured"] == measured          # served exactly as measured, nothing typed in
+    service.ranking(week, 3)                       # same question again -> from cache
+    after = service.efficiency()["live"]
+    assert after["by_endpoint"]["ranking"]["from_cache"] == before["live"]["by_endpoint"]["ranking"]["from_cache"] + 1
+    assert after["answers_computed"] == before["live"]["answers_computed"]

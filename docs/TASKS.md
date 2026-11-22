@@ -22,11 +22,11 @@ Order matters; each step is demo-able on its own.
 - [x] **F4 All wards (Alif):** tier counts, ranking with +2/+3/+4 heat strip (bonus: heatmap), by-city bars, CSV.
 - [x] **F5 Model accuracy (Nazifa; built by Alif with her OK):** MAE/RMSE per horizon vs seasonal baseline, by city, `/api/history`
       chart with 80% band (bonus: confidence intervals + validation dashboard).
-- [ ] **F6 Marketing page (Srijita):** `web/index.html` + `landing.css` + `landing.js` from `web/proto/hero-a.html`.
+- [x] **F6 Marketing page (Srijita):** `web/index.html` + `landing.css` + `landing.js` from `web/proto/hero-a.html`.
       Live card from `/api/forecast`, accuracy from `/api/metrics`. No login/register pages: the app has no
       accounts, and a page that doesn't work reads as mock UI.
-- [ ] **F7 Screenshots (Srijita):** fonts are vendored (Anton + Hind Siliguri); screenshots of
-      each view into `docs/screenshots/`, linked from README.
+- [x] **F7 Screenshots (Srijita):** fonts are vendored (Anton + Hind Siliguri); screenshots of
+      each view into `docs/screenshots/` (index: `docs/screenshots/README.md`). Linking from the main README: Alif.
 - [ ] **F8 Polish (Alif):** widths 360/768/1440, keyboard, error states (stop the server and reload),
       no console errors, `verify` skill.
 

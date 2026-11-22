@@ -21,7 +21,8 @@ import numpy as np
 import pandas as pd
 
 from src.features import (STATIC, WEATHER, HORIZONS, add_lag_features, feature_columns,
-                          required_columns, load_raw, validate)
+                          required_columns, load_raw, validate, CITY_COLUMNS,
+                          city_case_table)
 from src.train import BUNDLE, TIER_NAMES, TRAIN_END, to_tier, conformal_interval
 
 # Plain-language driver groups for the team interface. Each group's contribution is measured by
@@ -202,6 +203,10 @@ def predict_from_weather(weather: pd.DataFrame, horizon: int, mode: str = "weath
     except ValueError as e:   # e.g. a gap between history and the new weeks
         raise ValueError(f"weather input does not line up with ward history: {e}") from None
     feats = add_lag_features(combined)
+    # City-wide case rates must come from ALL wards' REPORTED cases, not from this subset with
+    # placeholder zeros. Weeks beyond the dataset have no reported cases yet -> NaN (the model
+    # handles missing values).
+    feats = feats.drop(columns=CITY_COLUMNS).merge(city_case_table(hist), on=["city", "date"], how="left")
     origin = w.groupby("ward_id")["date"].max()
     rows = feats[feats["date"] == feats["ward_id"].map(origin)]
     return _score(rows, horizon, mode, explain)

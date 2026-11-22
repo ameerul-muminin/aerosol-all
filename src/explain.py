@@ -36,7 +36,7 @@ def group_of(feature: str) -> str:
         return "Season"
     if feature in STATIC:
         return "Ward vulnerability"
-    if feature.startswith("cases_"):
+    if feature.startswith(("cases_", "city_rate", "city_trend")):
         return "Recent cases"
     raise ValueError(f"no driver group for feature {feature!r}")
 

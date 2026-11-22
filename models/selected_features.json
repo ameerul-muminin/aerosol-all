@@ -96,6 +96,11 @@
     "rain_sum_2_4",
     "rain_sum_0_3",
     "rain_sum_0_8",
-    "hum_mean_0_3"
+    "hum_mean_0_3",
+    "city_rate0",
+    "city_rate1",
+    "city_rate_mean4",
+    "city_rate_mean8",
+    "city_trend"
   ]
 }

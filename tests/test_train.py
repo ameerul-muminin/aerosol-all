@@ -28,7 +28,7 @@ def test_selected_features_are_valid_and_ordered():
     from src.train import SELECTED
     if not SELECTED.exists():
         return
-    allowed = feature_columns(anomaly=True)
+    allowed = feature_columns(anomaly=True, city=True)
     for h, feats in json.loads(SELECTED.read_text()).items():
         assert feats and len(set(feats)) == len(feats)
         assert set(feats) <= set(allowed), "selection may only remove features"

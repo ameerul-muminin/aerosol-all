@@ -17,10 +17,10 @@
         },
         "season": {
           "mean_abs_cases": 0.2607203904521694,
-          "mean_signed_cases": -0.07401943721845813
+          "mean_signed_cases": -0.07401943721845812
         },
         "temperature": {
-          "mean_abs_cases": 0.24922137481257373,
+          "mean_abs_cases": 0.24922137481257378,
           "mean_signed_cases": 0.15559896848624688
         }
       },
@@ -180,7 +180,7 @@
           },
           {
             "value": 0.5702,
-            "mean_predicted_cases": 2.944073515956361
+            "mean_predicted_cases": 2.9440735159563616
           },
           {
             "value": 0.6189,
@@ -218,7 +218,7 @@
           },
           {
             "value": 0.3303,
-            "mean_predicted_cases": 3.2335634676105705
+            "mean_predicted_cases": 3.23356346761057
           },
           {
             "value": 0.3711,
@@ -304,7 +304,7 @@
           },
           {
             "value": 43062.875,
-            "mean_predicted_cases": 3.0724282179254185
+            "mean_predicted_cases": 3.072428217925419
           },
           {
             "value": 46313.8857,
@@ -341,10 +341,10 @@
       "global_shapley": {
         "rainfall": {
           "mean_abs_cases": 1.478651583881064,
-          "mean_signed_cases": 0.5340182200675118
+          "mean_signed_cases": 0.5340182200675117
         },
         "season": {
-          "mean_abs_cases": 0.9345114155908256,
+          "mean_abs_cases": 0.9345114155908255,
           "mean_signed_cases": 0.5997289727142188
         },
         "temperature": {
@@ -352,12 +352,12 @@
           "mean_signed_cases": 0.2650282829838555
         },
         "humidity": {
-          "mean_abs_cases": 0.313543567573609,
+          "mean_abs_cases": 0.31354356757360896,
           "mean_signed_cases": 0.25820881067047885
         },
         "ward_vulnerability": {
-          "mean_abs_cases": 0.2665285152723654,
-          "mean_signed_cases": 0.01988856605838345
+          "mean_abs_cases": 0.2665285152723653,
+          "mean_signed_cases": 0.019888566058383465
         }
       },
       "partial_dependence": {
@@ -404,7 +404,7 @@
           },
           {
             "value": 267.8909,
-            "mean_predicted_cases": 3.1276398860749626
+            "mean_predicted_cases": 3.127639886074962
           },
           {
             "value": 294.5491,
@@ -438,7 +438,7 @@
           },
           {
             "value": 63.3465,
-            "mean_predicted_cases": 2.7357928102298867
+            "mean_predicted_cases": 2.735792810229886
           },
           {
             "value": 65.678,
@@ -550,7 +550,7 @@
         "Ward sanitation score": [
           {
             "value": 0.2895,
-            "mean_predicted_cases": 3.156750290825866
+            "mean_predicted_cases": 3.1567502908258662
           },
           {
             "value": 0.3303,
@@ -558,7 +558,7 @@
           },
           {
             "value": 0.3711,
-            "mean_predicted_cases": 3.141186444235907
+            "mean_predicted_cases": 3.1411864442359065
           },
           {
             "value": 0.412,
@@ -582,7 +582,7 @@
           },
           {
             "value": 0.6161,
-            "mean_predicted_cases": 2.9643087221446804
+            "mean_predicted_cases": 2.964308722144681
           },
           {
             "value": 0.6569,
@@ -620,7 +620,7 @@
           },
           {
             "value": 26807.8214,
-            "mean_predicted_cases": 2.826146515462248
+            "mean_predicted_cases": 2.8261465154622485
           },
           {
             "value": 30058.8321,
@@ -652,7 +652,7 @@
           },
           {
             "value": 52815.9071,
-            "mean_predicted_cases": 3.1600168843959766
+            "mean_predicted_cases": 3.1600168843959775
           },
           {
             "value": 56066.9179,
@@ -660,7 +660,7 @@
           },
           {
             "value": 59317.9286,
-            "mean_predicted_cases": 3.2524031361419254
+            "mean_predicted_cases": 3.252403136141925
           },
           {
             "value": 62568.9393,
@@ -676,335 +676,339 @@
     "4": {
       "global_shapley": {
         "season": {
-          "mean_abs_cases": 1.6763963938935749,
-          "mean_signed_cases": 1.268261723127045
+          "mean_abs_cases": 1.8263870027070914,
+          "mean_signed_cases": 1.4684566581544303
         },
         "humidity": {
-          "mean_abs_cases": 0.41793829954127,
-          "mean_signed_cases": 0.3697375222872212
+          "mean_abs_cases": 0.4294483027988789,
+          "mean_signed_cases": 0.3850627761270853
         },
         "rainfall": {
-          "mean_abs_cases": 0.3692855670992398,
-          "mean_signed_cases": 0.11846905423903575
+          "mean_abs_cases": 0.2861890531549274,
+          "mean_signed_cases": 0.02519141169425063
         },
         "temperature": {
-          "mean_abs_cases": 0.2476381221802854,
-          "mean_signed_cases": 0.12891909309179547
+          "mean_abs_cases": 0.28543865681867886,
+          "mean_signed_cases": 0.1523561646591257
         },
         "ward_vulnerability": {
-          "mean_abs_cases": 0.22621846306538806,
-          "mean_signed_cases": 0.0022378448604635803
+          "mean_abs_cases": 0.24601401251600488,
+          "mean_signed_cases": 0.003867460599973008
+        },
+        "recent_cases": {
+          "mean_abs_cases": 0.13905730615859913,
+          "mean_signed_cases": -0.11483242881840784
         }
       },
       "partial_dependence": {
         "Rain 2-4 weeks ago, total mm (breeding window)": [
           {
             "value": 1.299,
-            "mean_predicted_cases": 2.36624117358267
+            "mean_predicted_cases": 2.689529720099173
           },
           {
             "value": 27.9579,
-            "mean_predicted_cases": 2.4164135066462666
+            "mean_predicted_cases": 2.7097538713590548
           },
           {
             "value": 54.6168,
-            "mean_predicted_cases": 2.485257860272753
+            "mean_predicted_cases": 2.740479098288166
           },
           {
             "value": 81.2757,
-            "mean_predicted_cases": 2.485257860272753
+            "mean_predicted_cases": 2.7363347697502425
           },
           {
             "value": 107.9346,
-            "mean_predicted_cases": 2.756193784158799
+            "mean_predicted_cases": 2.7401770101975345
           },
           {
             "value": 134.5935,
-            "mean_predicted_cases": 2.8578450378066638
+            "mean_predicted_cases": 2.7654047579971532
           },
           {
             "value": 161.2524,
-            "mean_predicted_cases": 2.956925384499711
+            "mean_predicted_cases": 2.7654047579971532
           },
           {
             "value": 187.9113,
-            "mean_predicted_cases": 2.956925384499711
+            "mean_predicted_cases": 2.7491565263898514
           },
           {
             "value": 214.5701,
-            "mean_predicted_cases": 2.768872126932111
+            "mean_predicted_cases": 2.7326040687541298
           },
           {
             "value": 241.229,
-            "mean_predicted_cases": 2.7356782388515932
+            "mean_predicted_cases": 2.6705896945503365
           },
           {
             "value": 267.8879,
-            "mean_predicted_cases": 2.718259592769226
+            "mean_predicted_cases": 2.6408894019072786
           },
           {
             "value": 294.5468,
-            "mean_predicted_cases": 2.708419511106525
+            "mean_predicted_cases": 2.625103382027887
           },
           {
             "value": 321.2057,
-            "mean_predicted_cases": 2.6026503488009083
+            "mean_predicted_cases": 2.596839074414137
           },
           {
             "value": 347.8646,
-            "mean_predicted_cases": 2.6026503488009083
+            "mean_predicted_cases": 2.596839074414137
           },
           {
             "value": 374.5235,
-            "mean_predicted_cases": 2.6026503488009083
+            "mean_predicted_cases": 2.596839074414137
           }
         ],
         "Humidity, 4-week mean %": [
           {
             "value": 56.1749,
-            "mean_predicted_cases": 1.7915732537048799
+            "mean_predicted_cases": 1.7792610308169232
           },
           {
             "value": 58.519,
-            "mean_predicted_cases": 1.7915732537048799
+            "mean_predicted_cases": 1.7792610308169232
           },
           {
             "value": 60.8631,
-            "mean_predicted_cases": 1.7915732537048799
+            "mean_predicted_cases": 1.7792610308169232
           },
           {
             "value": 63.2072,
-            "mean_predicted_cases": 1.7915732537048799
+            "mean_predicted_cases": 1.7792610308169232
           },
           {
             "value": 65.5514,
-            "mean_predicted_cases": 1.7915732537048799
+            "mean_predicted_cases": 1.7792610308169232
           },
           {
             "value": 67.8955,
-            "mean_predicted_cases": 1.8636548197331166
+            "mean_predicted_cases": 1.836467971848548
           },
           {
             "value": 70.2396,
-            "mean_predicted_cases": 1.8636548197331166
+            "mean_predicted_cases": 1.836467971848548
           },
           {
             "value": 72.5838,
-            "mean_predicted_cases": 1.8636548197331166
+            "mean_predicted_cases": 1.9055642121186818
           },
           {
             "value": 74.9279,
-            "mean_predicted_cases": 1.9400549750120542
+            "mean_predicted_cases": 2.1463497896607078
           },
           {
             "value": 77.272,
-            "mean_predicted_cases": 2.0767249748388243
+            "mean_predicted_cases": 2.1463497896607078
           },
           {
             "value": 79.6161,
-            "mean_predicted_cases": 2.0767249748388243
+            "mean_predicted_cases": 2.1463497896607078
           },
           {
             "value": 81.9602,
-            "mean_predicted_cases": 2.7659246331800325
+            "mean_predicted_cases": 2.7858765064553728
           },
           {
             "value": 84.3044,
-            "mean_predicted_cases": 2.7814848611568435
+            "mean_predicted_cases": 2.7944683959412506
           },
           {
             "value": 86.6485,
-            "mean_predicted_cases": 2.85320159888012
+            "mean_predicted_cases": 2.8610245916275843
           },
           {
             "value": 88.9926,
-            "mean_predicted_cases": 2.867978690862178
+            "mean_predicted_cases": 2.8885216399206497
           }
         ],
         "Ward water-logging risk index": [
           {
             "value": 0.23,
-            "mean_predicted_cases": 2.001628989950127
+            "mean_predicted_cases": 1.9979484015688151
           },
           {
             "value": 0.2786,
-            "mean_predicted_cases": 2.070660219233013
+            "mean_predicted_cases": 2.067128018190446
           },
           {
             "value": 0.3272,
-            "mean_predicted_cases": 2.205378483578821
+            "mean_predicted_cases": 2.2410834010701617
           },
           {
             "value": 0.3758,
-            "mean_predicted_cases": 2.3113601419463174
+            "mean_predicted_cases": 2.35590978677003
           },
           {
             "value": 0.4244,
-            "mean_predicted_cases": 2.341039637130405
+            "mean_predicted_cases": 2.364930402516258
           },
           {
             "value": 0.473,
-            "mean_predicted_cases": 2.427472006878973
+            "mean_predicted_cases": 2.447519371258117
           },
           {
             "value": 0.5216,
-            "mean_predicted_cases": 2.631755152815096
+            "mean_predicted_cases": 2.6775431239814327
           },
           {
             "value": 0.5702,
-            "mean_predicted_cases": 2.658774146301348
+            "mean_predicted_cases": 2.6903596675690413
           },
           {
             "value": 0.6189,
-            "mean_predicted_cases": 2.7244036350033816
+            "mean_predicted_cases": 2.752533168663907
           },
           {
             "value": 0.6675,
-            "mean_predicted_cases": 2.7244036350033816
+            "mean_predicted_cases": 2.752533168663907
           },
           {
             "value": 0.7161,
-            "mean_predicted_cases": 2.874013070708633
+            "mean_predicted_cases": 2.911652701337096
           },
           {
             "value": 0.7647,
-            "mean_predicted_cases": 3.319411149018815
+            "mean_predicted_cases": 3.3165855281215726
           },
           {
             "value": 0.8133,
-            "mean_predicted_cases": 3.319411149018815
+            "mean_predicted_cases": 3.3165855281215726
           },
           {
             "value": 0.8619,
-            "mean_predicted_cases": 3.319411149018815
+            "mean_predicted_cases": 3.33557215477297
           },
           {
             "value": 0.9105,
-            "mean_predicted_cases": 3.319411149018815
+            "mean_predicted_cases": 3.33557215477297
           }
         ],
         "Ward sanitation score": [
           {
             "value": 0.2895,
-            "mean_predicted_cases": 2.8691718640917063
+            "mean_predicted_cases": 2.908587597932734
           },
           {
             "value": 0.3303,
-            "mean_predicted_cases": 2.8691718640917063
+            "mean_predicted_cases": 2.908587597932734
           },
           {
             "value": 0.3711,
-            "mean_predicted_cases": 2.8691718640917063
+            "mean_predicted_cases": 2.908587597932734
           },
           {
             "value": 0.412,
-            "mean_predicted_cases": 2.804550771292359
+            "mean_predicted_cases": 2.8132962241889587
           },
           {
             "value": 0.4528,
-            "mean_predicted_cases": 2.7493039761494193
+            "mean_predicted_cases": 2.782964344436057
           },
           {
             "value": 0.4936,
-            "mean_predicted_cases": 2.7493039761494193
+            "mean_predicted_cases": 2.782964344436057
           },
           {
             "value": 0.5344,
-            "mean_predicted_cases": 2.7009910560646313
+            "mean_predicted_cases": 2.7189263794539102
           },
           {
             "value": 0.5752,
-            "mean_predicted_cases": 2.7009910560646313
+            "mean_predicted_cases": 2.7189263794539102
           },
           {
             "value": 0.6161,
-            "mean_predicted_cases": 2.7009910560646313
+            "mean_predicted_cases": 2.7189263794539102
           },
           {
             "value": 0.6569,
-            "mean_predicted_cases": 2.6373379985676952
+            "mean_predicted_cases": 2.6540936944959537
           },
           {
             "value": 0.6977,
-            "mean_predicted_cases": 2.6373379985676952
+            "mean_predicted_cases": 2.6540936944959537
           },
           {
             "value": 0.7385,
-            "mean_predicted_cases": 2.6373379985676952
+            "mean_predicted_cases": 2.6540936944959537
           },
           {
             "value": 0.7794,
-            "mean_predicted_cases": 2.6373379985676952
+            "mean_predicted_cases": 2.6540936944959537
           },
           {
             "value": 0.8202,
-            "mean_predicted_cases": 2.6373379985676952
+            "mean_predicted_cases": 2.6540936944959537
           },
           {
             "value": 0.861,
-            "mean_predicted_cases": 2.6373379985676952
+            "mean_predicted_cases": 2.6540936944959537
           }
         ],
         "Ward population density per km2": [
           {
             "value": 20305.8,
-            "mean_predicted_cases": 2.383988618593197
+            "mean_predicted_cases": 2.4049496840312723
           },
           {
             "value": 23556.8107,
-            "mean_predicted_cases": 2.4093302312806073
+            "mean_predicted_cases": 2.417606623019941
           },
           {
             "value": 26807.8214,
-            "mean_predicted_cases": 2.519690526491523
+            "mean_predicted_cases": 2.539633033891046
           },
           {
             "value": 30058.8321,
-            "mean_predicted_cases": 2.519690526491523
+            "mean_predicted_cases": 2.539633033891046
           },
           {
             "value": 33309.8429,
-            "mean_predicted_cases": 2.519690526491523
+            "mean_predicted_cases": 2.539633033891046
           },
           {
             "value": 36560.8536,
-            "mean_predicted_cases": 2.519690526491523
+            "mean_predicted_cases": 2.539633033891046
           },
           {
             "value": 39811.8643,
-            "mean_predicted_cases": 2.7638375035418115
+            "mean_predicted_cases": 2.7737555134188376
           },
           {
             "value": 43062.875,
-            "mean_predicted_cases": 2.7638375035418115
+            "mean_predicted_cases": 2.7737555134188376
           },
           {
             "value": 46313.8857,
-            "mean_predicted_cases": 2.8724078155136477
+            "mean_predicted_cases": 2.906502785221106
           },
           {
             "value": 49564.8964,
-            "mean_predicted_cases": 2.8724078155136477
+            "mean_predicted_cases": 2.906502785221106
           },
           {
             "value": 52815.9071,
-            "mean_predicted_cases": 2.9041720424591766
+            "mean_predicted_cases": 2.9422145374052135
           },
           {
             "value": 56066.9179,
-            "mean_predicted_cases": 2.9041720424591766
+            "mean_predicted_cases": 2.9422145374052135
           },
           {
             "value": 59317.9286,
-            "mean_predicted_cases": 3.0644352219900677
+            "mean_predicted_cases": 3.0883707875011934
           },
           {
             "value": 62568.9393,
-            "mean_predicted_cases": 3.0644352219900677
+            "mean_predicted_cases": 3.0883707875011934
           },
           {
             "value": 65819.95,
-            "mean_predicted_cases": 3.084115692384366
+            "mean_predicted_cases": 3.0949562165046904
           }
         ]
       }

@@ -90,9 +90,9 @@
       "validation": {
         "model": {
           "weeks": 35,
-          "precision_at_10": 0.4685714285714285,
-          "top5_captured": 0.3933856619570905,
-          "spearman": 0.49684139942376654
+          "precision_at_10": 0.48000000000000004,
+          "top5_captured": 0.42089307517878943,
+          "spearman": 0.5026367453217168
         },
         "seasonal": {
           "weeks": 35,
@@ -110,9 +110,9 @@
       "test": {
         "model": {
           "weeks": 34,
-          "precision_at_10": 0.48235294117647054,
-          "top5_captured": 0.39032470797176677,
-          "spearman": 0.44939487109716636
+          "precision_at_10": 0.4764705882352941,
+          "top5_captured": 0.40082050302638533,
+          "spearman": 0.44706079512033087
         },
         "seasonal": {
           "weeks": 34,

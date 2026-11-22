@@ -65,7 +65,15 @@
 .bar b { font-weight: 600; color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }
 .acc-card .foot { font-size: var(--fs-small); color: var(--ink-2); margin: 0; border-top: 1px solid var(--line); padding-top: 12px; }
 
+.foot-site { display: grid; grid-template-columns: 1fr auto; gap: 16px 40px; align-items: start; padding: 40px clamp(16px, 3vw, 40px); border-top: 1px solid var(--line); }
+.foot-site p { margin: 8px 0 0; color: var(--ink-2); max-width: 46ch; }
+.foot-site nav { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+.foot-site nav a { min-height: 44px; display: inline-flex; align-items: center; font-weight: 600; text-decoration: none; }
+.foot-site nav a:hover { text-decoration: underline; }
+.foot-site .foot-small { grid-column: 1 / -1; font-size: var(--fs-small); margin: 0; }
+
 @media (max-width: 760px) {
+  .foot-site { grid-template-columns: 1fr; }
   .acc-grid, .steps ol { grid-template-columns: 1fr; }
   .steps ol { gap: 24px; }
   .hero h1.display { white-space: normal; }

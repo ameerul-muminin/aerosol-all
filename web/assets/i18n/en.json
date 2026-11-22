@@ -170,6 +170,11 @@
     "step2_t": "It looks back",
     "step2_p": "The model reads the weather of the weeks before, plus each ward's water-logging, crowding and sanitation.",
     "step3_t": "Risk per ward, 2–4 weeks ahead",
-    "step3_p": "Expected cases, a likely range, a risk level and the reasons behind it."
+    "step3_p": "Expected cases, a likely range, a risk level and the reasons behind it.",
+    "foot_about": "Ward dengue forecasts for public health officers. No accounts, no tracking, no outside services.",
+    "foot_nav": "Pages",
+    "foot_api": "API",
+    "foot_data": "Data: EDU AI Hackathon 2026 dataset.",
+    "foot_team": "Built by Nazifa, Alif and Srijita."
   }
 }

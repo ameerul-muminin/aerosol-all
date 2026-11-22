@@ -281,7 +281,7 @@
     "foot_team": "Built by Nazifa, Alif and Srijita.",
     "nav_check": "Check a ward",
     "check_title": "Check a ward",
-    "check_sub": "Pick a ward and a week. Leave the weather empty to use what was recorded, or type that week's weather to see what changes.",
+    "check_sub": "Pick a ward and a week (forecasts are week by week). Leave the weather empty to use what was recorded, or type that week's weather: it replaces only that week, and the model still reads the 8 weeks of rain before it.",
     "check_week": "Week",
     "check_latest": "{date} (latest)",
     "check_wx": "That week's weather (optional)",

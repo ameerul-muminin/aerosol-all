@@ -163,6 +163,13 @@
     "acc_unit": "average error, cases per ward per week",
     "acc_model": "Model",
     "acc_base": "Seasonal",
-    "acc_rmse": "RMSE {rmse} · the 80% range held the real count {cov}% of the time"
+    "acc_rmse": "RMSE {rmse} · the 80% range held the real count {cov}% of the time",
+    "steps_title": "How the forecast is made",
+    "step1_t": "Weekly weather in",
+    "step1_p": "Rain, temperature and humidity for every ward, week by week.",
+    "step2_t": "It looks back",
+    "step2_p": "The model reads the weather of the weeks before, plus each ward's water-logging, crowding and sanitation.",
+    "step3_t": "Risk per ward, 2–4 weeks ahead",
+    "step3_p": "Expected cases, a likely range, a risk level and the reasons behind it."
   }
 }

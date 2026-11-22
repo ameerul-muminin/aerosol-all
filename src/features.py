@@ -90,7 +90,28 @@ def add_lag_features(df: pd.DataFrame) -> pd.DataFrame:
     extra["rain_anom_sum_2_4"] = extra[[f"rain_anom_lag{k}" for k in (2, 3, 4)]].sum(axis=1, skipna=False)
     extra["rain_anom_sum_0_3"] = extra[[f"rain_anom_lag{k}" for k in range(4)]].sum(axis=1, skipna=False)
     extra["cases_sum_0_3"] = extra[[f"cases_lag{k}" for k in range(4)]].sum(axis=1, skipna=False)
-    return pd.concat([out, extra], axis=1)
+    out = pd.concat([out, extra], axis=1)
+    city = city_case_table(out)
+    return out.merge(city, on=["city", "date"], how="left", validate="many_to_one")
+
+
+CITY_COLUMNS = ["city_rate0", "city_rate1", "city_rate_mean4", "city_rate_mean8", "city_trend"]
+
+
+def city_case_table(df: pd.DataFrame) -> pd.DataFrame:
+    """City-wide outbreak signal per (city, origin week t): average reported cases per ward in
+    the city at t, t-1, the last 4 and last 8 weeks, and the 3-week change. One ward's weekly
+    count is noisy (58% zeros); the city average is a steadier sign of a building outbreak.
+    Uses only cases reported at weeks <= t, so it is known at forecast time."""
+    c = (df.groupby(["city", "date"])["dengue_cases"].mean().rename("city_rate0")
+           .reset_index().sort_values(["city", "date"]))
+    g = c.groupby("city", sort=False)["city_rate0"]
+    lag = {k: g.shift(k) for k in range(8)}
+    c["city_rate1"] = lag[1]
+    c["city_rate_mean4"] = sum(lag[k] for k in range(4)) / 4
+    c["city_rate_mean8"] = sum(lag[k] for k in range(8)) / 8
+    c["city_trend"] = c["city_rate0"] - lag[3]
+    return c[["city", "date", *CITY_COLUMNS]]
 
 
 def anomaly_columns() -> list[str]:
@@ -101,15 +122,18 @@ def case_columns() -> list[str]:
     return [f"cases_lag{k}" for k in CASE_LAGS] + ["cases_sum_0_3"]
 
 
-def feature_columns(anomaly: bool = False, cases: bool = False) -> list[str]:
+def feature_columns(anomaly: bool = False, cases: bool = False, city: bool = False) -> list[str]:
     """Model inputs. Default = weather + ward attributes + season. `anomaly` adds rain
-    anomalies; `cases` adds reported-case history (optional weather+cases mode)."""
+    anomalies; `city` adds city-wide reported-case rates (used by the 4-week model, adopted by
+    CV); `cases` adds the ward's own reported-case history (optional weather+cases mode)."""
     cols = list(STATIC) + ["week_sin", "week_cos"]
     cols += [f"rain_lag{k}" for k in RAIN_LAGS]
     cols += [f"{s}_lag{k}" for s in ("temp", "hum") for k in TEMP_HUM_LAGS]
     cols += ["rain_sum_0_1", "rain_sum_2_4", "rain_sum_0_3", "rain_sum_0_8", "temp_mean_0_3", "hum_mean_0_3"]
     if anomaly:
         cols += anomaly_columns()
+    if city:
+        cols += CITY_COLUMNS
     if cases:
         cols += case_columns()
     return cols

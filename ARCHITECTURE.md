@@ -33,7 +33,10 @@ to *t*. All features are computed per ward with `groupby("ward_id").shift(k)`:
   with cases, r = 0.47);
 - temperature and humidity lags;
 - season (week-of-year);
-- ward water-logging, density and sanitation.
+- ward water-logging, density and sanitation;
+- 4-week model only: the city-wide average of reported cases per ward (this week, last week,
+  4- and 8-week means, 3-week change). One ward's count is noisy (58% zero weeks); the city average
+  is a steadier early sign of an outbreak. It uses only cases reported up to *t*.
 
 Tests prove that no feature changes when future rows are removed. **Feature selection** dropped only
 near-duplicates whose removal improved CV (the 4-week temperature mean, r = 0.98 with season); see
@@ -56,23 +59,25 @@ There is no random shuffle anywhere (sklearn's random early stopping is off).
 | Best baseline (seasonal mean / Ridge) | 1.91 (1.74) | 1.98 (1.96) | 1.98 (1.96) |
 | Extra trees | 1.03 (0.98) | 1.16 (1.10) | 1.44 (1.57) |
 | HistGradientBoosting, Poisson loss | 0.96 (1.03) | 1.14 (1.20) | 1.31 (1.70) |
-| **Deployed (tuned / ensemble)** | **0.95 (0.97)** | **1.09 (1.11)** | **1.28 (1.58)** |
+| **Deployed (tuned / ensemble)** | **0.95 (0.97)** | **1.09 (1.11)** | **1.24 (1.57)** |
 
 Random search (75 trials, `reports/tuning_log.json`) and single-change tests, under rules fixed in
 advance, adopted: outbreak-week weighting (h=2 ×4; h=3 ×2 on a boosting + extra-trees average),
 regularised settings at h=4 and season-aware ranges; recent-year weights and isotonic recalibration
 were rejected (`reports/improvements_round2.json`). **Ensemble (Part H):** at h=2 a weighted average
 (boosting 0.65, random forest 0.22, Poisson GLM 0.13; weights fitted on out-of-fold training
-predictions) beat it by 2.2% on CV; stacking never helped (`reports/ensemble.json`). Recent case
-counts didn't help, so the model stays weather-only.
+predictions) beat it by 2.2% on CV; stacking never helped (`reports/ensemble.json`). A ward's own
+recent case counts didn't help. At h=4 the city-wide case average lowered CV deviance by 2.6% (1.275 →
+1.243) and validation deviance by 0.6%, passing the same adoption rule, so the 4-week model uses it;
+at h=2/3 it made validation worse, so those stay weather-only.
 
 **Test (2024–25):**
-- MAE 1.12 / 1.12 / 1.25 (seasonal baseline 1.26).
-- Truly Critical weeks flagged High or above: 88% / 78% / 68%; alert precision 0.49 (h=2).
-- Outbreak weeks are still under-predicted by 5–8 cases (`reports/outbreak_errors.json`).
+- MAE 1.12 / 1.12 / 1.24 (seasonal baseline 1.26).
+- Truly Critical weeks flagged High or above: 88% / 78% / 67%; alert precision 0.49 (h=2).
+- Outbreak weeks are still under-predicted by 6–8 cases (`reports/outbreak_errors.json`).
 
-**Ablation** (`reports/ablation.json`): removing weather raises CV MAE by 39% / 26% / 4% (h=2/3/4);
-removing ward attributes by 13% / 10% / 6%. **Ward ranking** (`reports/ranking_eval.json`): about half of
+**Ablation** (`reports/ablation.json`): removing weather raises CV MAE by 39% / 26% / 3.5% (h=2/3/4);
+removing ward attributes by 13% / 10% / 8.5%. **Ward ranking** (`reports/ranking_eval.json`): about half of
 each in-season week's predicted top-10 wards are truly top-10 (test 0.51 / 0.49 / 0.48; random 0.17).
 
 At h=4 the model barely beats the baseline, because the main driver (rain 3 weeks earlier) hasn't

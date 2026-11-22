@@ -36,7 +36,7 @@
       "results": {
         "full": {
           "n_features": 29,
-          "cv_poisdev": 1.0871374391754431,
+          "cv_poisdev": 1.087137439175443,
           "cv_mae": 1.2003460321563786,
           "val_poisdev": 1.1116317039746146,
           "val_mae": 1.287295043237772
@@ -54,7 +54,7 @@
           "n_features": 26,
           "cv_poisdev": 1.2443806369963295,
           "cv_mae": 1.3255863504192216,
-          "val_poisdev": 1.3219026526741795,
+          "val_poisdev": 1.3219026526741797,
           "val_mae": 1.4690372451664895,
           "cv_mae_increase_pct": 10.4,
           "cv_poisdev_increase_pct": 14.5
@@ -65,29 +65,29 @@
       "model_kind": "hgb_poisson",
       "results": {
         "full": {
-          "n_features": 28,
-          "cv_poisdev": 1.2754022792334934,
-          "cv_mae": 1.3381886757307346,
-          "val_poisdev": 1.580267414658086,
-          "val_mae": 1.5140445963169555
+          "n_features": 33,
+          "cv_poisdev": 1.242838981661502,
+          "cv_mae": 1.3088665080749808,
+          "val_poisdev": 1.57014500058155,
+          "val_mae": 1.5019007058612026
         },
         "without_weather": {
-          "n_features": 5,
-          "cv_poisdev": 1.314286761934678,
-          "cv_mae": 1.3953298186334053,
-          "val_poisdev": 1.7075157973667143,
-          "val_mae": 1.5571212308687534,
-          "cv_mae_increase_pct": 4.3,
-          "cv_poisdev_increase_pct": 3.0
+          "n_features": 10,
+          "cv_poisdev": 1.2835830247182662,
+          "cv_mae": 1.3542346694741307,
+          "val_poisdev": 1.7397463914642997,
+          "val_mae": 1.5818772302164987,
+          "cv_mae_increase_pct": 3.5,
+          "cv_poisdev_increase_pct": 3.3
         },
         "without_ward_attributes": {
-          "n_features": 25,
-          "cv_poisdev": 1.4069144620565113,
-          "cv_mae": 1.4172826814158082,
-          "val_poisdev": 1.7748120661572313,
-          "val_mae": 1.641171869227827,
-          "cv_mae_increase_pct": 5.9,
-          "cv_poisdev_increase_pct": 10.3
+          "n_features": 30,
+          "cv_poisdev": 1.4212249814969335,
+          "cv_mae": 1.4202527398364966,
+          "val_poisdev": 1.7589870185465333,
+          "val_mae": 1.6505271825080752,
+          "cv_mae_increase_pct": 8.5,
+          "cv_poisdev_increase_pct": 14.4
         }
       }
     }

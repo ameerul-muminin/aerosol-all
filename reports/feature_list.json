@@ -76,7 +76,7 @@
       ]
     },
     "4": {
-      "n_features": 28,
+      "n_features": 33,
       "features": [
         "population_density_sqkm",
         "water_logging_risk_index",
@@ -105,7 +105,12 @@
         "rain_sum_2_4",
         "rain_sum_0_3",
         "rain_sum_0_8",
-        "hum_mean_0_3"
+        "hum_mean_0_3",
+        "city_rate0",
+        "city_rate1",
+        "city_rate_mean4",
+        "city_rate_mean8",
+        "city_trend"
       ]
     }
   },
@@ -198,7 +203,7 @@
       ]
     },
     "4": {
-      "n_features": 34,
+      "n_features": 39,
       "features": [
         "population_density_sqkm",
         "water_logging_risk_index",
@@ -228,6 +233,11 @@
         "rain_sum_0_3",
         "rain_sum_0_8",
         "hum_mean_0_3",
+        "city_rate0",
+        "city_rate1",
+        "city_rate_mean4",
+        "city_rate_mean8",
+        "city_trend",
         "cases_lag0",
         "cases_lag1",
         "cases_lag2",

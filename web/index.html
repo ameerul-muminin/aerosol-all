@@ -23,6 +23,7 @@
 <nav class="nav" data-i18n-attr="aria-label:landing.nav_label">
   <a class="brand" href="/"><svg class="mark" viewBox="0 0 26 40" aria-hidden="true" focusable="false"><rect x="8.6" y="2.8" width="4.8" height="3.8" rx="1"/><rect x="13.2" y="3.7" width="1.7" height="1.3" rx=".4"/><rect x="9.2" y="6.4" width="3.6" height="2"/><path d="M5.6 12.4C5.6 9.4 8 8 11 8s5.4 1.4 5.4 4.4Z"/><rect x="5.6" y="11.6" width="10.8" height="27" rx="1.5"/><rect class="lbl" x="5.6" y="19" width="10.8" height="10"/><rect x="5.6" y="22.6" width="10.8" height="2.8"/><g class="mist"><circle cx="17.3" cy="4.3" r="1"/><circle cx="19.9" cy="2.5" r=".85"/><circle cx="20.3" cy="6.1" r=".9"/><circle cx="22.9" cy="4.2" r=".8"/><circle cx="22.6" cy="1" r=".55"/><circle cx="23.1" cy="8" r=".6"/><circle cx="25.3" cy="2.5" r=".5"/><circle cx="25.4" cy="6.1" r=".5"/></g></svg><span data-i18n="app.name">aerosol-all</span></a>
   <span class="links">
+    <a href="#check" data-i18n="landing.nav_check">Check a ward</a>
     <a href="#how" data-i18n="landing.nav_how">How it works</a>
     <a href="#acc" data-i18n="landing.nav_acc">Accuracy</a>
     <div class="lang" role="group" data-i18n-attr="aria-label:lang.label">
@@ -58,6 +59,15 @@
     </div>
     <p class="inline-error" id="err" role="alert" hidden></p>
   </header>
+
+  <section class="check" id="check" aria-labelledby="check-h">
+    <h2 class="display" id="check-h" data-i18n="landing.check_title">Check a ward</h2>
+    <p class="acc-sub" data-i18n="landing.check_sub">Pick a ward and a week. Leave the weather empty to use what was recorded, or type that week's weather to see what changes.</p>
+    <div class="check-grid">
+      <form class="card check-form" id="check-form" novalidate></form>
+      <div class="card check-out" id="check-out" aria-live="polite"></div>
+    </div>
+  </section>
 
   <section class="band" id="how" aria-labelledby="how-h">
     <h2 class="display" id="how-h" data-i18n="landing.band_title">Rain today, cases in weeks</h2>

@@ -277,6 +277,22 @@
     "foot_nav": "Pages",
     "foot_api": "API",
     "foot_data": "Data: EDU AI Hackathon 2026 dataset.",
-    "foot_team": "Built by Nazifa, Alif and Srijita."
+    "foot_team": "Built by Nazifa, Alif and Srijita.",
+    "nav_check": "Check a ward",
+    "check_title": "Check a ward",
+    "check_sub": "Pick a ward and a week. Leave the weather empty to use what was recorded, or type that week's weather to see what changes.",
+    "check_week": "Week",
+    "check_latest": "{date} (latest)",
+    "check_wx": "That week's weather (optional)",
+    "check_recorded": "Recorded",
+    "check_go": "Get forecast",
+    "check_hint": "The data runs to the latest week shown; there is no live feed.",
+    "check_empty": "Your forecast will appear here.",
+    "check_for": "week of {week}, {h} weeks ahead",
+    "check_with_yours": "With the weather you typed",
+    "check_recorded_was": "With the recorded weather: {n} cases,",
+    "check_why": "Main reasons",
+    "check_effect": "{n} cases",
+    "check_open": "Open the full outlook →"
   }
 }

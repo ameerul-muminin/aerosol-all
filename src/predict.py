@@ -52,17 +52,36 @@ RANGES = {"avg_temp_c": (0, 50), "max_temp_c": (0, 55), "min_temp_c": (-5, 45),
           "rainfall_mm": (0, 1500), "relative_humidity_pct": (0, 100)}
 
 
+def _serve_single_threaded(obj, seen=None):
+    """Forests are trained with n_jobs=-1 (all cores). Serving scores 60 rows at a time (and the
+    Shapley drivers make 32 small calls), where starting a thread pool on every call costs far more
+    than the work: on a 16-core Windows laptop startup went from ~3 s to 86 s. Predictions do not
+    depend on n_jobs, so serve with one thread. Walks the custom wrappers (ensemble, blend, pipelines)."""
+    seen = set() if seen is None else seen
+    if id(obj) in seen or isinstance(obj, (str, bytes, int, float, np.ndarray, pd.DataFrame, pd.Series)):
+        return
+    seen.add(id(obj))
+    if getattr(obj, "n_jobs", None) not in (None, 1) and hasattr(obj, "predict"):
+        obj.n_jobs = 1
+    children = obj.values() if isinstance(obj, dict) else obj if isinstance(obj, (list, tuple)) else \
+        getattr(obj, "__dict__", {}).values()
+    for child in children:
+        _serve_single_threaded(child, seen)
+
+
 @lru_cache(maxsize=1)
 def load_bundle():
     """Load the model once. If it can't be unpickled (e.g. a different scikit-learn version),
     retrain from the raw data instead of crashing on a fresh machine."""
     try:
-        return joblib.load(BUNDLE)
+        bundle = joblib.load(BUNDLE)
     except Exception as exc:  # version mismatch or missing file
         print(f"[predict] could not load {BUNDLE.name} ({type(exc).__name__}); retraining...")
         from src.train import main as retrain
         retrain()
-        return joblib.load(BUNDLE)
+        bundle = joblib.load(BUNDLE)
+    _serve_single_threaded(bundle)
+    return bundle
 
 
 def build_features() -> pd.DataFrame:

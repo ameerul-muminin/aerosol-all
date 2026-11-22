@@ -46,3 +46,20 @@ def test_latest_week_forecasts_into_the_future(feat):
 def test_friendly_errors(feat, args, msg):
     with pytest.raises(ValueError, match=msg):
         predict_risk(feat, *args)
+
+
+def test_served_models_are_single_threaded():
+    """Forests are trained on all cores (n_jobs=-1) but served with one thread: tiny batches made the
+    thread pool dominate (86 s startup on a 16-core Windows laptop). Predictions do not depend on n_jobs."""
+    from src.predict import load_bundle
+    found = []
+    def walk(o, seen=set()):
+        if id(o) in seen or isinstance(o, (str, bytes, int, float)) or type(o).__module__.startswith(("numpy", "pandas")):
+            return
+        seen.add(id(o))
+        if hasattr(o, "predict") and getattr(o, "n_jobs", None) is not None:
+            found.append(o.n_jobs)
+        for c in (o.values() if isinstance(o, dict) else o if isinstance(o, (list, tuple)) else getattr(o, "__dict__", {}).values()):
+            walk(c, seen)
+    walk(load_bundle())
+    assert found and set(found) == {1}

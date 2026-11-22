@@ -77,7 +77,7 @@ Test years 2024–2025, never used for training or model choice (read from `repo
 |---|---|---|---|---|---|---|
 | 2 weeks | weighted ensemble (boosted trees, random forest, Poisson GLM) | 1.12 | 1.26 | 2.23 | 2.53 | 78.5% |
 | 3 weeks | blend of boosted trees + extra trees | 1.12 | 1.26 | 2.19 | 2.53 | 78.4% |
-| 4 weeks | gradient-boosted trees (Poisson) | 1.25 | 1.26 | 2.49 | 2.53 | 78.5% |
+| 4 weeks | gradient-boosted trees (Poisson), with city-wide case rates | 1.24 | 1.26 | 2.45 | 2.53 | 78.5% |
 
 At 4 weeks the model is only slightly better than the seasonal average on MAE: forecasting further ahead is harder.
 In the data, rain that is above normal for the time of year is followed by above-normal cases about 3 weeks later
@@ -94,7 +94,7 @@ Bad input returns HTTP 400 with `{"error": "<plain message>"}`.
 |---|---|---|
 | Claude (claude.ai chat) | Alif | Planning, dataset profiling, code review of the ML pipeline, API layer, tests, README/ARCHITECTURE drafts, frontend brief and UI prototype |
 | Claude Code | Alif, Nazifa | Writing, refactoring and testing code in the repo under each member's direction |
-| Antigravity | Srijita | Building the web frontend (`web/`) under her direction |
+| Antigravity (Gemini Pro, Hydrogen) | Srijita | Building the web frontend (`web/`) under her direction |
 
 **External APIs at runtime: none.** The app calls only its own local `/api` endpoints. All inference runs
 locally from the serialized model, so there are no API calls, tokens or usage costs.

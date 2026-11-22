@@ -53,6 +53,7 @@ button, input, select { font: inherit; color: inherit; }
 .lang button[aria-pressed="true"] { background: var(--ink); color: var(--on-dark); }
 
 .main { width: 100%; max-width: 1120px; padding: 32px 32px 96px; }
+.main:focus, .main:focus-visible { outline: none; box-shadow: none; }   /* focused by script on view change (screen readers start there); no ring on the whole page */
 .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; margin-bottom: 20px; }
 .head h1 { font-size: var(--fs-display); }
 .head p { color: var(--ink-2); }

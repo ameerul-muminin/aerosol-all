@@ -227,7 +227,8 @@
     "l_counts": "{hit} reused · {miss} computed",
     "l_model": "Model results (all 60 wards, one week and horizon)",
     "l_server": "Server answers",
-    "l_tab": "This browser tab"
+    "l_tab": "This browser tab",
+    "l_counts_tab": "{hit} from memory · {miss} asked the server"
   },
   "state": {
     "loading": "Loading…",

@@ -75,14 +75,14 @@ function live(l) {
   const rows = layers.map(([k, hit, miss]) => {
     const n = hit + miss;
     return `<div class="layer"><div class="top"><span>${esc(t(`cost.l_${k}`))}</span>
-        <b>${esc(t("cost.l_counts", { hit: num0(hit), miss: num0(miss) }))}</b></div>
-      <span class="split" role="img" aria-label="${esc(`${t(`cost.l_${k}`)}: ${t("cost.l_counts", { hit: num0(hit), miss: num0(miss) })}`)}">
+        <b>${esc(t(k === "tab" ? "cost.l_counts_tab" : "cost.l_counts", { hit: num0(hit), miss: num0(miss) }))}</b></div>
+      <span class="split" role="img" aria-label="${esc(`${t(`cost.l_${k}`)}: ${t(k === "tab" ? "cost.l_counts_tab" : "cost.l_counts", { hit: num0(hit), miss: num0(miss) })}`)}">
         ${n ? `<i class="hit" style="width:${(hit / n) * 100}%"></i><i class="miss" style="width:${(miss / n) * 100}%"></i>` : ""}</span></div>`;
   }).join("");
   const share = l.model_results_needed ? l.model_results_reused / l.model_results_needed : null;
   return `<div class="clk-head"><h2>${esc(t("cost.live_title"))}</h2>
       <button type="button" class="btn small" id="live-refresh">${esc(t("cost.refresh"))}</button></div>
-    <p class="live-big"><b>${share == null ? "–" : esc(pct(share))}</b><span>${esc(t("cost.live_sum", { runs: num0(l.model_runs), n: num0(l.model_results_needed) }))}</span></p>
+    <p class="live-big"><b>${share == null ? "–" : esc(pct(share))}</b><span>${esc(t("cost.live_sum", { runs: num0(l.model_results_needed - l.model_results_reused), n: num0(l.model_results_needed) }))}</span></p>
     <div class="legend"><span><i style="background:var(--tier-low)"></i>${esc(t("cost.lg_hit"))}</span><span><i style="background:var(--bar)"></i>${esc(t("cost.lg_miss"))}</span></div>
     <div class="layers">${rows}</div>
     <p class="acc-note">${esc(t("cost.live_note"))}</p>`;

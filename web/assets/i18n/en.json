@@ -132,5 +132,29 @@
     "offline": "Can't reach the forecast server. Check that it is running, then try again.",
     "retry": "Try again",
     "error_title": "Something went wrong"
+  },
+  "landing": {
+    "nav_label": "Main",
+    "nav_how": "How it works",
+    "nav_app": "Open dashboard",
+    "headline": "See the outbreak first",
+    "sub": "Dengue cases and risk for {n} city wards, {a} to {b} weeks ahead.",
+    "live": "Live forecast · week of {date} · {h} weeks ahead",
+    "cta": "Open the ward outlook →",
+    "hero_alt": "A rainy Dhaka street: water collects in a tyre, a bucket and puddles beside a parked rickshaw.",
+    "wards_of": "wards of {n}",
+    "chip_top": "Highest",
+    "chip_top_s": "cases · {ward}",
+    "chip_err": "Error vs seasonal",
+    "chip_err_s": "{years} test",
+    "band_title": "Rain today, cases in weeks",
+    "band_text": "Mosquitoes breed in standing water after rain. Cases follow weeks later. That gap is the time to act.",
+    "fact1_v": "7–14 days",
+    "fact1_k": "to breed",
+    "fact2_v": "2–4 weeks",
+    "fact2_k": "rain to cases",
+    "fact3_v": "150,000+",
+    "fact3_k": "hospitalised a year",
+    "source": "Source: EDU AI Hackathon 2026 brief."
   }
 }

@@ -28,7 +28,7 @@
 .c2 { left: 2%; top: 30%; }
 .c3 { right: 2%; top: 4%; }
 .c4 { right: 2%; top: 30%; }
-.hero .inline-error { margin: 16px 0 0; }
+.hero .inline-error:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 16px 0 0; }
 
 .band { background: var(--band); color: var(--on-dark); padding: clamp(56px, 7vw, 104px) clamp(16px, 3vw, 40px); }
 .band h2 { font-size: clamp(40px, 6vw, 88px); color: var(--accent); max-width: 12ch; margin: 0 0 20px; }

@@ -68,16 +68,27 @@ async function main() {
   document.querySelectorAll(".lang button").forEach((b) => {
     b.onclick = async () => { await setLang(b.dataset.lang); markLang(); render(); };
   });
+  load();
+}
+
+// Skeletons from the HTML, put back on every retry.
+const LIVE = ["sub", "chips", "acc-sub", "acc-grid"];
+const skeleton = Object.fromEntries(LIVE.map((id) => [id, $(id).innerHTML]));
+
+/** Fetch everything; on failure show the API's friendly message with a "Try again" button (never a blank page). */
+async function load() {
+  LIVE.forEach((id) => { $(id).innerHTML = skeleton[id]; $(id).hidden = false; });
+  $("err").hidden = true;
   try {
     const meta = await api.meta();
     const [rank, m] = await Promise.all([api.ranking(meta.as_of.default, HORIZON), get("/api/metrics")]);
     data = { meta, rank, m };
     render();
   } catch (e) {
-    $("chips").hidden = true;
-    $("sub").textContent = "";
-    $("err").textContent = e.message;
+    LIVE.forEach((id) => { $(id).hidden = true; });
+    $("err").innerHTML = `<span>${esc(e.message)}</span> <button type="button" class="btn small" id="retry">${esc(t("state.retry"))}</button>`;
     $("err").hidden = false;
+    $("retry").onclick = load;
   }
 }
 

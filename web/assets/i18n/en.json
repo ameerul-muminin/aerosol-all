@@ -155,6 +155,14 @@
     "fact2_k": "rain to cases",
     "fact3_v": "150,000+",
     "fact3_k": "hospitalised a year",
-    "source": "Source: EDU AI Hackathon 2026 brief."
+    "source": "Source: EDU AI Hackathon 2026 brief.",
+    "nav_acc": "Accuracy",
+    "acc_title": "Checked on weeks it never saw",
+    "acc_sub": "Tested on {years}, two years held back from training. Lower error is better.",
+    "acc_h": "{h} weeks ahead",
+    "acc_unit": "average error, cases per ward per week",
+    "acc_model": "Model",
+    "acc_base": "Seasonal",
+    "acc_rmse": "RMSE {rmse} · the 80% range held the real count {cov}% of the time"
   }
 }

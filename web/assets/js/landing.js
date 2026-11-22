@@ -1,9 +1,9 @@
 // Marketing page: live chips from /api (nothing typed into the HTML) + EN/বাংলা toggle.
 // Chips: Critical and High ward counts and the highest ward from /api/ranking, the test-period error
-// against the seasonal baseline from /api/metrics. The only hard-coded numbers are the three brief facts.
+// against the seasonal baseline and the per-horizon accuracy cards from /api/metrics. The only hard-coded numbers are the three brief facts.
 import { initI18n, setLang, getLang, t } from "./i18n.js";
 import { api, get } from "./api.js";
-import { num0, num1, dateLong, wardFull, tierHTML, esc } from "./format.js";
+import { num0, num1, num2, dateLong, wardFull, tierHTML, esc } from "./format.js";
 
 const HORIZON = 3;   // the middle of the 2–4 week window
 const $ = (id) => document.getElementById(id);
@@ -36,6 +36,26 @@ function render() {
     chip("c3", esc(t("landing.chip_top")), num1(top.predicted_cases), t("landing.chip_top_s", { ward: wardFull(top.ward_id, top.city) })),
     chip("c4", esc(t("landing.chip_err")), `${cut >= 0 ? "−" : "+"}${num0(Math.abs(cut))}%`, t("landing.chip_err_s", { years: testYears(m.split) })),
   ].join("");
+  renderAccuracy(m);
+}
+
+/** One card per horizon: model MAE vs the seasonal baseline (bars on one shared scale), RMSE, 80% coverage. */
+function renderAccuracy(m) {
+  const years = testYears(m.split);
+  const top = Math.max(...m.horizons.flatMap((h) => [h.mae, h.baseline_mae]));
+  const bar = (cls, label, v) =>
+    `<div class="bar ${cls}"><span>${esc(label)}</span><i style="--w:${(v / top).toFixed(3)}"></i><b>${num2(v)}</b></div>`;
+  $("acc-sub").textContent = t("landing.acc_sub", { years });
+  $("acc-grid").innerHTML = m.horizons.map((h) => `
+    <article class="acc-card">
+      <h3>${esc(t("landing.acc_h", { h: num0(h.horizon) }))}</h3>
+      <div class="big">${num2(h.mae)}</div>
+      <p class="unit">${esc(t("landing.acc_unit"))}</p>
+      <div class="bars" role="img" aria-label="${esc(`${t("landing.acc_model")} ${num2(h.mae)}, ${t("landing.acc_base")} ${num2(h.baseline_mae)}`)}">
+        ${bar("model", t("landing.acc_model"), h.mae)}${bar("base", t("landing.acc_base"), h.baseline_mae)}
+      </div>
+      <p class="foot">${esc(t("landing.acc_rmse", { rmse: num2(h.rmse), cov: num0(h.interval80_coverage * 100) }))}</p>
+    </article>`).join("");
 }
 
 function markLang() {

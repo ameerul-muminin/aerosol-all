@@ -2,138 +2,91 @@
 
 > ML sections (features, split, model selection) by A; data flow, serving, cost and Phase 2 by B/C.
 
-## System data flow
+![aerosol-all architecture: offline training pipeline and online serving path](docs/architecture.svg)
 
-```mermaid
-flowchart LR
-  A["hackathon_preli_dataset.xlsx<br/>60 wards × 522 weeks"] --> B["validate() + CSV cache<br/>src/features.py"]
-  B --> C["Lag features per ward_id<br/>rain lags 0–8 wk, temp/humidity 0–4 wk,<br/>rolling rain sums, season, ward profile"]
-  C --> D["Chronological split by target week<br/>train ≤2021 · val 2022–23 · test 2024–25"]
-  D --> E["HistGradientBoosting (Poisson)<br/>settings chosen by time-ordered CV<br/>one model per horizon: 2, 3, 4 weeks"]
-  E --> F["models/dengue_model.joblib<br/>+ tier cut points + 80% conformal band"]
-  E --> G["reports/metrics.json<br/>test_predictions_h*.csv"]
-  F --> H["src/predict.py + src/explain.py<br/>predictions, tiers, 80% range,<br/>exact grouped-Shapley drivers"]
-  C --> H
-  H --> I["api/service.py<br/>JSON views, LRU-cached"]
-  G --> I
-  I --> J["api/main.py (Flask)<br/>/api/forecast · POST /api/what_if · /api/ranking · /api/metrics<br/>gzip + Cache-Control"]
-  J --> K["web/ (HTML/CSS/JS)<br/>marketing page · dashboard"]
-  K --> L["Public health officer<br/>tier, likely range, drivers,<br/>ward ranking, accuracy"]
-```
-
-Offline (once): data → features → training → serialized model and metrics. Online (per click):
-the browser calls the local API, which reuses the loaded model and cached features. No step calls
-an external service.
+**Offline, once** (`python -m src.train`, about 100 s): data → lag features → chronological split → model
+selection → one serialized bundle plus `reports/`. **Online, per click:** the browser calls the local Flask API,
+which reuses the model and lag features loaded at startup. No step calls an external service.
 
 ## Features and leakage control
-Each forecast is made at origin week *t* for week *t + h*, where h = 2, 3 or 4, using only data up
-to *t*. All features are computed per ward with `groupby("ward_id").shift(k)`:
+A forecast is made at origin week *t* for week *t + h* (h = 2, 3, 4), using only data up to *t*.
+Features are built per ward with `groupby("ward_id").shift(k)`:
 
-- rainfall lags 0–8 weeks, including the 2–4 week breeding window (the 3-week lag correlates most
-  with cases, r = 0.47);
-- temperature and humidity lags;
-- season (week-of-year);
-- ward water-logging, density and sanitation;
-- 4-week model only: the city-wide average of reported cases per ward (this week, last week,
-  4- and 8-week means, 3-week change). One ward's count is noisy (58% zero weeks); the city average
-  is a steadier early sign of an outbreak. It uses only cases reported up to *t*.
+- rainfall lags 0–8 weeks, covering the 2–4 week breeding window. In the data, above-normal rain is followed
+  by above-normal cases 3 weeks later (r = 0.47, every city; `/api/lag_profile`);
+- temperature and humidity lags, season (week-of-year), ward water-logging, density and sanitation;
+- 4-week model only: the city-wide average of reported cases per ward (this week, last week, 4- and 8-week
+  means, 3-week change), a steadier early outbreak signal than one ward's count (58% zero weeks).
 
-Tests prove that no feature changes when future rows are removed. **Feature selection** dropped only
-near-duplicates whose removal improved CV (the 4-week temperature mean, r = 0.98 with season); see
-`reports/feature_selection_log.json` and `reports/feature_list.json`.
+Tests prove no feature changes when future rows are removed. Feature selection dropped only near-duplicates
+whose removal improved CV (`reports/feature_selection_log.json`).
 
 ## Chronological validation split
 | Set | Target weeks | Purpose |
 |---|---|---|
-| Train | 2016–2021 | fitting; **time-ordered CV**: 5 expanding yearly folds choose settings and features |
+| Train | 2016–2021 | fitting; **time-ordered CV** (5 expanding yearly folds) chooses settings and features |
 | Validation | 2022–2023 | confirming the choice; calibrating tiers and 80% intervals |
-| Test | 2024–2025 | reported once, never used for any choice |
+| Test | 2024–2025 | reported once, never used for any choice; rows hash-locked (`reports/test_set_lock.json`) |
 
-There is no random shuffle anywhere (sklearn's random early stopping is off).
+No random shuffle anywhere; a test fails if any decision script reads the test rows.
 
 ## Model selection
-12 models on identical folds (`reports/model_comparison.json`):
+12 models on identical folds (`reports/model_comparison.json`), Poisson deviance, CV mean (validation):
 
-| Poisson deviance, CV mean (validation) | h=2 | h=3 | h=4 |
+| | h=2 | h=3 | h=4 |
 |---|---|---|---|
 | Best baseline (seasonal mean / Ridge) | 1.91 (1.74) | 1.98 (1.96) | 1.98 (1.96) |
 | Extra trees | 1.03 (0.98) | 1.16 (1.10) | 1.44 (1.57) |
 | HistGradientBoosting, Poisson loss | 0.96 (1.03) | 1.14 (1.20) | 1.31 (1.70) |
-| **Deployed (tuned / ensemble)** | **0.95 (0.97)** | **1.09 (1.11)** | **1.24 (1.57)** |
+| **Deployed** | **0.95 (0.97)** | **1.09 (1.11)** | **1.24 (1.57)** |
 
-Random search (75 trials, `reports/tuning_log.json`) and single-change tests, under rules fixed in
-advance, adopted: outbreak-week weighting (h=2 ×4; h=3 ×2 on a boosting + extra-trees average),
-regularised settings at h=4 and season-aware ranges; recent-year weights and isotonic recalibration
-were rejected (`reports/improvements_round2.json`). **Ensemble (Part H):** at h=2 a weighted average
-(boosting 0.65, random forest 0.22, Poisson GLM 0.13; weights fitted on out-of-fold training
-predictions) beat it by 2.2% on CV; stacking never helped (`reports/ensemble.json`). A ward's own
-recent case counts didn't help. At h=4 the city-wide case average lowered CV deviance by 2.6% (1.275 →
-1.243) and validation deviance by 0.6%, passing the same adoption rule, so the 4-week model uses it;
-at h=2/3 it made validation worse, so those stay weather-only.
+Changes were adopted only under rules fixed in advance (random search, 75 trials, `reports/tuning_log.json`):
 
-**Test (2024–25):**
-- MAE 1.12 / 1.12 / 1.24 (seasonal baseline 1.26).
-- Truly Critical weeks flagged High or above: 88% / 78% / 67%; alert precision 0.49 (h=2).
-- Outbreak weeks are still under-predicted by 6–8 cases (`reports/outbreak_errors.json`).
+- **2 weeks:** weighted ensemble (boosting 0.65, random forest 0.22, Poisson GLM 0.13; weights fitted on
+  out-of-fold training predictions), 2.2% better on CV; stacking never helped (`reports/ensemble.json`).
+- **3 weeks:** boosting + extra-trees average with outbreak-week weighting.
+- **4 weeks:** regularised boosting plus the city-wide case average (CV deviance 1.275 → 1.243, validation −0.6%).
+  At 2 and 3 weeks it made validation worse, so those stay weather-only.
+- Rejected: recent-year weights, isotonic recalibration (`reports/improvements_round2.json`).
 
-**Ablation** (`reports/ablation.json`): removing weather raises CV MAE by 39% / 26% / 3.5% (h=2/3/4);
-removing ward attributes by 13% / 10% / 8.5%. **Ward ranking** (`reports/ranking_eval.json`): about half of
-each in-season week's predicted top-10 wards are truly top-10 (test 0.51 / 0.49 / 0.48; random 0.17).
+**Test (2024–25):** MAE 1.12 / 1.12 / 1.24 (seasonal baseline 1.26). Truly Critical weeks flagged High or above:
+88% / 78% / 67%. Outbreak weeks are still under-predicted by 6–8 cases (`reports/outbreak_errors.json`).
+At 4 weeks the model barely beats the baseline because the main driver, rain 3 weeks earlier, hasn't fallen yet:
+**2–3 weeks is the dependable window.** Removing weather raises CV MAE by 39% / 26% / 3.5%, removing ward
+attributes by 13% / 10% / 8.5% (`reports/ablation.json`). An unseen-city hold-out matches seen cities (MAE 1.08 vs 1.08 at h=2).
 
-At h=4 the model barely beats the baseline, because the main driver (rain 3 weeks earlier) hasn't
-fallen yet, so **2–3 weeks is the dependable window**. An unseen-city hold-out matches seen cities
-(MAE 1.08 against 1.08 at h=2).
-
-**Tiers:** 2 / 9 / 15 or more cases (training p70/p90/p97), calibrated on validation.
+**Tiers:** 2 / 9 / 15 or more cases (training p70/p90/p97), cut points calibrated on validation per horizon.
 **Intervals:** conformal per prediction level and season (Jul–Oct coverage 0.77–0.78).
-**Drivers:** exact grouped Shapley values, plus global importance and partial dependence (`reports/explainability.json`). The tier and interval issues
-were first seen on test, then confirmed on validation. Test rows are hash-locked
-(`reports/test_set_lock.json`), and a test fails if any decision script reads them.
+**Drivers:** exact grouped Shapley values that add up from the average week to the forecast (`reports/explainability.json`).
 
 ## Serving, compute and API cost efficiency
+- **No LLMs, no external APIs.** No per-request fees, tokens or rate limits. `scripts/measure_efficiency.py`
+  blocks outbound network while exercising every endpoint and records 0 external and 0 LLM calls.
+- **Loaded once.** One joblib bundle holds all three horizons; lag features for all wards are built at startup.
+- **One model pass per week and horizon.** `predict_all` scores all 60 wards at once (Shapley drivers: 32 batched
+  calls). That result is cached and reused by every view: a ward's forecast, the ranking, early warnings, the other horizons.
+- **Four cache layers, cheapest first:** browser memory (`api.js`), HTTP `Cache-Control: max-age=3600`, a bounded
+  LRU cache per question on the server, then the shared model pass. `/api/efficiency` shows live hit counts in the app.
+- **What-if** (`POST /api/what_if`) replaces 1–8 weeks of recorded weather and reruns the same lag pipeline; repeats are cached.
+- **Small payloads:** JSON over 1 KB is gzip-compressed. **Minimal stack:** Python (scikit-learn, pandas, Flask),
+  plain HTML/CSS/JS, no Node build, no GPU.
 
-- **No LLMs and no external APIs.** Inference runs locally from the serialized model, so there are no
-  per-request fees, token costs or rate limits. `scripts/measure_efficiency.py` blocks outbound network
-  while it exercises every endpoint and records `external_api_calls` (0) and `llm_calls` (0) in `reports/efficiency.json`.
-- **Serialized model, loaded once.** `models/dengue_model.joblib` holds all three horizon models and is
-  loaded at startup (`load_bundle()`, cached). Lag features for all wards are built once and reused.
-- **Weather what-if (`POST /api/what_if`).** Typed weekly rain / temperature / humidity replace the last 1–8 weeks
-  of the ward's recorded weather, then the same lag pipeline and model run (a test proves real values reproduce the
-  baseline). Baselines always use recorded weather; inputs outside the training range return a warning.
-- **Response caching.** Each API response depends only on its query, so `forecast` and `ranking` are
-  memoised with bounded LRU caches. The responses carry `Cache-Control: max-age=3600`, so browsers and any
-  CDN can reuse them.
-- **Vectorised inference.** One `predict_all` call scores all 60 wards in a single model pass. The
-  Shapley drivers need 32 batched calls for all 60 wards together, not separate calls per ward.
-- **Small payloads.** JSON responses over 1 KB are gzip-compressed.
-- **Minimal dependencies.** Python only (scikit-learn, pandas, Flask). There's no Node build or GPU,
-  and it runs on a basic office laptop.
-
-Measured with `python scripts/measure_efficiency.py --train --train-repeats 3` on a MacBook (Apple silicon, 8 cores,
-Python 3.9.6, 21 Nov 2026, load average 5.12 at start); medians over 50 calls, retrain median of 3.
-Source: `reports/efficiency.json`.
+Measured with `python scripts/measure_efficiency.py --train --train-repeats 3` (MacBook, Apple silicon, Python 3.9.6,
+21 Nov 2026; medians of 50 calls; `reports/efficiency.json`):
 
 | Measure | Value |
 |---|---|
-| Model file size (3 horizon models, incl. 2-week ensemble) | 11.4 MB |
-| Model load at startup (once) | 0.43 s |
-| Lag features for all 60 wards × 522 weeks (once at startup, from the CSV cache; a fresh clone reads the Excel file once, which is slower) | 1.0 s |
-| App startup, including pre-computing the default week | 2.7 s |
-| One-ward forecast, uncached: median / 95th percentile of 50 calls | 0.76 s / 0.88 s |
-| Ranking of 60 wards / one-ward forecast, cached (median of 50) | 0.002 s / 0.0006 s |
-| What-if scenario (POST /api/what_if, 4 weeks replaced): new / repeated | 0.53 s / 0.016 s |
+| Model file (3 horizons, incl. the 2-week ensemble) | 11.4 MB |
+| Startup: model load / lag features / app ready | 0.43 s / 1.0 s / 2.7 s |
+| One-ward forecast, uncached: median / 95th percentile | 0.76 s / 0.88 s |
+| Cached: 60-ward ranking / one-ward forecast | 0.002 s / 0.0006 s |
+| What-if, new / repeated | 0.53 s / 0.016 s |
 | Ranking payload, raw → gzip | 31.7 KB → 3.3 KB |
 | Peak Python memory | 229 MB |
-| Full retrain, 3 horizons with time-ordered CV: median (min–max of 3) | 100 s (97–106 s) |
-| External API calls / LLM calls during the run | 0 / 0 |
+| Full retrain, 3 horizons: median (min–max of 3) | 100 s (97–106 s) |
+| External API calls / LLM calls | 0 / 0 |
 
 ## Path to a live system (Phase 2)
-
-The split into model → `api/service.py` → `api/main.py` → `web/` keeps each layer replaceable:
-
-- **Live data.** Append new weekly weather and case rows, re-run `validate()` and refresh the caches. The
-  lag pipeline and API contract don't change.
-- **Scale out.** The API is stateless, so several workers can run behind a load balancer (for example
-  gunicorn), with the static `web/` folder on a CDN.
-- **Retraining.** `python -m src.train` rebuilds every artifact in under 2 minutes (100 s median of 3 runs). Metrics are versioned next to
-  the model in `reports/`.
+- **Live data:** append weekly weather and case rows, re-run `validate()`, refresh caches; the lag pipeline and API contract stay the same.
+- **Scale out:** the API is stateless, so several workers can run behind a load balancer, with `web/` on a CDN.
+- **Retraining:** `python -m src.train` rebuilds every artifact in under 2 minutes; metrics are versioned next to the model in `reports/`.

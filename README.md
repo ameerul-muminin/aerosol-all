@@ -8,6 +8,9 @@ resources to high-risk wards before cases peak.
 
 > Decision support on the provided hackathon dataset, not a medical diagnosis.
 
+**Live demo:** https://aerosol-all.onrender.com (dashboard: [/app/](https://aerosol-all.onrender.com/app/)). It runs on Render's free tier,
+so the first visit after a quiet spell can take about a minute to wake up; after that, pages are quick.
+
 ## Quick start (about 3 minutes)
 ```bash
 git clone https://github.com/ameerul-muminin/aerosol-all.git

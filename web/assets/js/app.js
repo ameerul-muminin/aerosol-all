@@ -60,7 +60,11 @@ function syncSidebar() {
   $("asof").value = state.as_of;
   $("f-ward").hidden = state.view === "wards" || state.view === "cost";   // views that are not about one ward
   document.querySelectorAll(".tabs a").forEach((a) => {
-    if (a.dataset.view === state.view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    if (a.dataset.view === state.view) {
+      a.setAttribute("aria-current", "page");
+      const row = a.parentElement;                 // phones: keep the current tab visible in the scrolling row
+      if (row.scrollWidth > row.clientWidth) row.scrollLeft = Math.max(0, a.offsetLeft - 16);
+    } else a.removeAttribute("aria-current");
   });
   document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === getLang())));
 }

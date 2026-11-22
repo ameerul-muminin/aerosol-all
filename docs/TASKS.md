@@ -27,7 +27,7 @@ Order matters; each step is demo-able on its own.
       accounts, and a page that doesn't work reads as mock UI.
 - [x] **F7 Screenshots (Srijita):** fonts are vendored (Anton + Hind Siliguri); screenshots of
       each view into `docs/screenshots/` (index: `docs/screenshots/README.md`). Linking from the main README: Alif.
-- [ ] **F8 Polish (Alif):** widths 360/768/1440, keyboard, error states (stop the server and reload),
+- [x] **F8 Polish (Alif):** widths 360/768/1440, keyboard, error states (stop the server and reload),
       no console errors, `verify` skill.
 
 ## Docs (morning)
@@ -40,7 +40,7 @@ Order matters; each step is demo-able on its own.
 - [ ] Re-run `python -m scripts.measure_efficiency --train` after the last model change; sync the cost table.
 
 ## Submission (Alif)
-- [ ] Git check: Srijita has 0 commits. F6/F7 must land from her own account, as her own work.
+- [x] Git check: Srijita has 0 commits. F6/F7 must land from her own account, as her own work. (Done: F6/F7 are her commits, PR #22.)
 - [ ] Clean-clone test on Windows: new folder + venv, README only, under 3 minutes.
 - [ ] Video: script (Nazifa drafts the ML part), two rehearsals, one uncut take of 3:00 or less, on localhost,
       voiceover, no slides.

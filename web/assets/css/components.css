@@ -311,15 +311,16 @@ details.why ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 8px; }
 /* dispatch */
 .settings-line { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; margin-bottom: 16px; color: var(--ink-2); }
 .settings-line b { color: var(--ink); font-weight: 600; }
-.check { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; font-weight: 500; color: var(--ink); cursor: pointer; }
-.check input { width: 18px; height: 18px; accent-color: var(--ink); }
+/* .chk / .nfacts, not .check / .facts: the landing page already uses those two names */
+.chk { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; font-weight: 500; color: var(--ink); cursor: pointer; }
+.chk input { width: 18px; height: 18px; accent-color: var(--ink); }
 .btnrow { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
 .notice-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 10px; }
 .notice-head h2 { font-size: var(--fs-h2); font-weight: 600; }
 .notice-head .city { color: var(--ink-3); font-size: var(--fs-small); }
-.facts { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 14px; color: var(--ink-2); margin-bottom: 14px; }
-.facts b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
-.facts b.deficit { color: var(--tier-critical); }
+.nfacts { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 14px; color: var(--ink-2); margin-bottom: 14px; }
+.nfacts b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.nfacts b.deficit { color: var(--tier-critical); }
 .msgs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; }
 .msg { display: grid; align-content: start; gap: 8px; }
 .msg .k { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: var(--fs-small); font-weight: 500; color: var(--ink-2); }

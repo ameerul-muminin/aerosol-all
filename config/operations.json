@@ -82,7 +82,7 @@
     "model_input": {
       "value": "water_logging_risk_index",
       "kind": "assumption",
-      "why": "Larvicide and drain-clearing crews remove standing water where Aedes mosquitoes breed, so the simulator lowers the ward's water_logging_risk_index (effective breeding habitat) and re-runs the Phase 1 models at 2, 3 and 4 weeks. It is the one crew-changeable input all three models use: the 2- and 3-week models use no case history at all, and the 4-week model's city case rates are cases already reported, which a crew cannot undo. Checked on 2025 peak weeks: lowering it never raises any ward's forecast."
+      "why": "Larvicide and drain-clearing crews remove standing water where Aedes mosquitoes breed, so the simulator lowers the ward's water_logging_risk_index (effective breeding habitat) and re-runs the Phase 1 models at 2, 3 and 4 weeks. It is the one crew-changeable input all three models use: the 2- and 3-week models use no case history at all, and the 4-week model's city case rates are cases already reported, which a crew cannot undo. Checked on two 2025 peak weeks (14 July, 1 September) with 15/30/50% cuts: 1,077 of 1,080 ward forecasts went down or stayed; 3 rose by 0.01 cases, one rounding step (python -m scripts.phase2_numbers)."
     },
     "reduction_per_crew": {
       "value": 0.15,

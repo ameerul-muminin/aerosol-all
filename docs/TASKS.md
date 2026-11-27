@@ -17,7 +17,7 @@ Allocation 15 · Overflow routing 10 · Vector-control simulator 10 · Offline 1
 Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 
 ## 0. Setup (first 30 min)
-- [ ] S1 Load new xlsx in `src/features.py` (keep Phase 1 file working); supply columns kept as targets, not features. (A)
+- [x] S1 Load new xlsx in `src/features.py` (keep Phase 1 file working); supply columns kept as targets, not features. (A)
 - [x] S2 `src/supplies.py`: case → supply lookup learned from data, with tests that it reproduces the table exactly. (A)
 - [x] S3 `config/operations.json`: bed capacity rule, stock per item, crew count, crew effect — every assumption in one place,
       with the reason written next to it. (A + B agree)

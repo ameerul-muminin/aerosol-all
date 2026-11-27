@@ -9,8 +9,15 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA_XLSX = ROOT / "hackathon_preli_dataset.xlsx"
+PHASE1_XLSX = ROOT / "hackathon_preli_dataset.xlsx"
+ONSITE_XLSX = ROOT / "bangladesh_dengue_large_dataset_onsite.xlsx"
+# Phase 2 data = the same 31,320 rows and Phase 1 columns + the supply columns below.
+# Use it when present; the Phase 1 file still works on its own.
+DATA_XLSX = ONSITE_XLSX if ONSITE_XLSX.exists() else PHASE1_XLSX
 CACHE_CSV = ROOT / "data" / "dataset_cache.csv"
+# Supplies needed in the SAME week as the cases (a fixed function of dengue_cases), so they
+# are outputs, never model inputs: using them as features would leak the target.
+SUPPLY_COLUMNS = ["saline_bags_needed", "diagnostic_kits_needed", "hospital_beds_required"]
 
 HORIZONS = (2, 3, 4)
 STATIC = ["population_density_sqkm", "water_logging_risk_index", "sanitation_score"]
@@ -21,11 +28,20 @@ ANOM_LAGS = range(0, 5)       # rain anomaly at t-0 .. t-4 weeks
 CASE_LAGS = range(0, 5)       # reported cases at t-0 .. t-4 weeks (optional mode)
 
 
-def load_raw(path: Path = DATA_XLSX) -> pd.DataFrame:
-    """Read the dataset (xlsx is slow, so cache a CSV copy) and validate it."""
-    if CACHE_CSV.exists() and CACHE_CSV.stat().st_mtime >= Path(path).stat().st_mtime:
+def load_raw(path: Path | None = None) -> pd.DataFrame:
+    """Read the dataset and validate it. The default file (DATA_XLSX) is cached as a CSV,
+    because xlsx is slow; any other path is read directly."""
+    path = DATA_XLSX if path is None else Path(path)
+    if path != DATA_XLSX:
+        return validate(pd.read_excel(path))
+    df = None
+    if CACHE_CSV.exists() and CACHE_CSV.stat().st_mtime >= path.stat().st_mtime:
         df = pd.read_csv(CACHE_CSV, parse_dates=["date"])
-    else:
+        # a cache made from the other file (with/without supply columns) is stale
+        has_supplies = set(SUPPLY_COLUMNS) <= set(df.columns)
+        if has_supplies != (path == ONSITE_XLSX):
+            df = None
+    if df is None:
         df = pd.read_excel(path)
         CACHE_CSV.parent.mkdir(exist_ok=True)
         df.to_csv(CACHE_CSV, index=False)
@@ -49,6 +65,13 @@ def validate(df: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("non-weekly spacing: shift(k) would not mean k weeks")
     if not (df.groupby("ward_id")[STATIC].nunique() == 1).all().all():
         raise ValueError("ward attributes not constant")
+    supplies = [c for c in SUPPLY_COLUMNS if c in df.columns]
+    if supplies:                                   # Phase 2 file: all three or none
+        if len(supplies) != len(SUPPLY_COLUMNS):
+            raise ValueError(f"missing supply columns: {sorted(set(SUPPLY_COLUMNS) - set(supplies))}")
+        s = df[SUPPLY_COLUMNS]                     # NaN is fine: what-if weeks have no supplies yet
+        if (s < 0).any().any() or (s.fillna(0) % 1 != 0).any().any():
+            raise ValueError("supply columns must be whole numbers, 0 or more")
     return df
 
 
@@ -136,6 +159,9 @@ def feature_columns(anomaly: bool = False, cases: bool = False, city: bool = Fal
         cols += CITY_COLUMNS
     if cases:
         cols += case_columns()
+    leak = set(cols) & set(SUPPLY_COLUMNS)
+    if leak:                                       # same-week supplies would leak the target
+        raise ValueError(f"supply columns must never be model inputs: {sorted(leak)}")
     return cols
 
 

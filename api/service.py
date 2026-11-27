@@ -776,6 +776,74 @@ _ANSWER_CACHES["dispatch"] = "_notices"
 _MODEL_CACHES = (*_MODEL_CACHES, "_notices")
 
 
+# ---------------------------------------------------------------- GET /api/supply_plan  (bonus B1)
+SUPPLY_KEYS = {"saline": "saline_bags_needed", "kits": "diagnostic_kits_needed", "beds": "hospital_beds_required"}
+_ASSUMPTIONS_USED["supply_plan"] = {"demand": ["basis", "rounding"]}
+
+
+def _need(cases) -> dict:
+    from src.supplies import supplies_for
+    s = supplies_for(cases)
+    return {"cases": int(cases.sum()), **{k: int(s[c].sum()) for k, c in SUPPLY_KEYS.items()}}
+
+
+def _order(weeks: list[dict]) -> dict:
+    """Saline and kits are used up, so the order is their sum over the weeks; beds are reused, so plan for the peak."""
+    return {"cases": sum(w["cases"] for w in weeks), "saline": sum(w["saline"] for w in weeks),
+            "kits": sum(w["kits"] for w in weeks), "beds_peak": max(w["beds"] for w in weeks)}
+
+
+@lru_cache(maxsize=64)
+def supply_plan(as_of: str, city: str | None = None) -> dict:
+    """Order now for weeks +2, +3 and +4: every ward's need in each week, from that horizon's forecast and the
+    same case -> supplies table as allocation (src/supplies.py). Built from the cached all-ward forecasts, so it
+    adds no model runs. expected = central forecast; cautious = top of the 80% range. Need only: the data has no
+    stock on hand, so subtract what is in the store before ordering."""
+    from src.supplies import case_count
+    city = _check_city(city)
+    weeks, wards = [], {}
+    for h in HORIZONS:
+        df = _ranking_df(as_of, h)
+        if city:
+            df = df[df["city"] == city]
+        df = df.sort_values("ward_id")
+        week = {"horizon": h, "forecast_week": str(df["forecast_week"].iloc[0])}
+        for basis, col in (("expected", "predicted_cases"), ("cautious", "range_high")):
+            cases = case_count(df[col].to_numpy())
+            week[basis] = _need(cases)
+            for (_, r), c in zip(df.iterrows(), cases):
+                w = wards.setdefault(r["ward_id"], {"ward_id": r["ward_id"], "city": r["city"], "weeks": {}})
+                cell = w["weeks"].setdefault(str(h), {"forecast_week": str(r["forecast_week"]), "risk_tier": r["risk_tier"]})
+                cell[basis] = _need(case_count([c]))
+        weeks.append(week)
+
+    def summarise(week_lists: dict) -> dict:
+        return {b: _order(week_lists[b]) for b in ("expected", "cautious")}
+
+    rows = []
+    for w in wards.values():
+        w["order"] = summarise({b: [w["weeks"][str(h)][b] for h in HORIZONS] for b in ("expected", "cautious")})
+        rows.append(w)
+    rows.sort(key=lambda w: (-w["order"]["expected"]["saline"], w["ward_id"]))
+    by_city = []
+    for c in sorted({w["city"] for w in rows}):
+        mine = [w for w in rows if w["city"] == c]
+        per_week = [{"horizon": h, **{b: {k: sum(w["weeks"][str(h)][b][k] for w in mine) for k in ("cases", *SUPPLY_KEYS)}
+                                      for b in ("expected", "cautious")}} for h in HORIZONS]
+        by_city.append({"city": c, "wards": len(mine), "weeks": per_week,
+                        "order": summarise({b: [wk[b] for wk in per_week] for b in ("expected", "cautious")})})
+    return {"as_of": as_of, "city": city, "weeks": weeks,
+            "order": summarise({b: [wk[b] for wk in weeks] for b in ("expected", "cautious")}),
+            "by_city": by_city, "wards": rows,
+            "rule": "Need for weeks +2, +3 and +4 from each horizon's forecast. Saline and kits are used up, so the "
+                    "order is their 3-week sum; beds are reused, so plan for the peak week. Expected = central "
+                    "forecast; cautious = top of the 80% range. Stock on hand is not in the data: subtract it.",
+            "assumptions": assumptions("supply_plan")}
+
+
+_ANSWER_CACHES["supply_plan"] = "supply_plan"
+
+
 # ---------------------------------------------------------------- GET /api/selfcheck
 def selfcheck(as_of: str | None = None, horizon: int = 2) -> dict:
     """Re-run every Phase 2 math check live, with outbound network blocked (src/selfcheck.py).

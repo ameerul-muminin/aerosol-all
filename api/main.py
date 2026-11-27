@@ -170,6 +170,11 @@ def create_app() -> Flask:
         """The printable commissioner brief (HTML, open it and print to PDF), same query as /api/dispatch."""
         return Response(service.dispatch_brief(*_dispatch_args()), mimetype="text/html")
 
+    @app.get("/api/supply_plan")
+    def supply_plan():
+        """Bonus B1: order now for weeks +2, +3, +4 (saline, kits, beds; expected and cautious) at ?as_of [&city]."""
+        return jsonify(service.supply_plan(_as_of(), request.args.get("city") or None))
+
     # ---- static frontend (web/) ----------------------------------------------------
     @app.get("/")
     @app.get("/<path:path>")

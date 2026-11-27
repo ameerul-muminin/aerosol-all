@@ -57,7 +57,8 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 ## 5. Offline resilience (15)
 - [ ] F1 Audit: no network calls anywhere (grep for http/requests/CDN); fonts vendored. (B)
 - [ ] F2 Kill-switch test: Wi-Fi off → run every endpoint + UI, zero crashes. Script it: `scripts/offline_check.py`. (B)
-- [ ] F3 Deterministic: same inputs → same allocation/routing/notices (seeded, stable sort ties by ward_id). Test it. (A)
+- [x] F3 Deterministic: same inputs → same allocation/routing/notices (seeded, stable sort ties by ward_id). Test it. (A)
+      Done for allocation, overflow, simulator and ROI ranking (`tests/test_determinism.py`); add notices when D1 lands.
 
 ## 6. Repo, live URL, docs (10)
 - [ ] G1 Deploy a live URL (free host that runs Flask); app must still run fully locally. (B)

@@ -200,6 +200,7 @@ def test_70_pct_on_2025_09_15_routes_every_overflow_patient(feat):
     r = overflow_plan(feat, "2025-09-15", 2, beds_available_pct=70)
     assert sum(t["patients"] for t in r["transfers"]) == 5
     assert sum(c["unroutable"] for c in r["cities"].values()) == 0
+    assert r["escalations"] == []
 
 
 def test_full_and_available_capacity_are_reported_per_ward_and_city(feat):
@@ -252,7 +253,48 @@ def test_2025_07_14_at_50_pct_cannot_route_because_every_ward_is_full(feat):
     free bed, so nobody can be moved. Pinned here so the claim is never made by mistake."""
     from src.overflow import overflow_plan
     r = overflow_plan(feat, "2025-07-14", 2, beds_available_pct=50)
+    assert len(r["escalations"]) == len(r["cities"]) == 5
+    for escalation, (city, summary) in zip(r["escalations"], sorted(r["cities"].items())):
+        assert escalation == {
+            "city": city,
+            "unroutable_patients": summary["unroutable"],
+            "surge_beds_needed": summary["unroutable"],
+            "suggestions": [],
+            "label": "requires city-level approval; not routed",
+        }
+        assert escalation["unroutable_patients"] > 0
     assert not any(w["available_capacity"] > w["beds_required"] for w in r["wards"].values())
     assert r["transfers"] == []
     assert sum(c["unroutable"] for c in r["cities"].values()) == \
         sum(max(0, w["beds_required"] - w["available_capacity"]) for w in r["wards"].values())
+
+
+def test_headroom_suggestions_are_advisory_and_sorted(feat):
+    from src.overflow import overflow_plan
+
+    result = overflow_plan(feat, "2024-08-19", 2, beds_available_pct=50)
+    assert result["escalations"]
+    assert result["transfers"]
+    cities = feat.drop_duplicates("ward_id").set_index("ward_id")["city"]
+    for transfer in result["transfers"]:
+        assert cities[transfer["from_ward"]] == cities[transfer["to_ward"]] == transfer["city"]
+    for entry in result["escalations"]:
+        assert entry["suggestions"] == [{"city": "Chattogram", "headroom": 1}]
+        assert all(suggestion["city"] != entry["city"] for suggestion in entry["suggestions"])
+    assert json.dumps(result) == json.dumps(overflow_plan(feat, "2024-08-19", 2, beds_available_pct=50))
+
+
+def test_escalation_suggestions_break_headroom_ties_by_city_name():
+    from src.overflow import _city_escalations
+
+    summaries = {
+        "Source": {"headroom": 0, "unroutable": 5},
+        "Z": {"headroom": 2, "unroutable": 0},
+        "C": {"headroom": 3, "unroutable": 0},
+        "A": {"headroom": 2, "unroutable": 0},
+        "Full": {"headroom": 0, "unroutable": 0},
+    }
+    escalation, = _city_escalations(summaries)
+    assert escalation["suggestions"] == [
+        {"city": "C", "headroom": 3}, {"city": "A", "headroom": 2}, {"city": "Z", "headroom": 2},
+    ]

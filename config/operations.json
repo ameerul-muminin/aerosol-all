@@ -119,6 +119,11 @@
   },
 
   "overflow": {
+    "escalation": {
+      "value": "suggest_other_cities",
+      "kind": "assumption",
+      "why": "If local routing leaves patients without a bed, report the surge beds needed and list other cities with remaining headroom for city-level approval. A suggestion reserves no beds and creates no cross-city transfer."
+    },
     "same_city_only": {
       "value": true,
       "kind": "assumption",

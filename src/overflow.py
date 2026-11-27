@@ -152,13 +152,37 @@ def usable_capacity(capacity: dict[str, int], beds_available_pct, config: dict |
     return {w: max(1, int(np.floor(c * pct / 100 + 1e-9))) for w, c in capacity.items()}
 
 
+def _city_escalations(cities: dict) -> list[dict]:
+    """Report outstanding bed demand and other cities' unreserved headroom."""
+    by_headroom = sorted(cities, key=lambda city: (-cities[city]["headroom"], city))
+    escalations = []
+    for city, summary in sorted(cities.items()):
+        unroutable = summary["unroutable"]
+        if unroutable == 0:
+            continue
+        escalations.append({
+            "city": city,
+            "unroutable_patients": unroutable,
+            "surge_beds_needed": unroutable,
+            "suggestions": [
+                {"city": other, "headroom": cities[other]["headroom"]}
+                for other in by_headroom if other != city and cities[other]["headroom"] > 0
+            ],
+            "label": "requires city-level approval; not routed",
+        })
+    return escalations
+
+
 def overflow_plan(feat_df, as_of_date, horizon: int, demand_basis: str | None = None,
                   config: dict | None = None, beds_available_pct: float | None = None) -> dict:
     """Forecast every ward (predict_all), turn cases into beds needed, route the overflow.
     `beds_available_pct` (30-100, default from config) is the share of each ward's beds free for
     dengue. Returns route_overflow()'s result plus as_of, horizon, forecast_week, demand_basis,
     beds_available_pct; each ward and city also gets full_capacity (the config rule) and
-    available_capacity (after the slider; the same as "capacity", which routing used)."""
+    available_capacity (after the slider; the same as "capacity", which routing used).
+    Each city with unroutable patients gets an escalation with its surge bed need
+    and advisory headroom from other cities.
+    """
     from src.allocation import load_config, setting
     from src.predict import predict_all
     from src.supplies import case_count, supplies_for
@@ -184,6 +208,7 @@ def overflow_plan(feat_df, as_of_date, horizon: int, demand_basis: str | None = 
         ids = [w["ward_id"] for w in wards if w["city"] == city]
         c["full_capacity"] = sum(full[i] for i in ids)
         c["available_capacity"] = sum(capacity[i] for i in ids)
+    result["escalations"] = _city_escalations(result["cities"])
     result.update(as_of=str(as_of_date)[:10], horizon=int(horizon), demand_basis=basis,
                   forecast_week=str(pred["forecast_week"].iloc[0]), beds_available_pct=float(pct))
     return result

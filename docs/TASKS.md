@@ -81,3 +81,4 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [ ] B1 Multi-week supply plan (order now for weeks +2..+4).
 - [ ] B2 Optimal crew placement (choose wards to maximise cases prevented).
 - [x] B3 allocation minimum share (A)
+- [x] B4 overflow escalation (A)

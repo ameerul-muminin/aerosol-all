@@ -79,17 +79,22 @@
   },
 
   "crew_effect": {
-    "case_input_reduction_per_crew": {
-      "value": 0.15,
-      "unit": "fraction",
+    "model_input": {
+      "value": "water_logging_risk_index",
       "kind": "assumption",
-      "why": "Used by the vector-control simulator: each crew lowers the ward's recent-case model inputs by 15% before the Phase 1 model is re-run at 2, 3 and 4 weeks. No intervention data exists, so this effect size is a stated assumption and the UI must say so."
+      "why": "Larvicide and drain-clearing crews remove standing water where Aedes mosquitoes breed, so the simulator lowers the ward's water_logging_risk_index (effective breeding habitat) and re-runs the Phase 1 models at 2, 3 and 4 weeks. It is the one crew-changeable input all three models use: the 2- and 3-week models use no case history at all, and the 4-week model's city case rates are cases already reported, which a crew cannot undo. Checked on 2025 peak weeks: lowering it never raises any ward's forecast."
+    },
+    "reduction_per_crew": {
+      "value": 0.15,
+      "unit": "fraction of the index",
+      "kind": "assumption",
+      "why": "Each crew lowers the ward's water-logging index by 15% of its value (2 crews 30%, 3 crews 45%). No intervention data exists, so this effect size is a stated assumption and the UI must say so; officers can change it here."
     },
     "max_total_reduction": {
       "value": 0.5,
-      "unit": "fraction",
+      "unit": "fraction of the index",
       "kind": "assumption",
-      "why": "Caps the combined effect at 50% so stacked crews cannot remove all transmission in the simulation."
+      "why": "Caps the combined effect at 50% so stacked crews cannot remove all breeding sites in the simulation."
     }
   },
 

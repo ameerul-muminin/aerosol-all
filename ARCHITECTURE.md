@@ -50,6 +50,11 @@ No LLMs or external APIs (`scripts/measure_efficiency.py` blocks the network and
 once; `predict_all` scores all 60 wards in one pass, reused by every view behind four caches (browser, HTTP
 `max-age=3600`, server LRU, shared pass). JSON over 1 KB is gzipped.
 
+**Where the model is deployed:** inside the API process, not as a separate ML service. `models/dengue_model.joblib`
+ships in the repository and in the Docker image; gunicorn loads it once (`--preload`) and every forecast is computed
+in-process on the server's CPU (for the live URL, the Render instance). `GET /api/version` shows the file's SHA-256,
+the scikit-learn version it needs, the model behind each horizon and the git commit Render built.
+
 `reports/efficiency.json` (MacBook, Apple silicon, Python 3.9.6, medians of 50 calls):
 
 | Measure | Value |

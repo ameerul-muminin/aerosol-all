@@ -91,7 +91,8 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 ## Judges' feedback (27 Nov)
 - [x] J1 "Public API on public Wi-Fi: add application rate limiting." Per-client + global token buckets,
       HTTP 429 + `Retry-After`, health/static/local never limited (`api/ratelimit.py`, `tests/test_rate_limit.py`). (B)
-- [ ] J2 "ML model: deployed where?" Show it live: `GET /api/version` (model file, fingerprint, versions, commit). (B)
+- [x] J2 "ML model: deployed where?" In the API process (no separate ML service); shown live by `GET /api/version`:
+      model file + SHA-256, scikit-learn version, model per horizon, host, git commit (`tests/test_api_version.py`). (B)
 - [ ] J3 "Hospital: what if the patient is sent and it's full?" A backup ward per transfer, same city. (B)
 
 ## 8. Phase 2 screens: full spec for C (R5, O4, V4, D3)

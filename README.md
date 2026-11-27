@@ -157,7 +157,7 @@ Every number shown in the app is read from `reports/metrics.json` or `reports/ef
 Phase 2: `POST /api/allocate` · `/api/overflow?as_of&horizon[&demand_basis&beds_available_pct]` · `POST /api/intervention` ·
 `/api/intervention/roi?as_of[&crews_per_ward]` · `/api/crew_plan?as_of[&crews]` · `/api/selfcheck[?as_of&horizon]` ·
 `/api/dispatch?as_of&horizon&stock_pct[&crews&beds_available_pct&lang&city]` · `/api/dispatch/brief` (same query; printable HTML) ·
-`/api/supply_plan?as_of[&city]`.
+`/api/supply_plan?as_of[&city]` · `/api/version` (where the model runs: file fingerprint, versions, deployed commit).
 Bad input returns HTTP 400 with `{"error": "<plain message>"}`. The public deployment is rate-limited per client
 (default 120 requests a minute, bursts of 60): too many requests get HTTP 429 with a message and `Retry-After`;
 local use is never limited (`api/ratelimit.py`).

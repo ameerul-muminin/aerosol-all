@@ -158,7 +158,9 @@ Phase 2: `POST /api/allocate` · `/api/overflow?as_of&horizon[&demand_basis&beds
 `/api/intervention/roi?as_of[&crews_per_ward]` · `/api/crew_plan?as_of[&crews]` · `/api/selfcheck[?as_of&horizon]` ·
 `/api/dispatch?as_of&horizon&stock_pct[&crews&beds_available_pct&lang&city]` · `/api/dispatch/brief` (same query; printable HTML) ·
 `/api/supply_plan?as_of[&city]`.
-Bad input returns HTTP 400 with `{"error": "<plain message>"}`.
+Bad input returns HTTP 400 with `{"error": "<plain message>"}`. The public deployment is rate-limited per client
+(default 120 requests a minute, bursts of 60): too many requests get HTTP 429 with a message and `Retry-After`;
+local use is never limited (`api/ratelimit.py`).
 
 ## Commit history
 Commit messages use `type(scope): summary`. In Phase 1 (21–22 Nov), 30 commits made in Claude Code sessions recorded

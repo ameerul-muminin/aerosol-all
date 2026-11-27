@@ -88,6 +88,12 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       expected and cautious; matches allocation and overflow (`tests/test_api_supply_plan.py`). (B)
 - [x] B2 Optimal crew placement (choose wards to maximise cases prevented). `src/placement.py`: exact knapsack, `GET /api/crew_plan`. (A)
 
+## Judges' feedback (27 Nov)
+- [x] J1 "Public API on public Wi-Fi: add application rate limiting." Per-client + global token buckets,
+      HTTP 429 + `Retry-After`, health/static/local never limited (`api/ratelimit.py`, `tests/test_rate_limit.py`). (B)
+- [ ] J2 "ML model: deployed where?" Show it live: `GET /api/version` (model file, fingerprint, versions, commit). (B)
+- [ ] J3 "Hospital: what if the patient is sent and it's full?" A backup ward per transfer, same city. (B)
+
 ## 8. Phase 2 screens: full spec for C (R5, O4, V4, D3)
 **For Srijita's agent.** Tell it: *"Implement section 8 of docs/TASKS.md in web/, in the order C0, R5, O4, V4, D3.
 Follow the build-ui skill. Do not change api/ or src/; if a field you need is missing, stop and ask Alif."*

@@ -147,6 +147,12 @@ checks the input, calls the `src/` module unchanged and returns plain JSON.
   browser-cacheable for 1 h; POST scenarios and live routes (`health`, `efficiency`, `selfcheck`) are never cached.
   The same request gives identical JSON, also after the caches are cleared (tested for allocate, overflow,
   intervention and ROI).
+- **Rate limiting** (`api/ratelimit.py`, no extra package): the live URL is public, so each client gets a token
+  bucket (default 120 requests a minute, bursts of 60) and all clients together a global one (1,200 a minute,
+  bursts of 300), so spoofed addresses cannot add up to a flood. A refused request costs no model run: it gets
+  HTTP 429 with a plain-English message and `Retry-After`, shown by the UI like any API error. `/api/health`,
+  static files and local use (127.0.0.1 without a proxy header: offline laptops, tests) are never limited.
+  Behind Render's proxy the client is the first `X-Forwarded-For` address. Limits are env settings (`docs/DEPLOY.md`).
 
 ### Order plan (bonus B1, `GET /api/supply_plan`, by B)
 Supplies have to be ordered before the week they are used. For weeks +2, +3 and +4 the plan takes each horizon's

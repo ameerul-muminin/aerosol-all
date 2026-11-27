@@ -63,6 +63,7 @@ reason next to it, and every Phase 2 planning answer from the API includes the a
 | **Overflow routing** (`src/overflow.py`) | Which wards will need more beds than they have, and where can those patients go? Only to wards with free beds **in the same city**; patients who cannot be placed are reported, not hidden. |
 | **Crew simulator** (`src/intervention.py`, `src/placement.py`) | If crews go to these wards, how much do cases, beds and saline drop 2–4 weeks later? The real models are re-run on the changed inputs. Wards are ranked by cases prevented per crew, and the best placement is found for a given number of crews. |
 | **Dispatch** (`src/dispatch.py`) | Ready-to-send SMS, WhatsApp text and a printable brief per ward, in English and বাংলা, from fixed templates (no LLM). |
+| **Order plan** (bonus) | What to order now for weeks +2, +3 and +4: saline, kits and beds per ward, city and region, for the expected forecast and the cautious top of its range. |
 
 Try them with the server running (`python -m api`):
 ```bash
@@ -74,6 +75,7 @@ curl -X POST http://127.0.0.1:8000/api/intervention -H "Content-Type: applicatio
 curl "http://127.0.0.1:8000/api/intervention/roi?as_of=2025-07-14"
 curl "http://127.0.0.1:8000/api/crew_plan?as_of=2025-07-14&crews=20"
 curl "http://127.0.0.1:8000/api/dispatch?as_of=2025-09-15&horizon=2&stock_pct=60&crews=20&beds_available_pct=70&lang=bn"
+curl "http://127.0.0.1:8000/api/supply_plan?as_of=2025-07-14"
 ```
 Rules, reasons and limits of each module: [ARCHITECTURE.md](ARCHITECTURE.md#phase-2-from-forecast-to-action).
 
@@ -154,7 +156,8 @@ Every number shown in the app is read from `reports/metrics.json` or `reports/ef
 `/api/metrics` · `/api/history?ward_id&horizon` · `/api/lag_profile[?city]` · `/api/efficiency` · `/api/health` · `POST /api/what_if`.
 Phase 2: `POST /api/allocate` · `/api/overflow?as_of&horizon[&demand_basis&beds_available_pct]` · `POST /api/intervention` ·
 `/api/intervention/roi?as_of[&crews_per_ward]` · `/api/crew_plan?as_of[&crews]` · `/api/selfcheck[?as_of&horizon]` ·
-`/api/dispatch?as_of&horizon&stock_pct[&crews&beds_available_pct&lang&city]` · `/api/dispatch/brief` (same query; printable HTML).
+`/api/dispatch?as_of&horizon&stock_pct[&crews&beds_available_pct&lang&city]` · `/api/dispatch/brief` (same query; printable HTML) ·
+`/api/supply_plan?as_of[&city]`.
 Bad input returns HTTP 400 with `{"error": "<plain message>"}`.
 
 ## Commit history

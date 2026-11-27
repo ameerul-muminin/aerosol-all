@@ -17,10 +17,11 @@ from pathlib import Path
 from flask import Flask, Response, jsonify, request, send_from_directory
 
 from api import service
+from api.ratelimit import RateLimiter
 
 WEB_DIR = Path(__file__).resolve().parents[1] / "web"
 CACHE_SECONDS = 3600  # forecasts for a given (ward, week, horizon) never change
-LIVE_PATHS = {"/api/health", "/api/efficiency", "/api/selfcheck"}   # live answers: never cached by browsers
+LIVE_PATHS = {"/api/health", "/api/efficiency", "/api/selfcheck", "/api/version"}   # never cached by browsers
 POST_EXAMPLES = {   # POST-only routes: a GET gets a 405 with an example body, not the web fallback
     "api/what_if": '{"ward_id": "DSCC_Ward_04", "rainfall_mm": 200}',
     "api/allocate": '{"as_of": "2025-07-14", "horizon": 3, "stock_pct": 60}',
@@ -35,6 +36,25 @@ def create_app() -> Flask:
     t = time.perf_counter()
     service.warm_up()  # load model + build lag features once, not per request
     print(f"[api] model + features ready in {time.perf_counter() - t:.2f}s")
+
+    # the live URL is public: one client must not tie up the server (api/ratelimit.py; RATE_LIMIT=off disables)
+    limiter = app.extensions["rate_limiter"] = RateLimiter.from_env()
+    if limiter.enabled:
+        print(f"[api] rate limit: {limiter.per_min:g}/min per client (burst {limiter.burst:g}); "
+              f"requests from this machine and /api/health are not limited")
+
+    @app.before_request
+    def rate_limit():
+        ok, wait, who = limiter.check(request.path, request.remote_addr, request.headers.get("X-Forwarded-For"))
+        if ok:
+            return None
+        secs = f"{wait} second{'s' if wait != 1 else ''}"
+        message = (f"Too many requests from your address. Please wait {secs} and try again." if who == "client"
+                   else f"The server is busy. Please wait {secs} and try again.")
+        resp = jsonify(error=message)
+        resp.status_code = 429
+        resp.headers["Retry-After"] = str(wait)
+        return resp
 
     def _horizon() -> int:
         try:
@@ -169,6 +189,13 @@ def create_app() -> Flask:
     def dispatch_brief():
         """The printable commissioner brief (HTML, open it and print to PDF), same query as /api/dispatch."""
         return Response(service.dispatch_brief(*_dispatch_args()), mimetype="text/html")
+
+    @app.get("/api/version")
+    def version():
+        """Where the ML model runs and which build is live: model file + SHA-256, versions, host, git commit."""
+        resp = jsonify(service.version())
+        resp.headers["Cache-Control"] = "no-store"     # a new deploy must show at once
+        return resp
 
     @app.get("/api/supply_plan")
     def supply_plan():

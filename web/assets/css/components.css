@@ -281,6 +281,8 @@ details.why ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 8px; }
 .xfer li:first-child { border-top: 0; padding-top: 0; }
 .xfer b { font-weight: 600; }
 .xfer span { color: var(--ink-3); font-size: 12px; }
+.xfer .bk { flex-basis: 100%; font-style: normal; font-size: 12px; color: var(--ink-2); }
+.xfer .bk.deficit { color: var(--tier-critical); }
 
 /* crew simulator */
 .stp { display: inline-flex; align-items: center; gap: 2px; }

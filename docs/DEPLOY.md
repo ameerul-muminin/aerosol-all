@@ -25,6 +25,9 @@ Steps (dashboard.render.com):
 2. Name `aerosol-all`, **Language: Docker**, branch `main`, region **Singapore** (closest to Bangladesh),
    instance type **Free**.
 3. **Environment Variables:** `WEB_CONCURRENCY` = `1`. Render sets `PORT` itself and the image listens on it.
+   Rate limiting is on by default (`api/ratelimit.py`); to tune it set `RATE_LIMIT_PER_MIN` / `RATE_LIMIT_BURST`
+   (per client, default 120 / 60) and `RATE_LIMIT_GLOBAL_PER_MIN` / `RATE_LIMIT_GLOBAL_BURST` (everyone, 1200 / 300),
+   or `RATE_LIMIT=off` to disable it.
 4. **Advanced → Health Check Path:** `/api/health`. Then **Deploy Web Service**.
 5. Check it: `https://<service>.onrender.com/api/selfcheck` must say `"passed": true`, then open `/app/`.
 

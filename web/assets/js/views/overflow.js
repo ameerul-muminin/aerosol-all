@@ -93,7 +93,7 @@ function paint(out, r) {
 
   const xfers = r.transfers.length
     ? `<ol class="xfer">${r.transfers.map((x) => `<li><b>${esc(wardName(x.from_ward))} → ${esc(wardName(x.to_ward))}</b>
-        <span>${esc(cityName(x.city))} · ${esc(x.patients === 1 ? t("flow.patient") : t("flow.patients", { n: num0(x.patients) }))}</span></li>`).join("")}</ol>`
+        <span>${esc(cityName(x.city))} · ${esc(x.patients === 1 ? t("flow.patient") : t("flow.patients", { n: num0(x.patients) }))}</span>${backupLine(x)}</li>`).join("")}</ol>`
     : `<p class="warn-none">${esc(t("flow.no_transfers"))}</p>`;
 
   out.innerHTML = `${alerts}${calm ? `<p class="calm">${esc(calm)}</p>` : ""}
@@ -131,4 +131,11 @@ function bindToggle(out, r) {
     bindToggle(out, r);
     card.querySelector("#o-all").focus();
   };
+}
+
+/** Judges: "what if the patient is sent and it's full?" Each transfer's backup ward (same city, most free beds left). */
+function backupLine(x) {
+  if (!x.backup_ward) return `<em class="bk deficit">${esc(t("flow.backup_none"))}</em>`;
+  const key = x.backup_free_beds === 1 ? "flow.backup_one" : "flow.backup";
+  return `<em class="bk">${esc(t(key, { ward: wardName(x.backup_ward), n: num0(x.backup_free_beds) }))}</em>`;
 }

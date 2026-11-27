@@ -50,6 +50,11 @@ No LLMs or external APIs (`scripts/measure_efficiency.py` blocks the network and
 once; `predict_all` scores all 60 wards in one pass, reused by every view behind four caches (browser, HTTP
 `max-age=3600`, server LRU, shared pass). JSON over 1 KB is gzipped.
 
+**Where the model is deployed:** inside the API process, not as a separate ML service. `models/dengue_model.joblib`
+ships in the repository and in the Docker image; gunicorn loads it once (`--preload`) and every forecast is computed
+in-process on the server's CPU (for the live URL, the Render instance). `GET /api/version` shows the file's SHA-256,
+the scikit-learn version it needs, the model behind each horizon and the git commit Render built.
+
 `reports/efficiency.json` (MacBook, Apple silicon, Python 3.9.6, medians of 50 calls):
 
 | Measure | Value |
@@ -98,7 +103,10 @@ wards; the divisor spreads crews. 100% stock = this week's total forecast need. 
 **Rule:** beds needed come from the supply lookup. Capacity = each ward's 95th-percentile weekly beds in
 2016–2021, rounded up, at least 2 (2–6 beds per ward, 223 in total). Patients move only within their city; the
 largest overflow is helped first, each patient goes to the ward with the most free beds, and what cannot be placed
-is reported as unroutable. `beds_available_pct` (30–100%) sets the share of beds free for dengue (beds are shared
+is reported as unroutable. **If a ward is full on arrival anyway** (forecasts have error), each
+transfer names a backup ward: the one in the same city with the most free beds left after routing; a city with no
+free bed left is marked `full`, and its unroutable patients need temporary beds or outside help (the API and the
+overflow screen say so; `tests/test_overflow_backup.py`). `beds_available_pct` (30–100%) sets the share of beds free for dengue (beds are shared
 with other patients). **Why:** the brief requires intra-city routing; training years only avoid leakage. Over 78 weeks (2024-06-03 to 2025-11-24, 2 weeks ahead) a transfer happens in 1 week at 100%
 beds, 13 at 70%, 4 at 50%. Demo week: 2025-09-15 at 70%, 5 patients moved, none stranded.
 
@@ -129,7 +137,7 @@ checks the input, calls the `src/` module unchanged and returns plain JSON.
 | Route | Input | Returns |
 |---|---|---|
 | `POST /api/allocate` | `as_of`, `horizon`, `stock_pct` (30–100), `crews?`, `demand_basis?`, `city?` | per-ward fill, deficits, `critical`, crews; region totals (`city` filters the rows only) |
-| `GET /api/overflow` | `as_of`, `horizon`, `demand_basis?`, `beds_available_pct?` | transfers (same city only), per-ward net deficit, per-city use, headroom, unroutable |
+| `GET /api/overflow` | `as_of`, `horizon`, `demand_basis?`, `beds_available_pct?` | transfers (same city only) each with a backup ward, per-ward net deficit and free beds after routing, per-city use, headroom, unroutable, `full` |
 | `POST /api/intervention` | `as_of`, `deployment` `{ward_id: crews}`, `total_crews?` | cases, beds, saline before/after at +2/+3/+4 weeks; ROI per ward; low/high effect band |
 | `GET /api/intervention/roi` | `as_of`, `crews_per_ward?` (1–3) | all 60 wards ranked by cases prevented per crew |
 | `GET /api/crew_plan` | `as_of`, `crews?` | the placement that prevents the most cases, next to the allocation rule's |
@@ -147,6 +155,12 @@ checks the input, calls the `src/` module unchanged and returns plain JSON.
   browser-cacheable for 1 h; POST scenarios and live routes (`health`, `efficiency`, `selfcheck`) are never cached.
   The same request gives identical JSON, also after the caches are cleared (tested for allocate, overflow,
   intervention and ROI).
+- **Rate limiting** (`api/ratelimit.py`, no extra package): the live URL is public, so each client gets a token
+  bucket (default 120 requests a minute, bursts of 60) and all clients together a global one (1,200 a minute,
+  bursts of 300), so spoofed addresses cannot add up to a flood. A refused request costs no model run: it gets
+  HTTP 429 with a plain-English message and `Retry-After`, shown by the UI like any API error. `/api/health`,
+  static files and local use (127.0.0.1 without a proxy header: offline laptops, tests) are never limited.
+  Behind Render's proxy the client is the first `X-Forwarded-For` address. Limits are env settings (`docs/DEPLOY.md`).
 
 ### Order plan (bonus B1, `GET /api/supply_plan`, by B)
 Supplies have to be ordered before the week they are used. For weeks +2, +3 and +4 the plan takes each horizon's

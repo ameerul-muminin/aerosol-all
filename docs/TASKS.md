@@ -89,6 +89,15 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       expected and cautious; matches allocation and overflow (`tests/test_api_supply_plan.py`). (B)
 - [x] B2 Optimal crew placement (choose wards to maximise cases prevented). `src/placement.py`: exact knapsack, `GET /api/crew_plan`. (A)
 
+## Judges' feedback (27 Nov)
+- [x] J1 "Public API on public Wi-Fi: add application rate limiting." Per-client + global token buckets,
+      HTTP 429 + `Retry-After`, health/static/local never limited (`api/ratelimit.py`, `tests/test_rate_limit.py`). (B)
+- [x] J2 "ML model: deployed where?" In the API process (no separate ML service); shown live by `GET /api/version`:
+      model file + SHA-256, scikit-learn version, model per horizon, host, git commit (`tests/test_api_version.py`). (B)
+- [x] J3 "Hospital: what if the patient is sent and it's full?" Arrivals are planned within free beds; each transfer
+      names a backup ward (same city, most free beds left), a city with none is `full` (escalate: temporary beds).
+      API + overflow screen line (`tests/test_overflow_backup.py`). (B; screen line needs C's OK)
+
 ## 8. Phase 2 screens: full spec for C (R5, O4, V4, D3)
 **For Srijita's agent.** Tell it: *"Implement section 8 of docs/TASKS.md in web/, in the order C0, R5, O4, V4, D3.
 Follow the build-ui skill. Do not change api/ or src/; if a field you need is missing, stop and ask Alif."*

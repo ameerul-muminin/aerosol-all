@@ -81,3 +81,20 @@ def test_children_follow_css_js_and_html():
         ["/assets/js/api.js", "/assets/js/views/x.js"]
     html = b'<link href="/assets/css/t.css"><script src="/assets/js/app.js"></script><a href="/app/">x</a>'
     assert oc._children("/", html) == ["/assets/css/t.css", "/assets/js/app.js"]
+
+
+def test_python_scan_flags_network_clients_and_allows_local_parsing(tmp_path):
+    for folder in ("src", "api", "scripts"):
+        (tmp_path / folder).mkdir()
+    (tmp_path / "src" / "a.py").write_text(
+        "import requests\nfrom urllib.request import urlopen\nimport http.client\n"
+        "from urllib.parse import urljoin\nimport urllib.parse\nfrom http.server import HTTPServer\n")
+    (tmp_path / "api" / "b.py").write_text("x = 1\n    import httpx\n")
+    (tmp_path / "scripts" / "c.py").write_text("from openai import OpenAI\n# import requests  (a comment)\n")
+    found = oc.network_imports(tmp_path)
+    assert found == ["src/a.py:1: requests", "src/a.py:2: urllib.request", "src/a.py:3: http.client",
+                     "api/b.py:2: httpx", "scripts/c.py:1: openai"], found
+
+
+def test_real_python_code_imports_no_network_client():
+    assert oc.network_imports() == []

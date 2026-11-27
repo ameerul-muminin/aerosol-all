@@ -73,7 +73,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [x] G2 ARCHITECTURE.md: add Phase 2 modules, diagram, every assumption from S3 and why. (A + B)
   - [x] A's half: Phase 2 diagram, one subsection per module, assumptions table from the config, limits, in-progress list.
   - [x] B's half: API routes, dispatch and offline sections once R4/O3/V3, D1 and F2 land.
-- [ ] G3 README: new run steps, exports, AI disclosure table updated with every tool each member used. (B)
+- [x] G3 README: new run steps, exports, AI disclosure table updated with every tool each member used. (B)
 - [ ] G4 Small commits from each person's account, commit convention from S4. (all)
 
 ## 7. Video (10) + Q&A (30)

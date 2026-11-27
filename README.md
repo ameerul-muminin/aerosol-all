@@ -166,7 +166,9 @@ history would break every clone.
 | Tool | Used by | What for |
 |---|---|---|
 | Claude (claude.ai chat) | Alif | Planning, dataset profiling, code review of the ML pipeline, API layer, tests, README/ARCHITECTURE drafts, frontend brief and UI prototype |
-| Claude Code | Alif, Nazifa | Writing, refactoring and testing code in the repo under each member's direction |
+| Claude Code | Alif, Nazifa, Srijita | Writing, refactoring and testing code in the repo under each member's direction. Alif in Phase 2: the Phase 2 API routes and their tests, offline and fuzz checks, merge-conflict fixes, README and ARCHITECTURE sections |
+| Codex | Nazifa | Writing and testing code for the ML pipeline and the Phase 2 modules, under her direction |
+| Grok | Nazifa | Research and questions: looking things up, explaining concepts, checking ideas |
 | Antigravity (Gemini Pro, Hydrogen) | Srijita | Building the web frontend (`web/`) under her direction |
 
 **External APIs at runtime: none.** The app calls only its own local `/api` endpoints. All inference runs

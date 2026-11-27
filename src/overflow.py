@@ -139,10 +139,25 @@ def bed_capacity(config: dict | None = None) -> dict[str, int]:
     return {ward_id: int(c) for ward_id, c in zip(q.index, cap)}
 
 
+def usable_capacity(capacity: dict[str, int], beds_available_pct, config: dict | None = None) -> dict[str, int]:
+    """Beds that can take dengue patients: floor(capacity x pct / 100), at least 1 bed.
+    pct must be within the config range (30-100); the rest of the beds serve other patients."""
+    from src.allocation import load_config
+    cfg = config or load_config()
+    entry = cfg["bed_capacity"]["beds_available_pct"]
+    lo, hi = entry["range"]
+    pct = entry["value"] if beds_available_pct is None else beds_available_pct
+    if isinstance(pct, bool) or not isinstance(pct, (int, float)) or not np.isfinite(pct) or not lo <= pct <= hi:
+        raise ValueError(f"Beds available must be between {lo}% and {hi}%; got {pct!r}.")
+    return {w: max(1, int(np.floor(c * pct / 100 + 1e-9))) for w, c in capacity.items()}
+
+
 def overflow_plan(feat_df, as_of_date, horizon: int, demand_basis: str | None = None,
-                  config: dict | None = None) -> dict:
+                  config: dict | None = None, beds_available_pct: float | None = None) -> dict:
     """Forecast every ward (predict_all), turn cases into beds needed, route the overflow.
-    Returns route_overflow()'s result plus as_of, horizon, forecast_week, demand_basis."""
+    `beds_available_pct` (30-100, default from config) is the share of each ward's beds free for
+    dengue. Returns route_overflow()'s result plus as_of, horizon, forecast_week, demand_basis,
+    beds_available_pct."""
     from src.allocation import load_config, setting
     from src.predict import predict_all
     from src.supplies import case_count, supplies_for
@@ -150,9 +165,10 @@ def overflow_plan(feat_df, as_of_date, horizon: int, demand_basis: str | None = 
     basis = demand_basis or setting(cfg, "demand", "basis")
     if basis not in cfg["demand"]["basis"]["allowed"]:
         raise ValueError(f"Demand basis must be one of {cfg['demand']['basis']['allowed']}; got {basis!r}.")
+    pct = setting(cfg, "bed_capacity", "beds_available_pct") if beds_available_pct is None else beds_available_pct
+    capacity = usable_capacity(bed_capacity(cfg), pct, cfg)     # check the slider before the slow part
     pred = predict_all(feat_df, as_of_date, horizon, with_drivers=False)
     beds = supplies_for(case_count(pred[basis].to_numpy()))["hospital_beds_required"].to_numpy()
-    capacity = bed_capacity(cfg)
     unknown = sorted(set(pred["ward_id"]) - set(capacity))
     if unknown:
         raise ValueError(f"No bed capacity for wards: {unknown}")
@@ -160,5 +176,5 @@ def overflow_plan(feat_df, as_of_date, horizon: int, demand_basis: str | None = 
              for w, c, b in zip(pred["ward_id"], pred["city"], beds)]
     result = route_overflow(wards)
     result.update(as_of=str(as_of_date)[:10], horizon=int(horizon), demand_basis=basis,
-                  forecast_week=str(pred["forecast_week"].iloc[0]))
+                  forecast_week=str(pred["forecast_week"].iloc[0]), beds_available_pct=float(pct))
     return result

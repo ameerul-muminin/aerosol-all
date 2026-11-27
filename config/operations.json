@@ -103,6 +103,13 @@
       "value": {"method": "per_ward_quantile", "quantile": 0.95, "period_end": "2021-12-31", "round": "up", "minimum_beds": 2},
       "kind": "data_rule",
       "why": "No bed capacity in the data. Each ward's capacity = the 95th percentile of its weekly hospital_beds_required in the training years (2016-2021), rounded up, at least 2. A ward is then over capacity only in its worst ~5% of weeks, which is when overflow routing should trigger. Training years only, so the validation and test years do not leak into the rule."
+    },
+    "beds_available_pct": {
+      "value": 100,
+      "range": [30, 100],
+      "unit": "percent of each ward's bed capacity",
+      "kind": "assumption",
+      "why": "Hospital beds are shared with non-dengue patients (other illness, injuries, births), so in a bad week only part of a ward's beds can take dengue cases. This control sets that share: capacity used = floor(capacity x pct / 100), at least 1 bed. 100% is the plain rule above; lower values let officers test a squeeze. Because dengue peaks hit every ward of a city in the same weeks, at 100% the forecast rarely exceeds capacity and routing seldom triggers; at lower shares it does."
     }
   },
 

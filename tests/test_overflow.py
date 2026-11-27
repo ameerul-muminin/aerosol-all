@@ -155,3 +155,48 @@ def test_overflow_plan_bad_basis(feat):
     from src.overflow import overflow_plan
     with pytest.raises(ValueError, match="Demand basis"):
         overflow_plan(feat, "2025-08-04", 2, "range_mid")
+
+
+# ---------------------------------------------------------------- beds available for dengue (slider)
+
+def test_usable_capacity_floors_and_keeps_one_bed():
+    from src.overflow import usable_capacity
+    assert usable_capacity({"a": 5, "b": 2, "c": 1}, 50) == {"a": 2, "b": 1, "c": 1}
+    assert usable_capacity({"a": 5, "b": 3}, 100) == {"a": 5, "b": 3}
+    assert usable_capacity({"a": 10}, 30) == {"a": 3}
+
+
+@pytest.mark.parametrize("pct", [29, 101, "50", True, float("nan")])
+def test_beds_available_pct_out_of_range(feat, pct):
+    from src.overflow import overflow_plan
+    with pytest.raises(ValueError, match="Beds available"):
+        overflow_plan(feat, "2025-08-04", 2, beds_available_pct=pct)
+
+
+def test_default_beds_available_is_100_pct(feat):
+    from src.overflow import overflow_plan
+    a, b = overflow_plan(feat, "2025-08-04", 2), overflow_plan(feat, "2025-08-04", 2, beds_available_pct=100)
+    assert a == b and a["beds_available_pct"] == 100.0
+
+
+@pytest.mark.parametrize("date, pct", [("2024-08-19", 50), ("2025-09-15", 70)])
+def test_fewer_beds_produces_intra_city_transfers(feat, date, pct):
+    """A whole city is often over capacity at once (dengue peaks are city-wide), so the test
+    uses weeks where some wards still have room: found by scanning Jun 2024 - Nov 2025."""
+    from src.overflow import bed_capacity, overflow_plan, usable_capacity
+    r = overflow_plan(feat, date, 2, beds_available_pct=pct)
+    assert r["transfers"]
+    city_of = feat.drop_duplicates("ward_id").set_index("ward_id")["city"]
+    for t in r["transfers"]:
+        assert city_of[t["from_ward"]] == city_of[t["to_ward"]] == t["city"]
+    cap = usable_capacity(bed_capacity(), pct)
+    assert all(w["capacity"] == cap[k] for k, w in r["wards"].items())
+    for k, w in r["wards"].items():                       # nobody is sent past a receiver's capacity
+        assert w["beds_required"] - w["routed_out"] + w["routed_in"] - w["net_deficit"] <= w["capacity"]
+
+
+def test_70_pct_on_2025_09_15_routes_every_overflow_patient(feat):
+    from src.overflow import overflow_plan
+    r = overflow_plan(feat, "2025-09-15", 2, beds_available_pct=70)
+    assert sum(t["patients"] for t in r["transfers"]) == 5
+    assert sum(c["unroutable"] for c in r["cities"].values()) == 0

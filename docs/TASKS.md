@@ -18,16 +18,16 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 
 ## 0. Setup (first 30 min)
 - [ ] S1 Load new xlsx in `src/features.py` (keep Phase 1 file working); supply columns kept as targets, not features. (A)
-- [ ] S2 `src/supplies.py`: case → supply lookup learned from data, with tests that it reproduces the table exactly. (A)
-- [ ] S3 `config/operations.json`: bed capacity rule, stock per item, crew count, crew effect — every assumption in one place,
+- [x] S2 `src/supplies.py`: case → supply lookup learned from data, with tests that it reproduces the table exactly. (A)
+- [x] S3 `config/operations.json`: bed capacity rule, stock per item, crew count, crew effect — every assumption in one place,
       with the reason written next to it. (A + B agree)
 - [ ] S4 Ask organisers: what does "follow version-onsite-final for each commit" mean (tag? branch? message prefix?). (B)
 
 ## 1. Constrained allocation engine (15)
-- [ ] R1 `src/allocation.py`: demand per ward = supplies(predicted cases, upper range optional);
+- [x] R1 `src/allocation.py`: demand per ward = supplies(predicted cases, upper range optional);
       stock slider 30–100%, crews total; priority score = risk tier × population density;
       greedy fill in priority order, `fulfilled_pct` and `deficit` per item, `critical` flag when < 100%. (A)
-- [ ] R2 Crew assignment derived from priority + cases; never more crews than available. (A)
+- [x] R2 Crew assignment derived from priority + cases; never more crews than available. (A)
 - [ ] R3 Tests: 100% stock → no deficits; 30% → deficits only in lowest-priority wards; totals never exceed stock. (B)
 - [ ] R4 API `POST /api/allocate` (as_of, horizon, stock_pct, crews, city?). (B)
 - [ ] R5 UI: sliders, live table, red deficit alerts. (C)

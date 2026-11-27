@@ -92,12 +92,15 @@ def _before_after(feat_df: pd.DataFrame, as_of: pd.Timestamp, crews: pd.Series, 
     before = day[col].to_numpy(dtype=float)
     # never below the lowest value the models were trained on: past it a tree model just
     # repeats its edge value, so a lower number would claim an effect nobody has seen
-    floor = np.minimum(before, input_floor(feat_df, col))
+    lowest = input_floor(feat_df, col)
+    wanted = before * (1 - reduction(k, cfg))
     changed = feat_df.copy()                       # predict_all checks history, so keep all weeks
-    changed.loc[on_day, col] = np.maximum(before * (1 - reduction(k, cfg)), floor)
+    changed.loc[on_day, col] = np.maximum(wanted, np.minimum(before, lowest))
     out = day[["ward_id", "city", col]].rename(columns={col: "input_before"}).set_index("ward_id")
     out["input_after"] = changed[on_day].set_index("ward_id")[col]
     out["crews"] = out.index.map(crews).fillna(0).astype(int)
+    out["floor_hit"] = pd.Series((k > 0) & (wanted < lowest), index=day["ward_id"].to_numpy()).reindex(out.index)
+    out["input_floor"] = lowest
     for h in HORIZONS:
         b = predict_all(feat_df, as_of, h, with_drivers=False).set_index("ward_id")
         a = predict_all(changed, as_of, h, with_drivers=False).set_index("ward_id")
@@ -115,8 +118,9 @@ def _load(cases: pd.Series) -> dict[str, int]:
 def simulate(feat_df: pd.DataFrame, as_of_date, deployment: dict[str, int], total_crews: int | None = None,
              config: dict | None = None) -> dict:
     """Deploy crews ({ward_id: crews}) at `as_of_date`; re-run the model at 2, 3 and 4 weeks.
-    Returns (JSON-ready): as_of, crews_used, assumption, `horizons` (region totals before/after:
-    cases, beds, saline) and `wards` (each deployed ward, best ROI first).
+    Returns (JSON-ready): as_of, crews_used, assumption (incl. input_floor), `horizons` (region
+    totals before/after: cases, beds, saline), `wards` (each deployed ward, best ROI first, with
+    floor_hit) and `floor_hit_wards` (wards whose cut was stopped at the training minimum).
     Bad input raises ValueError with a message fit to show the user."""
     cfg = config or load_config()
     as_of = _as_of(feat_df, as_of_date)
@@ -137,8 +141,11 @@ def simulate(feat_df: pd.DataFrame, as_of_date, deployment: dict[str, int], tota
 
     wards = [_ward_row(ward_id, r) for ward_id, r in t.loc[list(plan)].iterrows()]
     wards.sort(key=lambda w: (-w["roi"], w["ward_id"]))
+    assumption = _assumption(cfg)
+    assumption["input_floor"] = round(float(t["input_floor"].iloc[0]), 4)
     return {"as_of": str(as_of.date()), "crews_used": sum(plan.values()), "total_crews": total_crews,
-            "assumption": _assumption(cfg), "horizons": horizons, "wards": wards}
+            "assumption": assumption, "horizons": horizons, "wards": wards,
+            "floor_hit_wards": sorted(w["ward_id"] for w in wards if w["floor_hit"])}
 
 
 def _ward_row(ward_id: str, r: pd.Series) -> dict:
@@ -151,6 +158,7 @@ def _ward_row(ward_id: str, r: pd.Series) -> dict:
     crews = int(r["crews"])
     return {"ward_id": ward_id, "city": r["city"], "crews": crews,
             "input_before": round(float(r["input_before"]), 4), "input_after": round(float(r["input_after"]), 4),
+            "floor_hit": bool(r["floor_hit"]),
             "by_horizon": by_h, "cases_prevented": total,
             "roi": round(total / crews, 3) if crews else 0.0}
 

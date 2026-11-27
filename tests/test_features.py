@@ -125,3 +125,15 @@ def test_predictions_unchanged_by_the_new_dataset(h):
         a = predict_all(old, as_of, h, with_drivers=False)
         b = predict_all(new, as_of, h, with_drivers=False)
         pd.testing.assert_frame_equal(a, b)
+
+
+def test_feature_table_identical_with_either_file():
+    """Everything the models can see is the same; the onsite file only adds the supply outputs."""
+    from src.features import PHASE1_XLSX, SUPPLY_COLUMNS
+    old = add_lag_features(load_raw(PHASE1_XLSX))
+    new = add_lag_features(load_raw())
+    assert set(new.columns) - set(old.columns) == set(SUPPLY_COLUMNS)
+    pd.testing.assert_frame_equal(old, new.drop(columns=SUPPLY_COLUMNS))
+    for flags in [dict(anomaly=True, cases=True, city=True), {}]:
+        cols = feature_columns(**flags)
+        pd.testing.assert_frame_equal(old[cols], new[cols])

@@ -157,7 +157,8 @@ def overflow_plan(feat_df, as_of_date, horizon: int, demand_basis: str | None = 
     """Forecast every ward (predict_all), turn cases into beds needed, route the overflow.
     `beds_available_pct` (30-100, default from config) is the share of each ward's beds free for
     dengue. Returns route_overflow()'s result plus as_of, horizon, forecast_week, demand_basis,
-    beds_available_pct."""
+    beds_available_pct; each ward and city also gets full_capacity (the config rule) and
+    available_capacity (after the slider; the same as "capacity", which routing used)."""
     from src.allocation import load_config, setting
     from src.predict import predict_all
     from src.supplies import case_count, supplies_for
@@ -166,7 +167,8 @@ def overflow_plan(feat_df, as_of_date, horizon: int, demand_basis: str | None = 
     if basis not in cfg["demand"]["basis"]["allowed"]:
         raise ValueError(f"Demand basis must be one of {cfg['demand']['basis']['allowed']}; got {basis!r}.")
     pct = setting(cfg, "bed_capacity", "beds_available_pct") if beds_available_pct is None else beds_available_pct
-    capacity = usable_capacity(bed_capacity(cfg), pct, cfg)     # check the slider before the slow part
+    full = bed_capacity(cfg)
+    capacity = usable_capacity(full, pct, cfg)     # check the slider before the slow part
     pred = predict_all(feat_df, as_of_date, horizon, with_drivers=False)
     beds = supplies_for(case_count(pred[basis].to_numpy()))["hospital_beds_required"].to_numpy()
     unknown = sorted(set(pred["ward_id"]) - set(capacity))
@@ -175,6 +177,13 @@ def overflow_plan(feat_df, as_of_date, horizon: int, demand_basis: str | None = 
     wards = [{"ward_id": w, "city": c, "beds_required": int(b), "bed_capacity": capacity[w]}
              for w, c, b in zip(pred["ward_id"], pred["city"], beds)]
     result = route_overflow(wards)
+    # "capacity" is what routing used (= available); full_capacity is the rule before the slider
+    for ward_id, w in result["wards"].items():
+        w["full_capacity"], w["available_capacity"] = full[ward_id], capacity[ward_id]
+    for city, c in result["cities"].items():
+        ids = [w["ward_id"] for w in wards if w["city"] == city]
+        c["full_capacity"] = sum(full[i] for i in ids)
+        c["available_capacity"] = sum(capacity[i] for i in ids)
     result.update(as_of=str(as_of_date)[:10], horizon=int(horizon), demand_basis=basis,
                   forecast_week=str(pred["forecast_week"].iloc[0]), beds_available_pct=float(pct))
     return result

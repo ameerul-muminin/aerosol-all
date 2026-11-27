@@ -39,6 +39,7 @@ GET_QUERIES = {   # every GET route needs a known valid request; a new route wit
     "/api/overflow": f"?as_of={PEAK}&horizon=2&beds_available_pct=70",
     "/api/intervention/roi": f"?as_of={AS_OF}",
     "/api/selfcheck": f"?as_of={AS_OF}&horizon=3",
+    "/api/crew_plan": f"?as_of={AS_OF}&crews=20",
 }
 POST_BODIES = {
     "/api/what_if": {"ward_id": "DSCC_Ward_04", "as_of": AS_OF, "horizon": 3, "rainfall_mm": 200},

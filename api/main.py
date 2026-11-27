@@ -143,6 +143,11 @@ def create_app() -> Flask:
         resp.headers["Cache-Control"] = "no-store"     # a proof must run each time
         return resp
 
+    @app.get("/api/crew_plan")
+    def crew_plan():
+        """Bonus B2: best placement of ?crews (default: config) at ?as_of, vs the allocation crew rule."""
+        return jsonify(service.crew_plan(_as_of(), service.parse_whole(request.args.get("crews"), "crews")))
+
     # ---- static frontend (web/) ----------------------------------------------------
     @app.get("/")
     @app.get("/<path:path>")

@@ -528,6 +528,8 @@ _ASSUMPTIONS_USED = {
     "intervention_roi": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction",
                                          "sensitivity_per_crew"],
                          "crews": ["max_per_ward"]},
+    "crew_plan": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction"],
+                  "crews": ["total_default", "max_per_ward", "assignment_rule"]},
 }
 
 
@@ -684,10 +686,22 @@ def intervention_roi(as_of: str, crews_per_ward: int = 1) -> dict:
                    "assumptions": assumptions("intervention_roi")})
 
 
+# ---------------------------------------------------------------- GET /api/crew_plan  (bonus B2)
+@lru_cache(maxsize=64)
+def crew_plan(as_of: str, crews: int | None = None) -> dict:
+    """The crew plan that prevents the most cases over weeks +2..+4 (exact knapsack, src/placement.py),
+    with the allocation engine's crew rule on the same table for comparison. crews defaults to the config."""
+    from src.placement import best_placement
+    res = best_placement(features(), as_of, crews)
+    res["assumptions"] = assumptions("crew_plan")
+    return _plain(res)
+
+
 # live /api/efficiency counters also cover the Phase 2 answers (each miss runs the model)
 _ANSWER_CACHES.update({"allocate": "_allocation", "overflow": "overflow",
-                       "intervention": "_simulation", "intervention_roi": "intervention_roi"})
-_MODEL_CACHES = (*_MODEL_CACHES, "_allocation", "overflow", "_simulation", "intervention_roi")
+                       "intervention": "_simulation", "intervention_roi": "intervention_roi",
+                       "crew_plan": "crew_plan"})
+_MODEL_CACHES = (*_MODEL_CACHES, "_allocation", "overflow", "_simulation", "intervention_roi", "crew_plan")
 
 
 # ---------------------------------------------------------------- GET /api/selfcheck

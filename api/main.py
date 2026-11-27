@@ -21,6 +21,11 @@ from api import service
 WEB_DIR = Path(__file__).resolve().parents[1] / "web"
 CACHE_SECONDS = 3600  # forecasts for a given (ward, week, horizon) never change
 LIVE_PATHS = {"/api/health", "/api/efficiency"}   # answers change over time: never cached by browsers
+POST_EXAMPLES = {   # POST-only routes: a GET gets a 405 with an example body, not the web fallback
+    "api/what_if": '{"ward_id": "DSCC_Ward_04", "rainfall_mm": 200}',
+    "api/allocate": '{"as_of": "2025-07-14", "horizon": 3, "stock_pct": 60}',
+    "api/intervention": '{"as_of": "2025-07-14", "deployment": {"DSCC_Ward_04": 2}}',
+}
 
 
 def create_app() -> Flask:
@@ -107,14 +112,37 @@ def create_app() -> Flask:
     def history():
         return jsonify(service.ward_history(request.args.get("ward_id", ""), _horizon()))
 
+    # ---- Phase 2: operations (allocation, overflow routing, vector-control simulator) ----
+    @app.post("/api/allocate")
+    def allocate():
+        """JSON body {as_of, horizon, stock_pct (30-100), crews?, demand_basis?, city?}."""
+        return jsonify(service.allocate(request.get_json(silent=True)))
+
+    @app.get("/api/overflow")
+    def overflow():
+        a = request.args
+        return jsonify(service.overflow(_as_of(), service.parse_horizon(a.get("horizon", "3")),
+                                        a.get("demand_basis") or None,
+                                        service.parse_number(a.get("beds_available_pct"), "beds_available_pct")))
+
+    @app.post("/api/intervention")
+    def intervention():
+        """JSON body {as_of, deployment: {ward_id: crews}, total_crews?}."""
+        return jsonify(service.intervention(request.get_json(silent=True)))
+
+    @app.get("/api/intervention/roi")
+    def intervention_roi():
+        return jsonify(service.intervention_roi(
+            _as_of(), service.parse_whole(request.args.get("crews_per_ward"), "crews_per_ward", default=1)))
+
     # ---- static frontend (web/) ----------------------------------------------------
     @app.get("/")
     @app.get("/<path:path>")
     def web(path: str = ""):
         if path.startswith("api/"):                      # API typos get JSON, not the web fallback
-            if path.rstrip("/") == "api/what_if":
-                return jsonify(error="Use POST with a JSON body, e.g. "
-                                     '{"ward_id": "DSCC_Ward_04", "rainfall_mm": 200}.'), 405
+            example = POST_EXAMPLES.get(path.rstrip("/"))
+            if example:
+                return jsonify(error=f"Use POST with a JSON body, e.g. {example}."), 405
             return jsonify(error=f"Unknown API endpoint: /{path}"), 404
         target = WEB_DIR / path
         if path == "" or target.is_dir():

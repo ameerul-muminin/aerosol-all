@@ -300,7 +300,10 @@
     "no_busy_wards": "Every ward has room for its own patients.",
     "show_all": "Show all wards",
     "show_busy": "Show only wards with transfers or deficits",
-    "same_city": "Same city only."
+    "same_city": "Same city only.",
+    "backup": "If full on arrival → {ward} ({n} beds free)",
+    "backup_one": "If full on arrival → {ward} (1 bed free)",
+    "backup_none": "If full on arrival: no free bed left in the city. Escalate (temporary beds)."
   },
   "sim": {
     "title": "Crew simulator",

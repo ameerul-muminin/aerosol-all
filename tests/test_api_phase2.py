@@ -179,3 +179,32 @@ def test_overflow_transfers_never_cross_cities(client):
         moved = sum(t["patients"] for t in d["transfers"] if t["city"] == c["city"])
         wards = [w for w in d["wards"] if w["city"] == c["city"]]
         assert moved == sum(w["routed_out"] for w in wards) == sum(w["routed_in"] for w in wards)
+
+
+# ---------------------------------------------------------------- GET /api/crew_plan (bonus B2)
+def test_crew_plan_happy_path(client):
+    r = client.get(f"/api/crew_plan?as_of={A}&crews=10")
+    assert r.status_code == 200
+    d = r.get_json()
+    assert _plain_json(d)
+    assert d["as_of"] == A and d["crews_available"] == 10
+    assert d["crews_used"] == sum(d["plan"].values()) <= 10
+    assert d["cases_prevented"] >= d["compare"]["allocation_rule"]["cases_prevented"]
+    assert {w["ward_id"] for w in d["wards"]} == set(d["plan"])
+    assert _assumptions_from_config(d["assumptions"])
+
+
+def test_crew_plan_matches_the_module_and_defaults_to_config(client):
+    from src.placement import best_placement
+    d = client.get(f"/api/crew_plan?as_of={A}").get_json()
+    total = load_config()["crews"]["total_default"]["value"]
+    assert d["crews_available"] == total
+    direct = best_placement(service.features(), A, total)
+    assert d["plan"] == direct["plan"] and d["cases_prevented"] == direct["cases_prevented"]
+
+
+@pytest.mark.parametrize("query, msg", [("crews=-2", "whole number"), ("crews=two", "whole number"),
+                                        ("as_of=2025-7-14", "YYYY-MM-DD"), ("as_of=2025-07-15", "Mondays")])
+def test_crew_plan_bad_input_is_a_400(client, query, msg):
+    r = client.get(f"/api/crew_plan?{query}")
+    assert r.status_code == 400 and msg in r.get_json()["error"]

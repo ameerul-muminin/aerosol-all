@@ -3,20 +3,41 @@
 The `Dockerfile` runs the JSON API, the web frontend and the model in one container, with no network
 access needed at runtime. It is faster than `python -m api` on a free host because:
 
-- **gunicorn** (a production server) replaces Flask's development server: 2 worker processes x 4 threads;
+- **gunicorn** (a production server) replaces Flask's development server: `WEB_CONCURRENCY` worker processes
+  (default 2) x 4 threads;
 - **`--preload`**: the model and lag features load once, before the workers fork, so they share that memory;
 - the **CSV cache is built into the image**, so a cold start never parses the xlsx;
 - the image build **fails if the model file does not load**, instead of retraining at startup.
 
 Measured locally with the image's exact server command (`gunicorn 'api.main:create_app()' --preload --workers 2
 --threads 4`, MacBook, 27 Nov 2026): ready in about 3 s, `/api/selfcheck` passed, `/api/crew_plan` 0.35 s.
-Speed on a host depends on its CPU; a free Render instance (0.1 CPU, sleeps after 15 idle minutes) is
-the main reason the current deployment is slow.
+Speed on a host depends on its CPU: a free Render instance has 0.1 CPU and sleeps after 15 idle minutes.
 
-## Option A (recommended): Hugging Face Spaces, free
-A free CPU Space has far more CPU and memory than a free Render instance and sleeps only after a long
-idle period (check the current numbers on huggingface.co/pricing).
+## Option A (used for the live URL): Render, free plan, Docker
+Render's free plan has 512 MB of memory and 0.1 CPU, and the service sleeps after 15 idle minutes.
+Two settings make the app fit:
+- `WEB_CONCURRENCY=1`: one worker process (the image defaults to 2). Measured in a container limited to
+  0.1 CPU and 512 MB: memory 267 MB after every heavy route; with 2 workers it reached 469 MB, too close to the limit.
+- The case → supplies table is read once at startup (`api/service.py: warm_up()`), so no visitor waits for the xlsx.
 
+Steps (dashboard.render.com):
+1. **New** → **Web Service** → **Public Git Repository** → `https://github.com/ameerul-muminin/aerosol-all` → **Connect**.
+2. Name `aerosol-all`, **Language: Docker**, branch `main`, region **Singapore** (closest to Bangladesh),
+   instance type **Free**.
+3. **Environment Variables:** `WEB_CONCURRENCY` = `1`. Render sets `PORT` itself and the image listens on it.
+4. **Advanced → Health Check Path:** `/api/health`. Then **Deploy Web Service**.
+5. Check it: `https://<service>.onrender.com/api/selfcheck` must say `"passed": true`, then open `/app/`.
+
+To reuse an existing Render service instead (keeping its URL): **Settings** → language **Docker**, remove any
+custom start command, add `WEB_CONCURRENCY=1`, then deploy.
+
+In the same 0.1 CPU / 512 MB container: about 2 minutes from start to the first answer (paid at each deploy and each
+wake-up after sleep), then every route answers in under 6 s and cached answers at once. Open the URL a few minutes
+before a live demo so it is awake.
+
+## Option B: Hugging Face Spaces (needs a PRO account for Docker)
+On 27 Nov 2026 Hugging Face refused to create a Docker Space on the free `cpu-basic` hardware without a PRO
+subscription (free accounts can only host static Spaces, and this app needs its Python server). With PRO:
 1. On huggingface.co: **New Space** → SDK **Docker** → template **Blank** → hardware **CPU basic (free)**.
    The Space gets its own git repo with a `README.md` holding settings like:
    ```yaml
@@ -37,11 +58,6 @@ idle period (check the current numbers on huggingface.co/pricing).
    Files over 10 MB (the 11.4 MB `models/dengue_model.joblib`) must go through Git LFS, hence `git lfs track`.
 3. The Space builds the image and starts it. Open `https://<user>-<space>.hf.space/app/`.
 4. Check it: `https://<user>-<space>.hf.space/api/selfcheck?as_of=2025-07-14&horizon=3` must say `"passed": true`.
-
-## Option B: keep Render, switch it to Docker
-Render → the service → **Settings** → runtime **Docker** (it finds the `Dockerfile` at the repo root);
-remove any custom start command. Render sets `PORT` itself and the image listens on it. The free plan
-still sleeps and has 0.1 CPU; a paid instance removes both.
 
 ## Run it locally (any machine with Docker)
 ```sh

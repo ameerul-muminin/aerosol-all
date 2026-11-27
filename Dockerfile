@@ -30,4 +30,5 @@ RUN python -c "from src.features import load_raw; load_raw()" \
 EXPOSE 7860
 # gunicorn instead of Flask's development server. --preload loads the model and features once,
 # before the workers fork, so both workers share that memory; threads serve requests in parallel.
-CMD ["sh", "-c", "exec gunicorn 'api.main:create_app()' --bind 0.0.0.0:${PORT} --preload --workers 2 --threads 4 --timeout 120 --access-logfile -"]
+# WEB_CONCURRENCY = worker processes (default 2). Set it to 1 on a 512 MB host such as Render's free plan.
+CMD ["sh", "-c", "exec gunicorn 'api.main:create_app()' --bind 0.0.0.0:${PORT} --preload --workers ${WEB_CONCURRENCY:-2} --threads 4 --timeout 120 --access-logfile -"]

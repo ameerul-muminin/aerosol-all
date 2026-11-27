@@ -31,8 +31,10 @@ def features() -> pd.DataFrame:
 
 def warm_up() -> None:
     """Load model + features once at startup so the first request is fast."""
+    from src.supplies import load_model
     load_bundle()
     features()
+    load_model()                # the case -> supplies table is read from the xlsx: seconds on a laptop, ~45 s on 0.1 CPU
     default = meta()["as_of"]["default"]
     for h in HORIZONS:          # pre-compute the default week so the first page view is instant
         _ranking_df(default, h)

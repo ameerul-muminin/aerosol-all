@@ -73,6 +73,23 @@ def reduction(crews, cfg: dict | None = None):
     return np.minimum(per * np.asarray(crews, dtype=float), cap)
 
 
+def sensitivity_configs(cfg: dict) -> tuple[dict, dict]:
+    """Copies of `cfg` with reduction_per_crew set to the lowest and highest value of
+    crew_effect.sensitivity_per_crew (the central run keeps reduction_per_crew as it is)."""
+    import copy
+    e = cfg["crew_effect"]
+    values = e.get("sensitivity_per_crew", {}).get("value") or [e["reduction_per_crew"]["value"]]
+    if isinstance(values, (str, bytes)) or not all(isinstance(v, (int, float)) and not isinstance(v, bool)
+                                                   and 0 <= v <= 1 for v in values):
+        raise ValueError("crew_effect.sensitivity_per_crew must be a list of fractions between 0 and 1.")
+    out = []
+    for v in (min(values), max(values)):
+        c = copy.deepcopy(cfg)
+        c["crew_effect"]["reduction_per_crew"]["value"] = float(v)
+        out.append(c)
+    return out[0], out[1]
+
+
 def input_floor(feat_df: pd.DataFrame, col: str) -> float:
     """Lowest value of `col` in the training years (read from the data, not hard-coded)."""
     from src.train import TRAIN_END
@@ -125,21 +142,33 @@ def simulate(feat_df: pd.DataFrame, as_of_date, deployment: dict[str, int], tota
     cfg = config or load_config()
     as_of = _as_of(feat_df, as_of_date)
     plan = _check_deployment(deployment, set(feat_df["ward_id"]), cfg, total_crews)
-    t = _before_after(feat_df, as_of, pd.Series(plan, dtype=int), cfg)
+    crews = pd.Series(plan, dtype=int)
+    t = _before_after(feat_df, as_of, crews, cfg)
+    low_cfg, high_cfg = sensitivity_configs(cfg)
+    band = {"low": _before_after(feat_df, as_of, crews, low_cfg),
+            "high": _before_after(feat_df, as_of, crews, high_cfg)}
 
     horizons = []
     for h in HORIZONS:
         b, a = t[f"before_h{h}"], t[f"after_h{h}"]
         lb, la = _load(b), _load(a)
-        horizons.append({
+        row = {
             "horizon": h, "forecast_week": t[f"week_h{h}"].iloc[0],
             "cases_before": round(float(b.sum()), 2), "cases_after": round(float(a.sum()), 2),
             "cases_prevented": round(float((b - a).sum()), 2),
             "beds_before": lb["beds"], "beds_after": la["beds"], "beds_freed": lb["beds"] - la["beds"],
             "saline_before": lb["saline"], "saline_after": la["saline"], "saline_saved": lb["saline"] - la["saline"],
-        })
+        }
+        for end, tb in band.items():            # same "before"; "after" with the low / high effect
+            after = tb[f"after_h{h}"]
+            lend = _load(after)
+            row[f"cases_prevented_{end}"] = round(float((b - after).sum()), 2)
+            row[f"beds_freed_{end}"] = lb["beds"] - lend["beds"]
+            row[f"saline_saved_{end}"] = lb["saline"] - lend["saline"]
+        horizons.append(row)
 
-    wards = [_ward_row(ward_id, r) for ward_id, r in t.loc[list(plan)].iterrows()]
+    wards = [_ward_row(ward_id, r, {e: tb.loc[ward_id] for e, tb in band.items()})
+             for ward_id, r in t.loc[list(plan)].iterrows()]
     wards.sort(key=lambda w: (-w["roi"], w["ward_id"]))
     assumption = _assumption(cfg)
     assumption["input_floor"] = round(float(t["input_floor"].iloc[0]), 4)
@@ -148,7 +177,11 @@ def simulate(feat_df: pd.DataFrame, as_of_date, deployment: dict[str, int], tota
             "floor_hit_wards": sorted(w["ward_id"] for w in wards if w["floor_hit"])}
 
 
-def _ward_row(ward_id: str, r: pd.Series) -> dict:
+def _prevented(r: pd.Series) -> float:
+    return round(sum(round(float(r[f"before_h{h}"]) - float(r[f"after_h{h}"]), 2) for h in HORIZONS), 2)
+
+
+def _ward_row(ward_id: str, r: pd.Series, band: dict | None = None) -> dict:
     by_h = {}
     for h in HORIZONS:
         b, a = float(r[f"before_h{h}"]), float(r[f"after_h{h}"])
@@ -156,11 +189,16 @@ def _ward_row(ward_id: str, r: pd.Series) -> dict:
                         "cases_after": round(a, 2), "cases_prevented": round(b - a, 2)}
     total = round(sum(v["cases_prevented"] for v in by_h.values()), 2)
     crews = int(r["crews"])
-    return {"ward_id": ward_id, "city": r["city"], "crews": crews,
-            "input_before": round(float(r["input_before"]), 4), "input_after": round(float(r["input_after"]), 4),
-            "floor_hit": bool(r["floor_hit"]),
-            "by_horizon": by_h, "cases_prevented": total,
-            "roi": round(total / crews, 3) if crews else 0.0}
+    row = {"ward_id": ward_id, "city": r["city"], "crews": crews,
+           "input_before": round(float(r["input_before"]), 4), "input_after": round(float(r["input_after"]), 4),
+           "floor_hit": bool(r["floor_hit"]),
+           "by_horizon": by_h, "cases_prevented": total,
+           "roi": round(total / crews, 3) if crews else 0.0}
+    for end, rb in (band or {}).items():         # same weeks with the low / high crew effect
+        prevented = _prevented(rb)
+        row[f"cases_prevented_{end}"] = prevented
+        row[f"roi_{end}"] = round(prevented / crews, 3) if crews else 0.0
+    return row
 
 
 def _assumption(cfg: dict) -> dict:
@@ -168,21 +206,27 @@ def _assumption(cfg: dict) -> dict:
     return {"model_input": e["model_input"]["value"],
             "reduction_per_crew": e["reduction_per_crew"]["value"],
             "max_total_reduction": e["max_total_reduction"]["value"],
-            "note": "Effect size is a planning assumption (no intervention data); see config/operations.json."}
+            "sensitivity_per_crew": e.get("sensitivity_per_crew", {}).get("value"),
+            "note": "Effect size is a planning assumption (no intervention data); low/high show the range "
+                    "from sensitivity_per_crew. See config/operations.json."}
 
 
 def roi_ranking(feat_df: pd.DataFrame, as_of_date, crews_per_ward: int = 1, config: dict | None = None) -> list[dict]:
     """Every ward's ROI if it got `crews_per_ward` crews: cases prevented over weeks +2..+4
-    per crew, best first (ties by ward_id). Wards do not affect each other, so all are scored
-    in one model run per horizon."""
+    per crew, best first (ties by ward_id), with roi_low/roi_high from the sensitivity range.
+    Wards do not affect each other, so all are scored in one model run per horizon and effect."""
     cfg = config or load_config()
     as_of = _as_of(feat_df, as_of_date)
     cap = int(setting(cfg, "crews", "max_per_ward"))
     if isinstance(crews_per_ward, bool) or not isinstance(crews_per_ward, Integral) or not 1 <= crews_per_ward <= cap:
         raise ValueError(f"Crews per ward must be a whole number from 1 to {cap}.")
     wards = sorted(feat_df.loc[feat_df["date"] == as_of, "ward_id"].unique())
-    t = _before_after(feat_df, as_of, pd.Series(crews_per_ward, index=wards), cfg)
-    rows = [_ward_row(w, r) for w, r in t.iterrows()]
+    crews = pd.Series(crews_per_ward, index=wards)
+    t = _before_after(feat_df, as_of, crews, cfg)
+    low_cfg, high_cfg = sensitivity_configs(cfg)
+    band = {"low": _before_after(feat_df, as_of, crews, low_cfg),
+            "high": _before_after(feat_df, as_of, crews, high_cfg)}
+    rows = [_ward_row(w, r, {e: tb.loc[w] for e, tb in band.items()}) for w, r in t.iterrows()]
     rows.sort(key=lambda w: (-w["roi"], w["ward_id"]))
     for rank, row in enumerate(rows, 1):
         row["rank"] = rank

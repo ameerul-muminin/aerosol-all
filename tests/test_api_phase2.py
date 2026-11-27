@@ -179,3 +179,21 @@ def test_overflow_transfers_never_cross_cities(client):
         moved = sum(t["patients"] for t in d["transfers"] if t["city"] == c["city"])
         wards = [w for w in d["wards"] if w["city"] == c["city"]]
         assert moved == sum(w["routed_out"] for w in wards) == sum(w["routed_in"] for w in wards)
+
+
+
+# ---------------------------------------------------------------- simulator sensitivity band
+def test_intervention_reports_the_sensitivity_band(client):
+    d = client.post("/api/intervention", json={"as_of": A, "deployment": DEPLOY, "total_crews": 5}).get_json()
+    for h in d["horizons"]:
+        for key in ("cases_prevented", "beds_freed", "saline_saved"):
+            assert f"{key}_low" in h and f"{key}_high" in h
+        assert h["cases_prevented_low"] <= h["cases_prevented"] + 0.05 <= h["cases_prevented_high"] + 0.1
+    assert all("roi_low" in w and "roi_high" in w for w in d["wards"])
+    assert d["assumptions"]["crew_effect"]["sensitivity_per_crew"]["value"] == [0.05, 0.15, 0.25]
+
+
+def test_intervention_roi_reports_the_sensitivity_band(client):
+    d = client.get(f"/api/intervention/roi?as_of={A}").get_json()
+    assert all("roi_low" in w and "roi_high" in w for w in d["wards"])
+    assert "sensitivity_per_crew" in d["assumptions"]["crew_effect"]

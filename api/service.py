@@ -521,10 +521,12 @@ _ASSUMPTIONS_USED = {
     "overflow": {"demand": ["basis", "rounding"],
                  "bed_capacity": ["rule", "beds_available_pct"],
                  "overflow": ["same_city_only", "sender_order", "receiver_order"]},
-    "intervention": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction"],
+    "intervention": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction",
+                                     "sensitivity_per_crew"],
                      "crews": ["total_default", "max_per_ward"],
                      "demand": ["rounding"]},
-    "intervention_roi": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction"],
+    "intervention_roi": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction",
+                                         "sensitivity_per_crew"],
                          "crews": ["max_per_ward"]},
 }
 

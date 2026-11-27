@@ -32,7 +32,7 @@ async function request(path, init) {
 }
 
 export function get(path, params = {}) {
-  const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ""));
+  const qs = clean(params);
   const url = qs.toString() ? `${path}?${qs}` : path;
   if (cache.has(url)) browserCache.reused += 1;
   else {
@@ -57,4 +57,18 @@ export const api = {
   lagProfile: (city) => get("/api/lag_profile", { city }),
   history: (ward_id, horizon) => get("/api/history", { ward_id, horizon }),
   whatIf: (body) => post("/api/what_if", body),
+  // Phase 2: allocation, overflow, crew simulator, dispatch
+  allocate: (body) => post("/api/allocate", body),           // {as_of, horizon, stock_pct, crews?, demand_basis?, city?}
+  overflow: (as_of, horizon, beds_available_pct, demand_basis) => get("/api/overflow", { as_of, horizon, beds_available_pct, demand_basis }),
+  roi: (as_of, crews_per_ward) => get("/api/intervention/roi", { as_of, crews_per_ward }),
+  intervention: (body) => post("/api/intervention", body),   // {as_of, deployment: {ward_id: crews}, total_crews?}
+  crewPlan: (as_of, crews) => get("/api/crew_plan", { as_of, crews }),
+  dispatch: (q) => get("/api/dispatch", q),                  // q = {as_of, horizon, stock_pct, crews, beds_available_pct, lang, city}
+  briefUrl: (q) => `/api/dispatch/brief?${clean(q)}`,       // a page to open, not JSON to fetch
+  supplyPlan: (as_of, city) => get("/api/supply_plan", { as_of, city }),
 };
+
+/** Query string without empty values (unset settings fall back to the server's defaults). */
+function clean(params) {
+  return new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ""));
+}

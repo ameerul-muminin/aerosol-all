@@ -60,7 +60,9 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [ ] D3 UI: "Dispatch" view with copy buttons and print-to-PDF. (C)
 
 ## 5. Offline resilience (15)
-- [ ] F1 Audit: no network calls anywhere (grep for http/requests/CDN); fonts vendored. (B)
+- [x] F1 Audit: no network calls anywhere (grep for http/requests/CDN); fonts vendored. (B)
+      Automated in `scripts/offline_check.py`: no network client imported in src/, api/ or scripts/ (`network_imports()`),
+      no remote URL a browser would load in web/ (`remote_urls()`); fonts, images, CSS and JS are all in `web/assets/`.
 - [x] F2 Kill-switch test: Wi-Fi off → run every endpoint + UI, zero crashes. Script it: `scripts/offline_check.py`. (B)
       Done by A: `python -m scripts.offline_check` blocks outbound network, calls every /api route and every web file the two pages load, and scans web/ for remote loads.
 - [x] F3 Deterministic: same inputs → same allocation/routing/notices (seeded, stable sort ties by ward_id). Test it. (A)

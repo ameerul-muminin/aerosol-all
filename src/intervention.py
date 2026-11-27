@@ -73,6 +73,15 @@ def reduction(crews, cfg: dict | None = None):
     return np.minimum(per * np.asarray(crews, dtype=float), cap)
 
 
+def input_floor(feat_df: pd.DataFrame, col: str) -> float:
+    """Lowest value of `col` in the training years (read from the data, not hard-coded)."""
+    from src.train import TRAIN_END
+    train = feat_df.loc[feat_df["date"] <= TRAIN_END, col]
+    if train.empty:
+        raise ValueError("No training-period rows to find the lowest model input.")
+    return float(train.min())
+
+
 def _before_after(feat_df: pd.DataFrame, as_of: pd.Timestamp, crews: pd.Series, cfg: dict) -> pd.DataFrame:
     """One row per ward: city, crews, the model input before/after, and cases before/after
     per horizon (columns before_h2, after_h2, ...)."""
@@ -80,8 +89,12 @@ def _before_after(feat_df: pd.DataFrame, as_of: pd.Timestamp, crews: pd.Series, 
     on_day = (feat_df["date"] == as_of).to_numpy()
     day = feat_df[on_day]
     k = day["ward_id"].map(crews).fillna(0).to_numpy()
+    before = day[col].to_numpy(dtype=float)
+    # never below the lowest value the models were trained on: past it a tree model just
+    # repeats its edge value, so a lower number would claim an effect nobody has seen
+    floor = np.minimum(before, input_floor(feat_df, col))
     changed = feat_df.copy()                       # predict_all checks history, so keep all weeks
-    changed.loc[on_day, col] = day[col].to_numpy() * (1 - reduction(k, cfg))
+    changed.loc[on_day, col] = np.maximum(before * (1 - reduction(k, cfg)), floor)
     out = day[["ward_id", "city", col]].rename(columns={col: "input_before"}).set_index("ward_id")
     out["input_after"] = changed[on_day].set_index("ward_id")[col]
     out["crews"] = out.index.map(crews).fillna(0).astype(int)

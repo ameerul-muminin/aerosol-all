@@ -4,7 +4,7 @@ import json
 import pytest
 
 from src.allocation import load_config
-from src.intervention import reduction, roi_ranking, simulate
+from src.intervention import input_floor, reduction, roi_ranking, simulate
 
 PEAK, QUIET = "2025-07-14", "2025-02-03"
 
@@ -34,7 +34,9 @@ def test_crews_change_the_model_input_and_the_forecast_only_goes_down(feat, rank
     plan = {w["ward_id"]: 2 for w in ranking[:3]}
     s = simulate(feat, PEAK, plan)
     for w in s["wards"]:
-        assert w["input_after"] == pytest.approx(w["input_before"] * (1 - reduction(2)), abs=1e-4)
+        floor = input_floor(feat, "water_logging_risk_index")
+        expected = max(w["input_before"] * (1 - reduction(2)), floor)
+        assert w["input_after"] == pytest.approx(expected, abs=1e-4)
         for h in ("2", "3", "4"):
             v = w["by_horizon"][h]
             assert v["cases_after"] <= v["cases_before"]
@@ -118,3 +120,20 @@ def test_bad_dates_give_friendly_errors(feat, date, msg):
 def test_bad_crews_per_ward_in_ranking(feat, k):
     with pytest.raises(ValueError, match="1 to 3"):
         roi_ranking(feat, PEAK, crews_per_ward=k)
+
+
+def test_input_never_goes_below_the_training_minimum(feat):
+    col = "water_logging_risk_index"
+    train_min = feat.loc[feat["date"] <= "2021-12-31", col].min()
+    assert input_floor(feat, col) == train_min
+    wards = feat.drop_duplicates("ward_id").set_index("ward_id")[col]
+    low = wards.idxmin()                                   # already at the floor
+    near = wards[wards * (1 - reduction(3)) < train_min].drop(low).index[0]   # would cross it
+    s = simulate(feat, PEAK, {low: 3, near: 3})
+    by_id = {w["ward_id"]: w for w in s["wards"]}
+    assert by_id[low]["input_after"] == pytest.approx(train_min)
+    assert by_id[low]["cases_prevented"] == 0          # no room to lower, so no claimed effect
+    assert by_id[near]["input_after"] == pytest.approx(train_min)
+    assert by_id[near]["input_before"] > train_min
+    for w in s["wards"]:
+        assert w["input_after"] >= train_min - 1e-9

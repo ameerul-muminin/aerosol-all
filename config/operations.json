@@ -94,7 +94,7 @@
       "value": 0.5,
       "unit": "fraction of the index",
       "kind": "assumption",
-      "why": "Caps the combined effect at 50% so stacked crews cannot remove all breeding sites in the simulation."
+      "why": "Caps the combined effect at 50% so stacked crews cannot remove all breeding sites in the simulation. The index is also never lowered below the lowest value in the training years (read from the data by src/intervention.py), because the models have never seen lower values and cannot say what happens there."
     }
   },
 

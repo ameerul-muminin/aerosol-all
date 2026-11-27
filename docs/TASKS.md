@@ -28,7 +28,9 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       stock slider 30–100%, crews total; priority score = risk tier × population density;
       greedy fill in priority order, `fulfilled_pct` and `deficit` per item, `critical` flag when < 100%. (A)
 - [x] R2 Crew assignment derived from priority + cases; never more crews than available. (A)
-- [ ] R3 Tests: 100% stock → no deficits; 30% → deficits only in lowest-priority wards; totals never exceed stock. (B)
+- [x] R3 Tests: 100% stock → no deficits; 30% → deficits only in lowest-priority wards; totals never exceed stock. (B)
+      Covered in `tests/test_allocation.py`: `test_full_stock_means_no_deficit_and_nothing_critical`,
+      `test_scarcity_hits_only_the_lowest_priority_wards`, `test_totals_never_exceed_stock` (+ `test_plan_on_real_forecasts`).
 - [ ] R4 API `POST /api/allocate` (as_of, horizon, stock_pct, crews, city?). (B)
 - [ ] R5 UI: sliders, live table, red deficit alerts. (C)
 
@@ -36,7 +38,9 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [x] O1 `src/overflow.py`: per ward beds needed vs capacity; overflow sent to wards with headroom
       **in the same city only**, lowest burden first; output transfers list, net deficit per ward,
       city utilisation %, city headroom. (A)
-- [ ] O2 Tests: no cross-city transfer; patients conserved; unroutable overflow reported. (B)
+- [x] O2 Tests: no cross-city transfer; patients conserved; unroutable overflow reported. (B)
+      Covered in `tests/test_overflow.py`: `test_transfers_stay_within_city`, `test_fewer_beds_produces_intra_city_transfers`,
+      `test_patients_are_conserved_*` (2), `test_unroutable_overflow_is_reported_per_ward_and_city`.
 - [ ] O3 API `GET /api/overflow?as_of&horizon`. (B)
 - [ ] O4 UI: per-city utilisation bars + transfer list (from → to, patients). (C)
 

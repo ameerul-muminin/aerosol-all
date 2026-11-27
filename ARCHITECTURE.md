@@ -74,7 +74,10 @@ Everything below runs in the same Python process, offline, with no network or LL
         +--> simulate / roi_ranking  src/intervention.py  crews -> lower water-logging -> re-run models h=2,3,4
         |
         v
- dispatch notices (in progress) -> /api/* (in progress) -> web UI (in progress)
+ dispatch notices       src/dispatch.py  SMS, WhatsApp, printable brief (EN + বাংলা) -> exports/
+        |
+        v
+ /api/* (in progress) -> web UI (in progress)
  all settings: config/operations.json            no network, no LLM, deterministic
 ```
 
@@ -110,8 +113,16 @@ so `roi_ranking()` scores all 60 wards in one run per horizon (under 0.2 s). Exa
 crews: diminishing returns); 2 crews in each of the top 5 wards cut the 2-week forecast from 564.3 to 552.4 cases,
 5 beds and 30 saline bags. Off-season (2025-02-03) no ward saves more than 0.01 cases.
 
+### Dispatch notices (`src/dispatch.py`, by B)
+`build_notices()` runs the allocation and overflow plans and fills fixed text templates (no LLM) for each ward,
+in English and বাংলা: the forecast with its 80% range and tier, allocated vs required saline, kits and beds with
+deficits, crews assigned and bed routing in/out. `sms()`, `whatsapp()` and `brief_html()` format them; critical
+wards come first in the brief. Samples in `exports/` come from
+`python -m scripts.export_dispatch --as-of 2025-09-15 --horizon 2 --stock-pct 60 --crews 20 --beds-pct 70`.
+
 ### Determinism
-Every entry point gives identical output when repeated or when input rows are shuffled (`tests/test_determinism.py`).
+Allocation, overflow, the simulator and the ROI ranking give identical output when repeated or when input rows are
+shuffled (`tests/test_determinism.py`); notices are not yet in that test.
 
 ### Assumptions (`config/operations.json`, condensed; the file holds the full reason for each)
 | Setting | Value | Kind | Why |
@@ -152,7 +163,6 @@ Every entry point gives identical output when repeated or when input rows are sh
 | Item | Owner |
 |---|---|
 | `POST /api/allocate`, `GET /api/overflow`, `POST /api/intervention` (R4, O3, V3) | B |
-| `src/dispatch.py` notices (SMS, WhatsApp, HTML brief, EN + বাংলা) and `exports/` samples (D1, D2) | B |
 | `scripts/offline_check.py` kill-switch test (F2), live URL (G1) | B |
 | Allocation, overflow, simulator and dispatch views (R5, O4, V4, D3) | C |
 

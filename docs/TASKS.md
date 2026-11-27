@@ -33,7 +33,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       Covered in `tests/test_allocation.py`: `test_full_stock_means_no_deficit_and_nothing_critical`,
       `test_scarcity_hits_only_the_lowest_priority_wards`, `test_totals_never_exceed_stock` (+ `test_plan_on_real_forecasts`).
 - [x] R4 API `POST /api/allocate` (as_of, horizon, stock_pct, crews, city?). (B)
-- [ ] R5 UI: sliders, live table, red deficit alerts. (C) Full spec: section 8, R5.
+- [x] R5 UI: sliders, live table, red deficit alerts. (C) Full spec: section 8, R5.
 
 ## 2. Hospital overflow routing (10)
 - [x] O1 `src/overflow.py`: per ward beds needed vs capacity; overflow sent to wards with headroom
@@ -43,7 +43,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       Covered in `tests/test_overflow.py`: `test_transfers_stay_within_city`, `test_fewer_beds_produces_intra_city_transfers`,
       `test_patients_are_conserved_*` (2), `test_unroutable_overflow_is_reported_per_ward_and_city`.
 - [x] O3 API `GET /api/overflow?as_of&horizon`. (B)
-- [ ] O4 UI: per-city utilisation bars + transfer list (from → to, patients). (C) Full spec: section 8, O4.
+- [x] O4 UI: per-city utilisation bars + transfer list (from → to, patients). (C) Full spec: section 8, O4.
 
 ## 3. Vector-control simulator (10) — must be model-driven, not a toggle
 - [x] V1 `src/intervention.py`: crews on selected wards change the **model inputs** (e.g. lower lagged
@@ -51,7 +51,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       cases, beds, saline. Effect size is an assumption in S3; say so in the UI. (A)
 - [x] V2 ROI = cases prevented per crew; rank all wards. (A)
 - [x] V3 Tests + API `POST /api/intervention`. (B)
-- [ ] V4 UI: pick wards + crews, before/after per horizon, ROI ranking. (C) Full spec: section 8, V4.
+- [x] V4 UI: pick wards + crews, before/after per horizon, ROI ranking. (C) Full spec: section 8, V4.
 
 ## 4. Dispatch notices + /exports (part of 10)
 - [x] D1 `src/dispatch.py`: template-only (no LLM) notices per ward: SMS (≤160 chars), WhatsApp, printable HTML brief
@@ -59,7 +59,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [x] D2 `python -m scripts.export_dispatch` → `exports/` sample SMS/WhatsApp/HTML (committed). (B)
 - [x] D4 API for D3: `GET /api/dispatch` (notices as JSON with SMS + WhatsApp text) and `GET /api/dispatch/brief`
       (printable HTML). Reproduces `exports/` byte for byte (`tests/test_api_dispatch.py`). (B)
-- [ ] D3 UI: "Dispatch" view with copy buttons and print-to-PDF. (C) Full spec: section 8, D3.
+- [x] D3 UI: "Dispatch" view with copy buttons and print-to-PDF. (C) Full spec: section 8, D3.
 
 ## 5. Offline resilience (15)
 - [x] F1 Audit: no network calls anywhere (grep for http/requests/CDN); fonts vendored. (B)

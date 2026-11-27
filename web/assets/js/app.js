@@ -1,5 +1,7 @@
-// App shell: state in the URL, hash router (#outlook, #wards, #accuracy, #cost), sidebar inputs from /api/meta, EN/বাংলা toggle.
-// URL shape: /app/?ward=CCC_Ward_01&as_of=2025-07-14&h=3&city=Gazipur#wards
+// App shell: state in the URL, hash router (#outlook, #wards, #accuracy, #cost, #allocation, #overflow, #simulator,
+// #dispatch), sidebar inputs from /api/meta, EN/বাংলা toggle.
+// URL shape: /app/?ward=CCC_Ward_01&as_of=2025-07-14&h=3&city=Gazipur&stock=50&crews=20&beds=80&basis=range_high#allocation
+// stock/crews/beds/basis are shared by the four Phase 2 views, so Dispatch uses what was set on Allocation and Overflow.
 import { api } from "./api.js";
 import { initI18n, setLang, getLang } from "./i18n.js";
 import { showError } from "./ui.js";
@@ -8,8 +10,16 @@ import * as outlook from "./views/outlook.js";
 import * as wards from "./views/wards.js";
 import * as accuracy from "./views/accuracy.js";
 import * as cost from "./views/cost.js";
+import * as allocation from "./views/allocation.js";
+import * as overflow from "./views/overflow.js";
+import * as simulator from "./views/simulator.js";
+import * as dispatch from "./views/dispatch.js";
 
-const VIEWS = { outlook, wards, accuracy, cost };
+const VIEWS = { outlook, wards, accuracy, cost, allocation, overflow, simulator, dispatch };
+// views about the whole region, not one ward: the sidebar Ward field is hidden on these
+const REGION_VIEWS = ["wards", "cost", "allocation", "overflow", "simulator", "dispatch"];
+const STOCK_DEFAULT = 60;
+const whole = (v) => (/^\d+$/.test(v || "") ? v : "");   // "" = let the server use its default
 const $ = (id) => document.getElementById(id);
 const main = $("main");
 let meta;
@@ -27,12 +37,20 @@ function readState() {
     as_of: q.get("as_of") || meta.as_of.default,
     h: meta.horizons.includes(h) ? h : 3,
     city: meta.cities.some((c) => c.city === q.get("city")) ? q.get("city") : "",
+    stock: Number(whole(q.get("stock")) || STOCK_DEFAULT),
+    crews: whole(q.get("crews")),
+    beds: whole(q.get("beds")),
+    basis: q.get("basis") === "range_high" ? "range_high" : "",
   };
 }
 
 function writeUrl() {
   const q = new URLSearchParams({ ward: state.ward, as_of: state.as_of, h: state.h });
   if (state.city) q.set("city", state.city);
+  if (state.stock !== STOCK_DEFAULT) q.set("stock", state.stock);
+  if (state.crews !== "") q.set("crews", state.crews);
+  if (state.beds !== "") q.set("beds", state.beds);
+  if (state.basis) q.set("basis", state.basis);
   history.replaceState(null, "", `?${q}#${state.view}`);
 }
 
@@ -42,6 +60,13 @@ function set(patch) {
   writeUrl();
   syncSidebar();
   render();
+}
+
+/** Live controls call ctx.save({...}): it updates the state and the URL but does not re-render, so a slider
+ *  keeps focus while it is dragged. The view repaints its own results. */
+function save(patch) {
+  state = { ...state, ...patch };
+  writeUrl();
 }
 
 function fillSidebar() {
@@ -58,7 +83,7 @@ function fillSidebar() {
 function syncSidebar() {
   $("ward").value = state.ward;
   $("asof").value = state.as_of;
-  $("f-ward").hidden = state.view === "wards" || state.view === "cost";   // views that are not about one ward
+  $("f-ward").hidden = REGION_VIEWS.includes(state.view);   // views that are not about one ward
   document.querySelectorAll(".tabs a").forEach((a) => {
     if (a.dataset.view === state.view) {
       a.setAttribute("aria-current", "page");
@@ -75,7 +100,7 @@ function render() {
   rendered = key;
   main.classList.toggle("anim", animate);
   document.body.classList.toggle("no-anim", animate);   // thumbs jump into place on first paint
-  VIEWS[state.view].render(main, { state, meta, set, retry: render });
+  VIEWS[state.view].render(main, { state, meta, set, save, retry: render });
 }
 
 async function boot() {

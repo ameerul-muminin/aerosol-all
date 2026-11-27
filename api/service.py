@@ -556,6 +556,8 @@ def _check_fields(body, allowed: tuple, example: str) -> dict:
 def _check_city(city) -> str | None:
     if city in (None, ""):
         return None
+    if not isinstance(city, str):
+        raise ValueError("city must be a city name, e.g. \"Gazipur\".")
     if city not in {c["city"] for c in meta()["cities"]}:
         raise ValueError(f"Unknown city: {city}")
     return city
@@ -565,7 +567,7 @@ def _check_basis(basis) -> str | None:
     if basis in (None, ""):
         return None
     allowed = _ops_config()["demand"]["basis"]["allowed"]
-    if basis not in allowed:
+    if not isinstance(basis, str) or basis not in allowed:
         raise ValueError(f"demand_basis must be one of: {', '.join(allowed)}.")
     return basis
 
@@ -611,7 +613,7 @@ def allocate(body) -> dict:
     body = _check_fields(body, ALLOCATE_KEYS, '{"as_of": "2025-07-14", "horizon": 3, "stock_pct": 60}')
     as_of = parse_as_of(body.get("as_of") or meta()["as_of"]["default"])
     horizon = parse_horizon(body.get("horizon", 3))
-    if body.get("stock_pct") is None:
+    if body.get("stock_pct") in (None, ""):
         raise ValueError("stock_pct is required: the share of full stock available, from 30 to 100 (percent).")
     stock_pct = parse_number(body["stock_pct"], "stock_pct")
     crews = parse_whole(body.get("crews"), "crews")

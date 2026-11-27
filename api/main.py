@@ -53,6 +53,10 @@ def create_app() -> Flask:
     def not_found(_):
         return jsonify(error="Not found"), 404
 
+    @app.errorhandler(500)
+    def server_error(_):  # last resort for a bug: still JSON the UI can show, never an HTML or traceback page
+        return jsonify(error="Something went wrong on the server. Please try again, or change the input."), 500
+
     @app.after_request
     def compress_and_cache(resp):
         if request.path.startswith("/api/") and resp.status_code == 200 and request.path not in LIVE_PATHS:

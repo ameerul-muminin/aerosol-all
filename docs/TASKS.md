@@ -22,6 +22,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [x] S3 `config/operations.json`: bed capacity rule, stock per item, crew count, crew effect — every assumption in one place,
       with the reason written next to it. (A + B agree)
 - [ ] S4 Ask organisers: what does "follow version-onsite-final for each commit" mean (tag? branch? message prefix?). (B)
+- [x] S5 `/api/selfcheck` (`src/selfcheck.py`): every Phase 2 math check re-run live, with the network blocked. (A)
 
 ## 1. Constrained allocation engine (15)
 - [x] R1 `src/allocation.py`: demand per ward = supplies(predicted cases, upper range optional);

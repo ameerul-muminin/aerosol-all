@@ -20,7 +20,7 @@ from api import service
 
 WEB_DIR = Path(__file__).resolve().parents[1] / "web"
 CACHE_SECONDS = 3600  # forecasts for a given (ward, week, horizon) never change
-LIVE_PATHS = {"/api/health", "/api/efficiency"}   # answers change over time: never cached by browsers
+LIVE_PATHS = {"/api/health", "/api/efficiency", "/api/selfcheck"}   # live answers: never cached by browsers
 POST_EXAMPLES = {   # POST-only routes: a GET gets a 405 with an example body, not the web fallback
     "api/what_if": '{"ward_id": "DSCC_Ward_04", "rainfall_mm": 200}',
     "api/allocate": '{"as_of": "2025-07-14", "horizon": 3, "stock_pct": 60}',
@@ -134,6 +134,14 @@ def create_app() -> Flask:
     def intervention_roi():
         return jsonify(service.intervention_roi(
             _as_of(), service.parse_whole(request.args.get("crews_per_ward"), "crews_per_ward", default=1)))
+
+    @app.get("/api/selfcheck")
+    def selfcheck():
+        """Live math checks with the network blocked. ?as_of (default: latest week) &horizon (default 2)."""
+        a = request.args
+        resp = jsonify(service.selfcheck(a.get("as_of") or None, service.parse_horizon(a.get("horizon", "2"))))
+        resp.headers["Cache-Control"] = "no-store"     # a proof must run each time
+        return resp
 
     # ---- static frontend (web/) ----------------------------------------------------
     @app.get("/")

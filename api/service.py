@@ -686,3 +686,12 @@ def intervention_roi(as_of: str, crews_per_ward: int = 1) -> dict:
 _ANSWER_CACHES.update({"allocate": "_allocation", "overflow": "overflow",
                        "intervention": "_simulation", "intervention_roi": "intervention_roi"})
 _MODEL_CACHES = (*_MODEL_CACHES, "_allocation", "overflow", "_simulation", "intervention_roi")
+
+
+# ---------------------------------------------------------------- GET /api/selfcheck
+def selfcheck(as_of: str | None = None, horizon: int = 2) -> dict:
+    """Re-run every Phase 2 math check live, with outbound network blocked (src/selfcheck.py).
+    Not cached on purpose: each call proves the math again. Default week = the latest in the data."""
+    from src.selfcheck import run_checks
+    as_of = parse_as_of(as_of or meta()["as_of"]["max"])
+    return _plain(run_checks(features(), as_of, horizon))

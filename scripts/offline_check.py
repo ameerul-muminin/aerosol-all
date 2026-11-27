@@ -10,6 +10,9 @@ and DNS lookups to anything but localhost raise), it:
    and JS imports (plus the two language files i18n.js fetches by a computed path),
 4. scans web/ for http(s):// URLs a browser would load (src, <link href>, CSS url()/@import,
    JS import/fetch); namespace strings and licence text are not loads and are ignored.
+5. scans the Python in src/, api/ and scripts/ for network client imports (requests, urllib.request,
+   http.client, httpx, aiohttp, sockets libraries for mail/FTP, LLM SDKs); urllib.parse only splits
+   strings and is allowed (F1: no network code anywhere, not just none that happened to run).
 Prints route -> status -> ms, then "OFFLINE CHECK PASSED" or the list of failures.
 """
 from __future__ import annotations
@@ -105,6 +108,24 @@ def remote_urls(web: Path = WEB) -> list[str]:
     return sorted(set(found))
 
 
+PY_DIRS = ("src", "api", "scripts")
+NETWORK_IMPORT = re.compile(
+    r"^\s*(?:import|from)\s+(requests|urllib3|urllib(?!\.parse\b)(?:\.\w+)?|http\.client|httpx|aiohttp|"
+    r"websockets?|smtplib|ftplib|telnetlib|paramiko|openai|anthropic|google\.generativeai)\b", re.M)
+
+
+def network_imports(root: Path = ROOT) -> list[str]:
+    """`file:line: module` for every network client the app's Python code imports."""
+    found = []
+    for folder in PY_DIRS:
+        for path in sorted((root / folder).rglob("*.py")):
+            text = path.read_text("utf-8", "replace")
+            for m in NETWORK_IMPORT.finditer(text):
+                line = text.count("\n", 0, m.start()) + 1
+                found.append(f"{path.relative_to(root).as_posix()}:{line}: {m.group(1)}")
+    return found
+
+
 def _api_routes(app) -> list[tuple[str, str]]:
     out = set()
     for rule in app.url_map.iter_rules():
@@ -172,6 +193,8 @@ def run() -> tuple[list[dict], list[str], bool]:
         failures.insert(0, "the network block did not work")
     for item in remote_urls():
         failures.append(f"remote URL a browser would load: {item}")
+    for item in network_imports():
+        failures.append(f"network client imported in Python code: {item}")
     return rows, failures, blocked
 
 
@@ -185,7 +208,8 @@ def main(argv=None) -> int:
         print(f"{(r['method'] + ' ' + r['path']).strip('- '):<{width}}  {str(r['status']):>6}  {r['ms']:>6.0f}{mark}")
     n_api = sum(1 for r in rows if r["path"].startswith("/api/"))
     n_web = sum(1 for r in rows if r["method"] == "GET" and not r["path"].startswith("/api/"))
-    print(f"\n{n_api} API calls, {n_web} web files, remote URLs in web/: {len(remote_urls())}")
+    print(f"\n{n_api} API calls, {n_web} web files, remote URLs in web/: {len(remote_urls())}, "
+          f"network imports in Python: {len(network_imports())}")
     if failures:
         print("\nOFFLINE CHECK FAILED")
         for f in failures:

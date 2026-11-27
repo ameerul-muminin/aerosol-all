@@ -200,3 +200,59 @@ def test_70_pct_on_2025_09_15_routes_every_overflow_patient(feat):
     r = overflow_plan(feat, "2025-09-15", 2, beds_available_pct=70)
     assert sum(t["patients"] for t in r["transfers"]) == 5
     assert sum(c["unroutable"] for c in r["cities"].values()) == 0
+
+
+def test_full_and_available_capacity_are_reported_per_ward_and_city(feat):
+    from src.overflow import bed_capacity, overflow_plan, usable_capacity
+    r = overflow_plan(feat, "2024-08-19", 2, beds_available_pct=50)
+    full, avail = bed_capacity(), usable_capacity(bed_capacity(), 50)
+    assert r["beds_available_pct"] == 50.0
+    for k, w in r["wards"].items():
+        assert (w["full_capacity"], w["available_capacity"], w["capacity"]) == (full[k], avail[k], avail[k])
+    for city, c in r["cities"].items():
+        ids = [k for k in r["wards"] if feat.loc[feat["ward_id"] == k, "city"].iloc[0] == city]
+        assert c["full_capacity"] == sum(full[i] for i in ids)
+        assert c["available_capacity"] == c["capacity"] == sum(avail[i] for i in ids)
+        assert c["available_capacity"] < c["full_capacity"]
+
+
+def test_100_pct_gives_the_same_routing_as_before_the_slider(feat):
+    """'Before' = routing straight on the full capacity rule, without the slider."""
+    from src.overflow import bed_capacity, overflow_plan, route_overflow
+    from src.predict import predict_all
+    from src.supplies import case_count, supplies_for
+    r = overflow_plan(feat, "2025-08-04", 2, beds_available_pct=100)
+    pred = predict_all(feat, "2025-08-04", 2, with_drivers=False)
+    beds = supplies_for(case_count(pred["predicted_cases"].to_numpy()))["hospital_beds_required"]
+    cap = bed_capacity()
+    old = route_overflow([{"ward_id": w, "city": c, "beds_required": int(b), "bed_capacity": cap[w]}
+                          for w, c, b in zip(pred["ward_id"], pred["city"], beds)])
+    assert r["transfers"] == old["transfers"]
+    for k, w in old["wards"].items():
+        assert {key: r["wards"][k][key] for key in w} == w
+        assert r["wards"][k]["full_capacity"] == r["wards"][k]["available_capacity"]
+    for city, c in old["cities"].items():
+        assert {key: r["cities"][city][key] for key in c} == c
+
+
+def test_patients_are_conserved_with_fewer_beds(feat):
+    from src.overflow import overflow_plan
+    r = overflow_plan(feat, "2024-08-19", 2, beds_available_pct=50)
+    assert r["transfers"]
+    wards = r["wards"].values()
+    assert sum(t["patients"] for t in r["transfers"]) == sum(w["routed_out"] for w in wards) \
+        == sum(w["routed_in"] for w in wards)
+    admitted = sum(w["beds_required"] - w["routed_out"] + w["routed_in"] - w["net_deficit"] for w in wards)
+    stranded = sum(c["unroutable"] for c in r["cities"].values())
+    assert admitted + stranded == sum(w["beds_required"] for w in wards)
+
+
+def test_2025_07_14_at_50_pct_cannot_route_because_every_ward_is_full(feat):
+    """Asked for as a 'produces transfers' test, but it cannot: at 50% no ward in any city has a
+    free bed, so nobody can be moved. Pinned here so the claim is never made by mistake."""
+    from src.overflow import overflow_plan
+    r = overflow_plan(feat, "2025-07-14", 2, beds_available_pct=50)
+    assert not any(w["available_capacity"] > w["beds_required"] for w in r["wards"].values())
+    assert r["transfers"] == []
+    assert sum(c["unroutable"] for c in r["cities"].values()) == \
+        sum(max(0, w["beds_required"] - w["available_capacity"]) for w in r["wards"].values())

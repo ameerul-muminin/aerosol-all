@@ -137,3 +137,12 @@ def test_input_never_goes_below_the_training_minimum(feat):
     assert by_id[near]["input_before"] > train_min
     for w in s["wards"]:
         assert w["input_after"] >= train_min - 1e-9
+    # the floor is reported, so the UI can say "no further effect possible here"
+    assert by_id[low]["floor_hit"] and by_id[near]["floor_hit"]
+    assert s["floor_hit_wards"] == sorted([low, near])
+    assert s["assumption"]["input_floor"] == pytest.approx(train_min)
+
+
+def test_floor_not_reported_when_the_cut_stays_above_it(feat, ranking):
+    s = simulate(feat, PEAK, {ranking[0]["ward_id"]: 1})
+    assert s["floor_hit_wards"] == [] and not s["wards"][0]["floor_hit"]

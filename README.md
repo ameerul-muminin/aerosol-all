@@ -137,6 +137,12 @@ file `hackathon_preli_dataset.xlsx`, plus three supply columns: saline bags, dia
 Those columns are used for planning only, never as model inputs, so the Phase 1 model and results are unchanged.
 On first load the data is validated and cached as `data/dataset_cache.csv`.
 
+**Ward map** (`/proto/map.html`): ward boundaries from the Bangladesh Bureau of Statistics and OCHA ROAP, via
+[geoBoundaries](https://www.geoboundaries.org) (CC BY 3.0 IGO), simplified into `web/assets/data/ward_map.json`
+by `python -m scripts.build_ward_map ADM2.geojson ADM3.geojson ADM4.geojson` (reads local files only). The dataset gives
+ward IDs, not locations, so placing each ID on a real ward is an assumption, written in the script and on the map page.
+Gazipur and Narayanganj have no published ward boundaries, so only their city area is drawn.
+
 ## Results
 Test years 2024–2025, never used for training or model choice (read from `reports/metrics.json`; cases per ward-week):
 

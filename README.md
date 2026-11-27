@@ -12,6 +12,10 @@ SMS, WhatsApp and printable notices in English and বাংলা. Everything r
 
 > Decision support on the provided hackathon dataset, not a medical diagnosis.
 
+**Live demo: https://aerosol-all-1.onrender.com** (dashboard: `/app/`). It runs on Render's free plan, which sleeps
+after 15 idle minutes: the first visit after that can take a couple of minutes to wake it. Everything also runs
+locally and offline (below).
+
 ## Quick start (about 3 minutes)
 ```bash
 git clone https://github.com/ameerul-muminin/aerosol-all.git
@@ -43,6 +47,10 @@ model cannot extrapolate beyond what it has seen.
 | `/app/#wards` All wards | **Early warnings** (wards getting worse over the next 4 weeks), tier counts, ranking with a ward × horizon heat strip, by-city bars, CSV download |
 | `/app/#accuracy` Model accuracy | Test-year MAE/RMSE vs the seasonal average per horizon and per city, one ward's forecast vs reported cases with the 80% band, and the **breeding clock**: rain 0–12 weeks earlier vs cases now |
 | `/app/#cost` Cost & speed | Model size, cached vs fresh response times, response size, and live counters of how much work the caches save |
+| `/app/#allocation` Supply allocation | **Live scarcity controls**: available stock slider (30–100%), total spraying crews, expected or cautious demand, city. A red deficit alert, tiles for saline, kits, beds and crews, and every ward's allocated vs required supplies, crews and critical flag in priority order (CSV). Plus the order plan for weeks +2 to +4 |
+| `/app/#overflow` Hospital overflow | Slider for the share of beds free for dengue; each city's bed use, headroom and patients who cannot be placed; transfers (always inside one city); each ward's net deficit |
+| `/app/#simulator` Crew simulator | Wards ranked by cases prevented per crew (with a low–high band); pick wards and crews, re-run the models and see cases, beds and saline before and after at +2, +3 and +4 weeks; suggest the best placement |
+| `/app/#dispatch` Dispatch | Each ward's SMS and WhatsApp notice in English or বাংলা with copy buttons, a critical-only filter, and the printable commissioner brief (print or save as PDF) |
 
 Every view works in English and বাংলা. Screenshots: [docs/screenshots/](docs/screenshots/README.md)
 
@@ -50,6 +58,11 @@ Every view works in English and বাংলা. Screenshots: [docs/screenshots/
 |---|---|---|
 | ![Ward outlook](docs/screenshots/outlook.png) | ![All wards with early warnings](docs/screenshots/early-warnings.png) | ![Model accuracy](docs/screenshots/accuracy.png) |
 | ![Check a ward](docs/screenshots/check-a-ward.png) | ![Cost and speed](docs/screenshots/cost.png) | ![Landing page](docs/screenshots/landing.png) |
+
+| Phase 2 | |
+|---|---|
+| ![Supply allocation](docs/screenshots/allocation.png) | ![Hospital overflow](docs/screenshots/overflow.png) |
+| ![Crew simulator](docs/screenshots/simulator.png) | ![Dispatch](docs/screenshots/dispatch.png) |
 
 ## Phase 2: from forecast to action
 Forecast cases become saline bags, test kits and hospital beds through the dataset's own fixed table

@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proto · Risk map</title>
+<link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/tokens.css">
+<link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/components.css">
+<style>
+  /* Geographic ward map: real ward shapes (BBS via geoBoundaries) from /assets/data/ward_map.json.
+     Drawn as SVG, no map tiles, so it works offline. */
+  .page { max-width: 1280px; margin: 0 auto; padding: 32px 32px 96px; }
+  .map-card { grid-column: span 8; }
+  .side-card { grid-column: span 4; align-self: start; display: grid; gap: 16px; }
+  @media (max-width: 1000px) { .map-card, .side-card { grid-column: 1 / -1; } .page { padding: 20px 16px 64px; } }
+
+  .atlas { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; }
+  .atlas .col { display: grid; gap: 16px; align-content: start; }
+  @media (max-width: 620px) { .atlas { grid-template-columns: 1fr; } }
+  .panel { position: relative; border-radius: 12px; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+  .panel h3 { position: absolute; left: 12px; top: 10px; z-index: 1; margin: 0; font: 600 14px var(--font); color: var(--ink); pointer-events: none; }
+  .panel h3 small { display: block; font: 500 12px var(--font); color: var(--ink-3); }
+  .panel svg { display: block; width: 100%; height: auto; touch-action: none; }
+  .zoom { position: absolute; right: 10px; top: 10px; z-index: 1; display: grid; gap: 4px; }
+  .zoom button { width: 36px; height: 36px; border: 0; border-radius: 8px; background: var(--paper); box-shadow: var(--shadow-sm);
+                 font: 600 18px/1 var(--font); color: var(--ink); cursor: pointer; transition: transform var(--t-press) var(--ease-out); }
+  .zoom button:active { transform: scale(.97); }
+
+  .dist { fill: none; stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+  .ctx { fill: var(--sunk); stroke: var(--paper); stroke-width: .8; vector-effect: non-scaling-stroke; }
+  .ward { cursor: pointer; outline: none; }
+  .ward path { stroke: var(--paper); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .ward:hover path { stroke: var(--ink); stroke-width: 1.5; }
+  .ward:focus-visible path, .ward[aria-pressed="true"] path { stroke: var(--ink); stroke-width: 3; }
+  .wl { font-family: var(--font); font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  .area-lbl { font-family: var(--font); font-weight: 600; fill: var(--ink-2); text-anchor: middle; pointer-events: none; }
+
+  .xfer { fill: none; stroke: var(--ink); stroke-width: 2; vector-effect: non-scaling-stroke; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 12px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 10px; border: 0; border-radius: 8px;
+          font: 600 13px var(--font); cursor: pointer; box-shadow: 0 0 0 1px var(--line); transition: transform var(--t-press) var(--ease-out); }
+  .chip:active { transform: scale(.97); }
+  .chip[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--ink); }
+  .chip .tg { color: currentColor; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; margin-bottom: 20px; }
+  .controls .field select { min-width: 180px; }
+  .range { display: grid; gap: 6px; font-size: var(--fs-small); font-weight: 500; color: var(--ink-2); min-width: 220px; }
+  .range input { accent-color: var(--ink); min-height: 44px; }
+
+  .key { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: var(--fs-small); color: var(--ink-2); margin-top: 14px; }
+  .key span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 14px; height: 14px; border-radius: 3px; box-shadow: 0 0 0 1px var(--line); }
+  .note { margin-top: 10px; font-size: 12px; color: var(--ink-3); }
+  .note summary { cursor: pointer; color: var(--ink-2); }
+  .note ul { margin: 6px 0 0; padding-left: 18px; }
+
+  .d-title { font: 600 15px/1.3 var(--font); }
+  .d-big { font-size: 64px; }
+  .d-row { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .d-row b { font-weight: 600; }
+  .d-drv { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; font-size: 14px; margin-bottom: 14px; }
+  .empty { color: var(--ink-2); }
+  .btn-link { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: var(--r-ctl);
+              background: var(--accent); color: var(--accent-ink); font-weight: 600; text-decoration: none;
+              transition: transform var(--t-press) var(--ease-out); }
+  .btn-link:active { transform: scale(.97); }
+
+  .crow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .crow .stack { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+<main class="page" id="main">
+  <div class="head">
+    <h1 class="display" id="title">Risk map</h1>
+    <p id="sub"></p>
+    <div class="lang" style="margin:0 0 0 auto" role="group" aria-label="Language">
+      <button type="button" data-lang="en">EN</button><button type="button" data-lang="bn">বাংলা</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <label class="field"><span data-i18n="ctl.as_of">As of</span><select id="asof"></select></label>
+    <div class="field"><span id="hz-h">Weeks ahead</span>
+      <div class="seg" id="hz"><span class="thumb"></span>
+        <button type="button" data-v="2">+2</button><button type="button" data-v="3">+3</button><button type="button" data-v="4">+4</button>
+      </div>
+    </div>
+    <div class="field"><span id="mode-h">Colour by</span>
+      <div class="seg" id="mode"><span class="thumb"></span>
+        <button type="button" data-v="risk" id="m-risk">Risk tier</button>
+        <button type="button" data-v="cases" id="m-cases">Cases</button>
+        <button type="button" data-v="beds" id="m-beds">Hospital beds</button>
+      </div>
+    </div>
+    <label class="range" id="beds-ctl" hidden><span id="beds-lbl"></span>
+      <input type="range" id="beds" min="30" max="100" step="5" value="100">
+    </label>
+  </div>
+
+  <div class="grid">
+    <section class="card map-card" aria-labelledby="map-h">
+      <h2 id="map-h" class="sr-only">Ward map</h2>
+      <div class="atlas">
+        <div class="col"><div class="panel" id="p-dhaka"></div></div>
+        <div class="col">
+          <div class="panel" id="p-gazipur"></div>
+          <div class="panel" id="p-narayanganj"></div>
+          <div class="panel" id="p-chattogram"></div>
+        </div>
+      </div>
+      <div class="key" id="key"></div>
+      <details class="note" id="note"></details>
+    </section>
+    <aside class="side-card">
+      <section class="card" id="detail" aria-live="polite"></section>
+      <section class="card"><h2 class="d-title" id="cities-h"></h2><div id="cities"></div></section>
+    </aside>
+  </div>
+</main>
+
+<script type="module">
+import { get, api } from "/assets/js/api.js";
+import { initI18n, setLang, getLang, t } from "/assets/js/i18n.js";
+import { num0, num1, signed1, dateLong, cityName, wardNo, wardFull, tierHTML, tierName, LEVEL, driverName, esc } from "/assets/js/format.js";
+import { segment, showError, ticket } from "/assets/js/ui.js";
+
+// Strings live under "map.*" in en.json / bn.json; the English text here is only a fallback.
+const L = (k, fb, v = {}) => t(`map.${k}`, v, fb);
+const SVGNS = "http://www.w3.org/2000/svg";
+const TIERS = ["Low", "Medium", "High", "Critical"];
+
+const q = new URLSearchParams(location.search);
+const state = { as_of: q.get("as_of"), h: Number(q.get("h")) || 2, mode: q.get("mode") || "risk",
+                beds: Number(q.get("beds")) || 100, ward: q.get("ward") };
+const $ = (id) => document.getElementById(id);
+const el = (tag, attrs = {}, parent) => {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  if (parent) parent.appendChild(n);
+  return n;
+};
+
+function saveUrl() {
+  const p = new URLSearchParams({ as_of: state.as_of, h: state.h, mode: state.mode });
+  if (state.mode === "beds") p.set("beds", state.beds);
+  if (state.ward) p.set("ward", state.ward);
+  history.replaceState(null, "", `?${p}`);
+}
+
+// ---------- colour per mode (tokens only) ----------
+const TIER_FILL = { Low: ["--tier-low", 22], Medium: ["--tier-medium", 38], High: ["--tier-high", 100], Critical: ["--tier-critical", 100] };
+function tierPaint(tier) {
+  const [v, pct] = TIER_FILL[tier];
+  return pct === 100 ? { fill: `var(${v})`, ink: "var(--on-dark)" }
+                     : { fill: `color-mix(in srgb, var(${v}) ${pct}%, var(--paper))`, ink: "var(--ink)" };
+}
+const heatStep = (v, max) => Math.max(1, Math.min(7, Math.ceil((v / Math.max(max, 1e-9)) * 7)));
+const heatPaint = (s) => ({ fill: `var(--heat-${s})`, ink: s >= 5 ? "var(--on-dark)" : "var(--ink)" });
+function loadPaint(load, cap) {
+  if (!cap) return { fill: "var(--sunk)", ink: "var(--ink-2)" };
+  const u = load / cap;
+  if (u > 1) return { fill: "var(--tier-critical)", ink: "var(--on-dark)" };
+  if (u >= 0.8) return { fill: "var(--heat-4)", ink: "var(--ink)" };
+  return { fill: "var(--heat-2)", ink: "var(--ink)" };
+}
+function paintWard(w) {
+  if (state.mode === "risk") return tierPaint(w.risk_tier);
+  if (state.mode === "cases") return heatPaint(heatStep(w.predicted_cases, data.maxCases));
+  const b = data.beds[w.ward_id];
+  return b ? loadPaint(b.beds_required - b.routed_out + b.routed_in, b.available_capacity) : loadPaint(0, 0);   // after transfers
+}
+function paintCity(city) {   // Gazipur / Narayanganj have no ward shapes: the city area shows the city as a whole
+  const ws = data.rank.wards.filter((w) => w.city === city);
+  if (state.mode === "risk") return tierPaint(ws.reduce((a, w) => (LEVEL[w.risk_tier] > LEVEL[a] ? w.risk_tier : a), "Low"));
+  if (state.mode === "cases") return heatPaint(heatStep(Math.max(...ws.map((w) => w.predicted_cases)), data.maxCases));
+  const c = data.over.cities.find((x) => x.city === city);
+  return c ? loadPaint(c.demand, c.capacity) : loadPaint(0, 0);
+}
+
+// ---------- geometry ----------
+const ringsBox = (rings) => {
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const r of rings) for (const [x, y] of r) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  return [x0, x1, y0, y1];
+};
+/** Equirectangular projection for one panel (fine at city scale): lon/lat -> SVG units, north up. */
+function projector(box, width, height = null, pad = 0.06, top = 0) {
+  const [x0, x1, y0, y1] = box, k = Math.cos(((y0 + y1) / 2) * Math.PI / 180);
+  const dx = (x1 - x0) * k, dy = y1 - y0;
+  const h = height || (width * dy) / dx * (1 + 2 * pad) / (1 + 2 * pad);
+  const s = Math.min(width / dx, (h - top) / dy) * (1 - 2 * pad);          // fit inside, centred
+  const ox = (width - dx * s) / 2, oy = top + (h - top - dy * s) / 2;
+  return { w: width, h, p: ([lon, lat]) => [(lon - x0) * k * s + ox, (y1 - lat) * s + oy] };
+}
+const pathOf = (rings, P) => rings.map((r) => "M" + r.map((pt) => P.p(pt).map((v) => v.toFixed(1)).join(",")).join("L") + "Z").join("");
+function labelPoint(rings, P) {   // area-weighted centroid of the largest ring, in SVG units
+  const r = rings.reduce((a, b) => (b.length > a.length ? b : a)).map((pt) => P.p(pt));
+  let A = 0, cx = 0, cy = 0;
+  for (let i = 0; i < r.length - 1; i++) { const c = r[i][0] * r[i + 1][1] - r[i + 1][0] * r[i][1]; A += c; cx += (r[i][0] + r[i + 1][0]) * c; cy += (r[i][1] + r[i + 1][1]) * c; }
+  const [bx0, bx1, by0, by1] = ringsBox([r]);
+  return { x: A ? cx / (3 * A) : r[0][0], y: A ? cy / (3 * A) : r[0][1], size: Math.min(bx1 - bx0, by1 - by0) };
+}
+
+// ---------- data ----------
+let geo = null, data = null;
+const centers = {};   // ward_id -> [panel id, x, y] for transfer arrows
+
+async function load() {
+  const ok = ticket($("p-dhaka"));
+  const [rank, over] = await Promise.all([
+    api.ranking(state.as_of, state.h),
+    get("/api/overflow", { as_of: state.as_of, horizon: state.h, beds_available_pct: state.beds }),
+  ]);
+  if (!ok()) return;
+  data = { rank, over, maxCases: Math.max(...rank.wards.map((w) => w.predicted_cases)),
+           byWard: Object.fromEntries(rank.wards.map((w) => [w.ward_id, w])),
+           beds: Object.fromEntries(over.wards.map((w) => [w.ward_id, w])) };
+  if (!state.ward || !data.byWard[state.ward]) state.ward = rank.wards[0].ward_id;   // highest forecast first
+  render();
+}
+
+function render() {
+  saveUrl();
+  const { rank } = data;
+  $("sub").textContent = L("sub", "Forecast week {week} · {n} wards", { week: dateLong(rank.forecast_week), n: num0(rank.wards.length) });
+  $("beds-ctl").hidden = state.mode !== "beds";
+  $("beds-lbl").textContent = L("beds_pct", "Beds available: {p}% of normal", { p: num0(state.beds) });
+  drawShapes("p-dhaka", { title: L("dhaka", "Dhaka North & South"), sub: L("dhaka_sub", "N = North, S = South · scroll or + − to zoom"),
+                          prefixes: ["DNCC", "DSCC"], ctx: geo.context.Dhaka, width: 520, zoom: true });
+  drawArea("p-gazipur", "Gazipur", L("gz_sub", "North of Dhaka"), 250);
+  drawArea("p-narayanganj", "Narayanganj", L("ng_sub", "South-east of Dhaka"), 230);
+  drawShapes("p-chattogram", { title: cityName("Chattogram"), sub: L("ctg_sub", "Far south-east"),
+                               prefixes: ["CCC"], ctx: geo.context.Chattogram, width: 440, height: 300, fitMine: true, top: 48 });
+  drawKey(); drawDetail(); drawCities();
+}
+
+function wardGroup(svg, w, rings, P, labelScale = 1) {
+  const paint = paintWard(w);
+  const g = el("g", { class: "ward", tabindex: 0, role: "button", "data-w": w.ward_id, "aria-pressed": String(w.ward_id === state.ward),
+                      "aria-label": `${wardFull(w.ward_id, w.city)}: ${tierName(w.risk_tier)}, ${num1(w.predicted_cases)} ${L("cases_word", "cases")}` }, svg);
+  el("path", { d: pathOf(rings, P), fill: paint.fill }, g);
+  const lp = labelPoint(rings, P);
+  if (lp.size > 16) {
+    const tx = el("text", { class: "wl", x: lp.x, y: lp.y, fill: paint.ink, "font-size": Math.min(13, Math.max(8, lp.size / 2.6)) * labelScale }, g);
+    const pre = w.ward_id.startsWith("DNCC") ? L("n_pre", "N") : w.ward_id.startsWith("DSCC") ? L("s_pre", "S") : "";
+    tx.textContent = pre + num0(wardNo(w.ward_id));
+  }
+  g.addEventListener("click", () => pick(w.ward_id));
+  g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(w.ward_id); } });
+  return lp;
+}
+
+function drawShapes(id, { title, sub, prefixes, ctx, width, height = null, zoom = false, fitMine = false, top = 0 }) {
+  const mine = Object.entries(geo.wards).filter(([wid]) => prefixes.some((p) => wid.startsWith(p + "_")));
+  const box = ringsBox(fitMine ? mine.flatMap(([, s]) => s.rings) : [...mine.flatMap(([, s]) => s.rings), ...ctx]);
+  const P = projector(box, width, height, 0.06, top);
+  const svg = el("svg", { viewBox: `0 0 ${P.w.toFixed(0)} ${P.h.toFixed(0)}`, role: "group", "aria-label": `${title}: ${L("aria", "ward map")}` });
+  const world = el("g", {}, svg);
+  for (const r of ctx) el("path", { class: "ctx", d: pathOf([r], P) }, world);
+  for (const [wid, s] of mine) {
+    const w = data.byWard[wid]; if (!w) continue;
+    const lp = wardGroup(world, w, s.rings, P);
+    centers[wid] = [id, lp.x, lp.y];
+  }
+  if (state.mode === "beds") arrows(world, id, mine.map(([wid]) => wid));
+  const sel = world.querySelector('.ward[aria-pressed="true"]'); if (sel) world.appendChild(sel);   // selected outline on top
+  const panel = $(id);
+  panel.innerHTML = `<h3>${esc(title)}<small>${esc(sub)}</small></h3>`;
+  panel.appendChild(svg);
+  if (zoom) addZoom(panel, svg, P);
+}
+
+function drawArea(id, city, sub, height) {
+  const rings = geo.areas[city], dist = geo.districts[city];
+  const P = projector(ringsBox(rings), 440, height, 0.06, 56);
+  const svg = el("svg", { viewBox: `0 0 ${P.w.toFixed(0)} ${P.h.toFixed(0)}`, role: "img",
+                          "aria-label": `${cityName(city)}: ${L("area_aria", "city area; ward shapes are not published")}` });
+  el("path", { class: "dist", d: pathOf(dist, P) }, svg);
+  const paint = paintCity(city);
+  el("path", { d: pathOf(rings, P), fill: paint.fill, stroke: "var(--paper)", "stroke-width": 1 }, svg);
+  const ws = data.rank.wards.filter((w) => w.city === city).sort((a, b) => wardNo(a.ward_id) - wardNo(b.ward_id));
+  const chips = ws.map((w) => {
+    const p = paintWard(w);
+    return `<button type="button" class="chip" data-w="${esc(w.ward_id)}" aria-pressed="${w.ward_id === state.ward}"
+      style="background:${p.fill};color:${p.ink}" aria-label="${esc(wardFull(w.ward_id, w.city))}: ${esc(tierName(w.risk_tier))}">
+      ${num0(wardNo(w.ward_id))}<span class="tg" data-l="${LEVEL[w.risk_tier]}" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>`;
+  }).join("");
+  const panel = $(id);
+  panel.innerHTML = `<h3>${esc(cityName(city))}<small>${esc(sub)} · ${esc(L("no_shapes", "ward shapes not published"))}</small></h3>`;
+  panel.appendChild(svg);
+  panel.insertAdjacentHTML("beforeend", `<div class="chips">${chips}</div>`);
+  panel.querySelectorAll(".chip").forEach((b) => (b.onclick = () => pick(b.dataset.w)));
+}
+
+function arrows(world, panelId, ids) {
+  const set = new Set(ids);
+  for (const tr of data.over.transfers) {
+    if (!set.has(tr.from_ward) || !set.has(tr.to_ward)) continue;
+    const a = centers[tr.from_ward], b = centers[tr.to_ward]; if (!a || !b || a[0] !== panelId) continue;
+    const [ax, ay, bx, by] = [a[1], a[2], b[1], b[2]], mx = (ax + bx) / 2, my = (ay + by) / 2, len = Math.hypot(bx - ax, by - ay) || 1;
+    const qx = mx - ((by - ay) / len) * len * 0.25, qy = my + ((bx - ax) / len) * len * 0.25;
+    el("path", { class: "xfer", d: `M${ax},${ay} Q${qx},${qy} ${bx},${by}`, "marker-end": "url(#arrow)" }, world);
+  }
+  if (!world.ownerSVGElement.querySelector("#arrow")) {
+    const mk = el("marker", { id: "arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto" }, el("defs", {}, world.ownerSVGElement));
+    el("path", { d: "M0,0L10,5L0,10Z", fill: "var(--ink)" }, mk);
+  }
+}
+
+// zoom + pan by changing the viewBox (wheel, drag, buttons). Labels keep their size on screen.
+function addZoom(panel, svg, P) {
+  const full = { x: 0, y: 0, w: P.w, h: P.h };
+  let vb = state.vb && state.vb.w ? state.vb : { ...full };
+  const apply = () => {
+    svg.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+    const z = full.w / vb.w;
+    svg.querySelectorAll(".wl").forEach((t) => { t.style.fontSize = `${Number(t.getAttribute("font-size")) / Math.sqrt(z)}px`; });
+    state.vb = vb;
+  };
+  const zoomAt = (f, cx = vb.x + vb.w / 2, cy = vb.y + vb.h / 2) => {
+    const w = Math.min(full.w, Math.max(full.w / 8, vb.w / f)), h = w * (full.h / full.w);
+    vb = { x: clamp(cx - (cx - vb.x) * (w / vb.w), 0, full.w - w), y: clamp(cy - (cy - vb.y) * (h / vb.h), 0, full.h - h), w, h };
+    apply();
+  };
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const toSvg = (e) => { const r = svg.getBoundingClientRect(); return [vb.x + (e.clientX - r.left) / r.width * vb.w, vb.y + (e.clientY - r.top) / r.height * vb.h]; };
+  svg.addEventListener("wheel", (e) => { e.preventDefault(); const [x, y] = toSvg(e); zoomAt(e.deltaY < 0 ? 1.25 : 0.8, x, y); }, { passive: false });
+  let drag = null;
+  svg.addEventListener("pointerdown", (e) => { if (vb.w < full.w) drag = { x: e.clientX, y: e.clientY, vb: { ...vb }, moved: false }; });
+  svg.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    const r = svg.getBoundingClientRect(), dx = (e.clientX - drag.x) / r.width * vb.w, dy = (e.clientY - drag.y) / r.height * vb.h;
+    if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 4) drag.moved = true;
+    vb = { ...vb, x: clamp(drag.vb.x - dx, 0, full.w - vb.w), y: clamp(drag.vb.y - dy, 0, full.h - vb.h) }; apply();
+  });
+  svg.addEventListener("click", (e) => { if (drag && drag.moved) e.stopPropagation(); drag = null; }, true);
+  window.addEventListener("pointerup", () => setTimeout(() => (drag = null), 0));
+  const zb = document.createElement("div"); zb.className = "zoom";
+  zb.innerHTML = `<button type="button" aria-label="${esc(L("zin", "Zoom in"))}">+</button><button type="button" aria-label="${esc(L("zout", "Zoom out"))}">−</button><button type="button" aria-label="${esc(L("zreset", "Reset zoom"))}">⤢</button>`;
+  const [bi, bo, br] = zb.querySelectorAll("button");
+  bi.onclick = () => zoomAt(1.6); bo.onclick = () => zoomAt(1 / 1.6); br.onclick = () => { vb = { ...full }; apply(); };
+  panel.appendChild(zb);
+  apply();
+}
+
+function pick(id) {
+  state.ward = id;
+  document.querySelectorAll("[data-w]").forEach((g) => g.setAttribute("aria-pressed", String(g.dataset.w === id)));
+  const g = document.querySelector(`g.ward[data-w="${id}"]`); if (g) g.parentNode.appendChild(g);
+  drawDetail(); saveUrl();
+}
+
+function drawKey() {
+  const { rank, over } = data;
+  let items;
+  if (state.mode === "risk") items = TIERS.map((tr) => [tierPaint(tr).fill, `${tierName(tr)} (${num0(rank.tier_counts[tr])})`]);
+  else if (state.mode === "cases") items = [1, 3, 5, 7].map((s) => [`var(--heat-${s})`, s === 1 ? L("k_low", "fewest") : s === 7 ? `${L("k_high", "most")} (${num1(data.maxCases)})` : ""]);
+  else items = [["var(--heat-2)", L("k_b1", "under 80% full")], ["var(--heat-4)", L("k_b2", "80–100% full")], ["var(--tier-critical)", L("k_b3", "short after transfers")]];
+  items.push(["var(--sunk)", L("k_ctx", "ward not in the dataset")]);
+  $("key").innerHTML = items.map(([c, txt]) => `<span><i class="sw" style="background:${c}"></i>${esc(txt)}</span>`).join("")
+    + (state.mode === "beds" ? `<span>→ ${esc(L("k_xfer", "patients moved (same city)"))}: ${num0(over.transfers.length)}</span>` : "");
+  $("note").innerHTML = `<summary>${esc(L("src", "Map source and assumptions"))}</summary><p>${esc(L("source", geo.source))}</p>
+    <ul>${Object.entries(geo.assumptions).map(([c, a]) => `<li><b>${esc(cityName(c))}:</b> ${esc(L(`as_${c}`, a))}</li>`).join("")}</ul>`;
+}
+
+function drawDetail() {
+  const w = data.byWard[state.ward], b = data.beds[state.ward];
+  if (!w) { $("detail").innerHTML = `<p class="empty">${esc(L("pick", "Pick a ward on the map."))}</p>`; return; }
+  const drivers = w.top_drivers.slice(0, 3).map((d) =>
+    `<span>${esc(driverName(d.label))}</span><span class="num ${d.effect >= 0 ? "up" : "down"}">${signed1(d.effect)}</span>`).join("");
+  const link = `/app/?ward=${encodeURIComponent(w.ward_id)}&as_of=${state.as_of}&h=${state.h}#outlook`;
+  $("detail").innerHTML = `
+    <h2 class="d-title">${esc(wardFull(w.ward_id, w.city))}</h2>
+    <div>${tierHTML(w.risk_tier, { risk: true })}</div>
+    <div class="display d-big num">${num1(w.predicted_cases)}</div>
+    <p class="empty">${esc(L("range", "Likely {lo}–{hi} cases, week of {week}", { lo: num1(w.range_low), hi: num1(w.range_high), week: dateLong(w.forecast_week) }))}</p>
+    ${b ? `<div class="d-row"><span>${esc(L("beds_need", "Beds needed / available"))}</span><b class="num">${num0(b.beds_required)} / ${num0(b.available_capacity)}</b></div>
+           <div class="d-row"><span>${esc(L("moved", "Moved out / in"))}</span><b class="num">${num0(b.routed_out)} / ${num0(b.routed_in)}</b></div>
+           <div class="d-row"><span>${esc(L("short", "Still short"))}</span><b class="num">${num0(b.net_deficit)}</b></div>` : ""}
+    <div class="d-row"><span>${esc(L("why", "Why: average week {ref} → this ward {y}", { ref: num1(w.driver_reference_cases), y: num1(w.predicted_cases) }))}</span></div>
+    <div class="d-drv">${drivers}</div>
+    <a class="btn-link" href="${link}">${esc(L("open", "Open ward outlook"))}</a>`;
+}
+
+function drawCities() {
+  const { rank, over } = data;
+  $("cities-h").textContent = state.mode === "beds" ? L("cities_beds", "Bed use by city") : L("cities_risk", "Risk mix by city");
+  $("cities").innerHTML = rank.by_city.map((c) => {
+    const oc = over.cities.find((x) => x.city === c.city);
+    const right = state.mode === "beds" && oc ? `${num0(oc.utilisation_pct)}%` : `${num0(c.Critical + c.High)} ${L("hc", "high or critical")}`;
+    const segs = TIERS.filter((k) => c[k]).map((k) => `<i style="flex:${c[k]};background:${tierPaint(k).fill}" title="${esc(tierName(k))}: ${num0(c[k])}"></i>`).join("");
+    return `<div class="crow"><span>${esc(cityName(c.city))}</span><b class="num">${esc(right)}</b><div class="stack" aria-hidden="true">${segs}</div></div>`;
+  }).join("");
+}
+
+// ---------- boot ----------
+function labels() {
+  document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === getLang())));
+  $("title").textContent = L("title", "Risk map"); $("hz-h").textContent = L("horizon", "Weeks ahead"); $("mode-h").textContent = L("mode", "Colour by");
+  $("m-risk").textContent = L("m_risk", "Risk tier"); $("m-cases").textContent = L("m_cases", "Cases"); $("m-beds").textContent = L("m_beds", "Hospital beds");
+}
+
+async function boot() {
+  await initI18n();
+  labels();
+  document.querySelectorAll(".lang button").forEach((b) => (b.onclick = async () => {
+    if (b.dataset.lang === getLang()) return;
+    await setLang(b.dataset.lang);
+    document.title = `${L("title", "Risk map")} · aerosol-all`;
+    labels(); fillWeeks(); if (data) render();
+  }));
+  const [meta, shapes] = await Promise.all([api.meta(), fetch("/assets/data/ward_map.json").then((r) => r.json())]);
+  geo = shapes;
+  state.as_of = state.as_of || meta.as_of.default;
+  weeks = meta.as_of; fillWeeks();
+  document.title = `${L("title", "Risk map")} · aerosol-all`;
+  $("asof").onchange = () => { state.as_of = $("asof").value; run(); };
+  segment($("hz"), state.h, (v) => { state.h = Number(v); run(); });
+  segment($("mode"), state.mode, (v) => { state.mode = v; render(); });
+  let tmr; $("beds").value = state.beds;
+  $("beds").oninput = () => { state.beds = Number($("beds").value); $("beds-lbl").textContent = L("beds_pct", "Beds available: {p}% of normal", { p: num0(state.beds) });
+                              clearTimeout(tmr); tmr = setTimeout(run, 150); };
+  await run();
+}
+let weeks = null;
+function fillWeeks() {   // week list in the active language
+  if (!weeks) return;
+  const opts = [];
+  for (let d = new Date(`${weeks.max}T00:00:00Z`); d >= new Date(`${weeks.min}T00:00:00Z`); d.setUTCDate(d.getUTCDate() - 7)) {
+    const iso = d.toISOString().slice(0, 10); opts.push(`<option value="${iso}">${esc(dateLong(iso))}</option>`);
+  }
+  $("asof").innerHTML = opts.join(""); $("asof").value = state.as_of;
+}
+async function run() { try { await load(); } catch (e) { showError($("p-dhaka"), e, run); } }
+boot();
+</script>
+</body>
+</html>

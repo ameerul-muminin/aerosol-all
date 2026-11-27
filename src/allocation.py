@@ -10,9 +10,9 @@ Rules (every number they use lives in config/operations.json, with the reason):
 - Need per ward = supplies for its forecast case count (src/supplies.py: learned from the data).
 - Available per item = floor(stock_pct% x full stock); full stock = this week's total need
   unless a fixed warehouse count is set in the config.
-- Priority = tier weight x population_density_sqkm, ties by ward_id. Wards are filled in that
-  order, each to 100%, until an item runs out. So shortage lands on the lowest-priority wards,
-  allocated totals never exceed stock, and any ward under 100% on any item is `critical`.
+- Priority = tier weight x population_density_sqkm, ties by ward_id. Fill the optional
+  whole-unit minimum share in that order, then fill remaining needs by priority until stock
+  runs out. Totals never exceed stock, and any ward under 100% on any item is `critical`.
 - Crews are handed out one at a time to the ward with the highest
   (priority x predicted cases) / (crews already there + 1); capped per ward; never more than given.
 Same inputs -> same output (no randomness, stable ordering).
@@ -61,6 +61,15 @@ def _check_stock_pct(stock_pct, cfg) -> float:
     if not lo <= stock_pct <= hi:
         raise ValueError(f"Stock must be between {lo}% and {hi}%; got {stock_pct:g}%.")
     return float(stock_pct)
+
+
+def _check_min_share_pct(min_share_pct, cfg) -> float:
+    if min_share_pct is None:
+        min_share_pct = cfg["priority"].get("min_share_pct", {"value": 0})["value"]
+    if (isinstance(min_share_pct, bool) or not isinstance(min_share_pct, Real)
+            or not 0 <= min_share_pct <= 50):
+        raise ValueError("Minimum share must be a number between 0% and 50%.")
+    return float(min_share_pct)
 
 
 def _check_crews(crews, cfg) -> int:
@@ -133,15 +142,18 @@ def assign_crews(order: pd.DataFrame, crews: int, cfg: dict) -> np.ndarray:
 # ---------------------------------------------------------------- main entry
 
 def allocate(predictions: pd.DataFrame, stock_pct: float, crews: int | None = None,
-             demand_basis: str | None = None, config: dict | None = None) -> pd.DataFrame:
+             demand_basis: str | None = None, config: dict | None = None,
+             min_share_pct: float | None = None) -> pd.DataFrame:
     """One row per ward, in priority order. Columns:
     priority_rank, ward_id, city, risk_tier, population_density_sqkm, priority_score,
     predicted_cases, demand_cases, then for each of saline / kits / beds:
-    <item>_required, <item>_allocated, <item>_fulfilled_pct, <item>_deficit;
+    <item>_required, <item>_guaranteed (first-pass units), <item>_allocated,
+    <item>_fulfilled_pct, <item>_deficit;
     fulfilled_pct (worst item), critical (any item under 100%), crews_assigned.
     Bad input raises ValueError with a message fit to show the user."""
     cfg = config or load_config()
     stock_pct = _check_stock_pct(stock_pct, cfg)
+    min_share_pct = _check_min_share_pct(min_share_pct, cfg)
     crews = _check_crews(crews, cfg)
     basis = demand_basis or setting(cfg, "demand", "basis")
     pred = _check_predictions(predictions, basis, cfg)
@@ -160,8 +172,11 @@ def allocate(predictions: pd.DataFrame, stock_pct: float, crews: int | None = No
     pct_cols = []
     for item, k in ITEM_KEYS.items():
         req = need[item].to_numpy(dtype=int)
-        got = _greedy_fill(req, stock[item])
+        minimum = np.floor(req * min_share_pct / 100).astype(int)
+        guaranteed = _greedy_fill(minimum, stock[item])
+        got = guaranteed + _greedy_fill(req - guaranteed, stock[item] - int(guaranteed.sum()))
         d[f"{k}_required"] = req
+        d[f"{k}_guaranteed"] = guaranteed
         d[f"{k}_allocated"] = got
         d[f"{k}_fulfilled_pct"] = np.where(req > 0, np.floor(1000 * got / np.maximum(req, 1)) / 10, 100.0)
         d[f"{k}_deficit"] = req - got
@@ -169,6 +184,7 @@ def allocate(predictions: pd.DataFrame, stock_pct: float, crews: int | None = No
     d["fulfilled_pct"] = d[pct_cols].min(axis=1)
     d["critical"] = d[[f"{k}_deficit" for k in ITEM_KEYS.values()]].gt(0).any(axis=1)
     d["crews_assigned"] = assign_crews(d, crews, cfg)
+    d.attrs["min_share_pct"] = min_share_pct
     return d
 
 
@@ -185,7 +201,8 @@ def totals(alloc: pd.DataFrame, stock_pct: float, crews: int | None = None, conf
                     "deficit": int(alloc[f"{k}_deficit"].sum()),
                     "wards_short": int(alloc[f"{k}_deficit"].gt(0).sum())}
     assigned = int(alloc["crews_assigned"].sum())
-    return {"stock_pct": float(stock_pct), "items": items,
+    return {"stock_pct": float(stock_pct),
+            "min_share_pct": _check_min_share_pct(alloc.attrs.get("min_share_pct"), cfg), "items": items,
             "critical_wards": int(alloc["critical"].sum()), "wards": int(len(alloc)),
             "crews": {"available": crews, "assigned": assigned, "unused": crews - assigned}}
 
@@ -197,8 +214,9 @@ def with_density(predictions: pd.DataFrame, feat_df: pd.DataFrame) -> pd.DataFra
 
 
 def plan(feat_df: pd.DataFrame, as_of_date, horizon: int, stock_pct: float, crews: int | None = None,
-         demand_basis: str | None = None, config: dict | None = None) -> pd.DataFrame:
+         demand_basis: str | None = None, config: dict | None = None,
+         min_share_pct: float | None = None) -> pd.DataFrame:
     """predict_all() for every ward at (as_of_date, horizon), then allocate()."""
     from src.predict import predict_all      # lazy: allocate() itself needs no model
     pred = predict_all(feat_df, as_of_date, horizon, with_drivers=False)
-    return allocate(with_density(pred, feat_df), stock_pct, crews, demand_basis, config)
+    return allocate(with_density(pred, feat_df), stock_pct, crews, demand_basis, config, min_share_pct)

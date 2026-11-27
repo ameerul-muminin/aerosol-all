@@ -210,3 +210,65 @@ def test_plan_on_real_forecasts(feat):
     assert short["critical"].any()
     # same call twice -> identical (offline determinism)
     pd.testing.assert_frame_equal(short, plan(feat, "2025-07-14", 3, 30, crews=20))
+
+
+def test_zero_minimum_share_preserves_greedy_fill():
+    predictions = make_pred(25)
+    default = allocate(predictions, 60)
+    explicit = allocate(predictions, 60, min_share_pct=0)
+    pd.testing.assert_frame_equal(default, explicit)
+    summary = totals(explicit, 60)
+    assert summary["min_share_pct"] == 0
+    for item in KEYS:
+        available = summary["items"][item]["available"]
+        for row in explicit.to_dict("records"):
+            expected = min(available, row[f"{item}_required"])
+            assert row[f"{item}_allocated"] == expected
+            assert row[f"{item}_guaranteed"] == 0
+            available -= expected
+
+
+def test_minimum_share_and_priority_at_sixty_percent_stock():
+    predictions = make_pred(25, 3)
+    predictions["risk_tier"], predictions["population_density_sqkm"] = "High", 40_000
+    allocation = allocate(predictions, 60, min_share_pct=20)
+    shuffled = predictions.sample(frac=1, random_state=7)
+    pd.testing.assert_frame_equal(allocation, allocate(shuffled, 60, min_share_pct=20))
+    summary = totals(allocation, 60)
+    assert summary["min_share_pct"] == 20
+    for item in KEYS:
+        required = allocation[f"{item}_required"]
+        guaranteed = allocation[f"{item}_guaranteed"]
+        allocated = allocation[f"{item}_allocated"]
+        # Whole units round down, including for wards that need fewer than five.
+        pd.testing.assert_series_equal(guaranteed, required // 5, check_names=False)
+        assert (guaranteed <= allocated).all()
+        assert (allocated <= required).all()
+        assert allocated.sum() <= summary["items"][item]["available"]
+        residual = required - guaranteed
+        top_up = allocated - guaranteed
+        second_pass_fill = top_up[residual > 0] / residual[residual > 0]
+        assert second_pass_fill.is_monotonic_decreasing
+
+
+def test_minimum_share_cannot_exceed_fixed_stock():
+    cfg = load_config()
+    cfg["priority"]["min_share_pct"]["value"] = 20
+    cfg["stock"]["full_stock_units"]["value"]["saline_bags_needed"] = 4
+    predictions = make_pred(3).assign(predicted_cases=20)
+    allocation = allocate(predictions, 60, config=cfg)
+    assert allocation["saline_guaranteed"].tolist() == [2, 0, 0]
+    assert allocation["saline_allocated"].tolist() == [2, 0, 0]
+    assert totals(allocation, 60, config=cfg)["min_share_pct"] == 20
+
+
+@pytest.mark.parametrize("pct", [-1, 51, "20", True, float("nan")])
+def test_invalid_minimum_share(pct):
+    with pytest.raises(ValueError, match="Minimum share must be a number between 0% and 50%"):
+        allocate(make_pred(), 60, min_share_pct=pct)
+
+
+def test_plan_passes_minimum_share_through(feat):
+    allocation = plan(feat, "2025-07-14", 2, 60, min_share_pct=20)
+    assert totals(allocation, 60)["min_share_pct"] == 20
+    assert allocation["saline_guaranteed"].sum() > 0

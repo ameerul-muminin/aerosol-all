@@ -45,10 +45,15 @@
       "kind": "assumption",
       "why": "Same inputs must give the same allocation (offline determinism), so equal scores are ordered by ward_id."
     },
+    "min_share_pct": {
+      "value": 0,
+      "kind": "assumption",
+      "why": "Optionally give each ward a whole-unit share of its demand before filling outstanding needs by priority. Zero preserves the original greedy allocation; a positive share spreads stock when supplies permit."
+    },
     "fill_rule": {
       "value": "greedy_by_priority",
       "kind": "assumption",
-      "why": "Wards are filled in priority order, each to 100% of its need, until an item runs out; the next ward may get a partial fill and the rest get none. Shortage therefore lands only on the lowest-priority wards, and any ward under 100% is flagged critical."
+      "why": "After any minimum-share pass, wards are filled in priority order until the available stock runs out. Any ward under 100% is flagged critical."
     }
   },
 

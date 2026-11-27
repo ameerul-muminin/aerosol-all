@@ -22,6 +22,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [x] S3 `config/operations.json`: bed capacity rule, stock per item, crew count, crew effect — every assumption in one place,
       with the reason written next to it. (A + B agree)
 - [ ] S4 Ask organisers: what does "follow version-onsite-final for each commit" mean (tag? branch? message prefix?). (B)
+- [x] S5 `/api/selfcheck` (`src/selfcheck.py`): every Phase 2 math check re-run live, with the network blocked. (A)
 
 ## 1. Constrained allocation engine (15)
 - [x] R1 `src/allocation.py`: demand per ward = supplies(predicted cases, upper range optional);
@@ -60,7 +61,8 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 
 ## 5. Offline resilience (15)
 - [ ] F1 Audit: no network calls anywhere (grep for http/requests/CDN); fonts vendored. (B)
-- [ ] F2 Kill-switch test: Wi-Fi off → run every endpoint + UI, zero crashes. Script it: `scripts/offline_check.py`. (B)
+- [x] F2 Kill-switch test: Wi-Fi off → run every endpoint + UI, zero crashes. Script it: `scripts/offline_check.py`. (B)
+      Done by A: `python -m scripts.offline_check` blocks outbound network, calls every /api route and every web file the two pages load, and scans web/ for remote loads.
 - [x] F3 Deterministic: same inputs → same allocation/routing/notices (seeded, stable sort ties by ward_id). Test it. (A)
       Done for allocation, overflow, simulator and ROI ranking (`tests/test_determinism.py`); add notices when D1 lands.
 

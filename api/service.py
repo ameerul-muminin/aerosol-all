@@ -521,10 +521,12 @@ _ASSUMPTIONS_USED = {
     "overflow": {"demand": ["basis", "rounding"],
                  "bed_capacity": ["rule", "beds_available_pct"],
                  "overflow": ["same_city_only", "sender_order", "receiver_order"]},
-    "intervention": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction"],
+    "intervention": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction",
+                                     "sensitivity_per_crew"],
                      "crews": ["total_default", "max_per_ward"],
                      "demand": ["rounding"]},
-    "intervention_roi": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction"],
+    "intervention_roi": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction",
+                                         "sensitivity_per_crew"],
                          "crews": ["max_per_ward"]},
     "crew_plan": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction"],
                   "crews": ["total_default", "max_per_ward", "assignment_rule"]},
@@ -700,3 +702,12 @@ _ANSWER_CACHES.update({"allocate": "_allocation", "overflow": "overflow",
                        "intervention": "_simulation", "intervention_roi": "intervention_roi",
                        "crew_plan": "crew_plan"})
 _MODEL_CACHES = (*_MODEL_CACHES, "_allocation", "overflow", "_simulation", "intervention_roi", "crew_plan")
+
+
+# ---------------------------------------------------------------- GET /api/selfcheck
+def selfcheck(as_of: str | None = None, horizon: int = 2) -> dict:
+    """Re-run every Phase 2 math check live, with outbound network blocked (src/selfcheck.py).
+    Not cached on purpose: each call proves the math again. Default week = the latest in the data."""
+    from src.selfcheck import run_checks
+    as_of = parse_as_of(as_of or meta()["as_of"]["max"])
+    return _plain(run_checks(features(), as_of, horizon))

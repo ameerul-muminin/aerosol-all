@@ -95,6 +95,12 @@
       "unit": "fraction of the index",
       "kind": "assumption",
       "why": "Caps the combined effect at 50% so stacked crews cannot remove all breeding sites in the simulation. The index is also never lowered below the lowest value in the training years (read from the data by src/intervention.py), because the models have never seen lower values and cannot say what happens there."
+    },
+    "sensitivity_per_crew": {
+      "value": [0.05, 0.15, 0.25],
+      "unit": "fraction of the index per crew: low, central, high",
+      "kind": "assumption",
+      "why": "The true effect of a crew is unknown (no intervention data), so the simulator also re-runs the models with the lowest and highest values here and shows the result as a range (cases_prevented_low/high, roi_low/high). The central figure still uses reduction_per_crew; the cap and the training-minimum floor apply to every run."
     }
   },
 

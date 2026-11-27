@@ -77,7 +77,7 @@ Everything below runs in the same Python process, offline, with no network or LL
  dispatch notices       src/dispatch.py  SMS, WhatsApp, printable brief (EN + বাংলা) -> exports/
         |
         v
- /api/* (in progress) -> web UI (in progress)
+ /api/*  (api/main.py, api/service.py)  ->  web UI (Phase 2 views in progress)
  all settings: config/operations.json            no network, no LLM, deterministic
 ```
 
@@ -112,6 +112,8 @@ all three models use water-logging, which larvicide crews remove; on two 2025 pe
 so `roi_ranking()` scores all 60 wards in one run per horizon (under 0.2 s). Example (2025-07-14): best ward DSCC_Ward_12 saves 5.6 cases per crew (3.5 with 2
 crews: diminishing returns); 2 crews in each of the top 5 wards cut the 2-week forecast from 564.3 to 552.4 cases,
 5 beds and 30 saline bags. Off-season (2025-02-03) no ward saves more than 0.01 cases.
+Because the true crew effect is unknown, every result also carries a low/high band from re-running the models at
+5% and 25% per crew (`crew_effect.sensitivity_per_crew`); the central figure stays at 15%.
 
 ### Dispatch notices (`src/dispatch.py`, by B)
 `build_notices()` runs the allocation and overflow plans and fills fixed text templates (no LLM) for each ward,
@@ -120,9 +122,14 @@ deficits, crews assigned and bed routing in/out. `sms()`, `whatsapp()` and `brie
 wards come first in the brief. Samples in `exports/` come from
 `python -m scripts.export_dispatch --as-of 2025-09-15 --horizon 2 --stock-pct 60 --crews 20 --beds-pct 70`.
 
-### Determinism
+### Determinism and offline checks
 Allocation, overflow, the simulator and the ROI ranking give identical output when repeated or when input rows are
 shuffled (`tests/test_determinism.py`); notices are not yet in that test.
+`GET /api/selfcheck` (`src/selfcheck.py`) re-runs the math live with outbound network blocked: the supply table
+against every data row; stock never over-allocated and priority order respected; patients conserved within cities;
+the simulator's crew limit, floor and direction; SMS limits; a second identical run; and the model loading from disk.
+`python -m scripts.offline_check` blocks the network, starts the app, calls every `/api` route and every file the two
+pages load, and fails on any remote URL a browser would fetch.
 
 ### Assumptions (`config/operations.json`, condensed; the file holds the full reason for each)
 | Setting | Value | Kind | Why |
@@ -142,6 +149,7 @@ shuffled (`tests/test_determinism.py`); notices are not yet in that test.
 | `crew_effect.model_input` | water_logging_risk_index | assumption | the one crew-changeable input all three models use |
 | `crew_effect.reduction_per_crew` | 0.15 | assumption | no intervention data; officers can change it |
 | `crew_effect.max_total_reduction` | 0.5 | assumption | crews cannot remove all breeding sites |
+| `crew_effect.sensitivity_per_crew` | 0.05 / 0.15 / 0.25 | assumption | the true effect is unknown, so results show a low–high range |
 | `bed_capacity.rule` | 95% quantile to 2021, round up, min 2 | **data rule** | no capacity in the data; over capacity only in a ward's worst ~5% of weeks |
 | `bed_capacity.beds_available_pct` | 100 | assumption | beds are shared with non-dengue patients |
 | `overflow.same_city_only` | true | assumption | required by the brief |
@@ -162,8 +170,7 @@ shuffled (`tests/test_determinism.py`); notices are not yet in that test.
 ### In progress (not on `main` yet)
 | Item | Owner |
 |---|---|
-| `POST /api/allocate`, `GET /api/overflow`, `POST /api/intervention` (R4, O3, V3) | B |
-| `scripts/offline_check.py` kill-switch test (F2), live URL (G1) | B |
+| Live URL (G1) | B |
 | Allocation, overflow, simulator and dispatch views (R5, O4, V4, D3) | C |
 
 ### Reproducing the Phase 2 numbers

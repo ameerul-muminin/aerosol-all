@@ -4,7 +4,7 @@ import json
 import pytest
 
 from src.allocation import load_config
-from src.intervention import input_floor, reduction, roi_ranking, simulate
+from src.intervention import input_floor, reduction, roi_ranking, sensitivity_configs, simulate
 
 PEAK, QUIET = "2025-07-14", "2025-02-03"
 
@@ -146,3 +146,58 @@ def test_input_never_goes_below_the_training_minimum(feat):
 def test_floor_not_reported_when_the_cut_stays_above_it(feat, ranking):
     s = simulate(feat, PEAK, {ranking[0]["ward_id"]: 1})
     assert s["floor_hit_wards"] == [] and not s["wards"][0]["floor_hit"]
+
+
+# ---------------------------------------------------------------- sensitivity band
+
+BAND_TOL = 0.05     # tree forecasts are rounded to 0.01 per ward and horizon
+
+
+def test_sensitivity_configs_take_the_ends_of_the_range():
+    cfg = load_config()
+    low, high = sensitivity_configs(cfg)
+    values = cfg["crew_effect"]["sensitivity_per_crew"]["value"]
+    assert values == [0.05, 0.15, 0.25]
+    assert low["crew_effect"]["reduction_per_crew"]["value"] == min(values)
+    assert high["crew_effect"]["reduction_per_crew"]["value"] == max(values)
+    assert cfg["crew_effect"]["reduction_per_crew"]["value"] == 0.15          # central untouched
+    cfg["crew_effect"]["sensitivity_per_crew"]["value"] = [0.05, "lots"]
+    with pytest.raises(ValueError, match="sensitivity_per_crew"):
+        sensitivity_configs(cfg)
+
+
+def test_simulate_reports_a_band_per_horizon(feat, ranking):
+    s = simulate(feat, PEAK, {w["ward_id"]: 2 for w in ranking[:3]})
+    for h in s["horizons"]:
+        for key in ("cases_prevented", "beds_freed", "saline_saved"):
+            low, mid, high = h[f"{key}_low"], h[key], h[f"{key}_high"]
+            assert low <= mid + BAND_TOL and mid <= high + BAND_TOL, (h["horizon"], key, low, mid, high)
+        assert h["cases_prevented_low"] < h["cases_prevented_high"]
+    for w in s["wards"]:
+        assert w["roi_low"] <= w["roi"] + BAND_TOL <= w["roi_high"] + 2 * BAND_TOL
+    assert s["assumption"]["sensitivity_per_crew"] == [0.05, 0.15, 0.25]
+
+
+def test_central_value_is_unchanged_by_the_band(feat, ranking):
+    """The central figures must equal a run with the configured 0.15 and no band at all."""
+    cfg = load_config()
+    cfg["crew_effect"]["sensitivity_per_crew"]["value"] = [0.15]
+    plan = {ranking[0]["ward_id"]: 2}
+    a, b = simulate(feat, PEAK, plan), simulate(feat, PEAK, plan, config=cfg)
+    for ha, hb in zip(a["horizons"], b["horizons"]):
+        assert ha["cases_prevented"] == hb["cases_prevented"] == hb["cases_prevented_low"] == hb["cases_prevented_high"]
+
+
+def test_roi_ranking_has_an_ordered_band_for_every_ward(ranking):
+    assert all({"roi_low", "roi_high", "cases_prevented_low", "cases_prevented_high"} <= set(w) for w in ranking)
+    for w in ranking:
+        assert w["roi_low"] <= w["roi"] + BAND_TOL and w["roi"] <= w["roi_high"] + BAND_TOL, w["ward_id"]
+    assert ranking[0]["roi_low"] < ranking[0]["roi"] < ranking[0]["roi_high"]
+
+
+def test_band_still_respects_the_training_floor(feat):
+    col = "water_logging_risk_index"
+    low_ward = feat.drop_duplicates("ward_id").set_index("ward_id")[col].idxmin()
+    s = simulate(feat, PEAK, {low_ward: 3})
+    w = s["wards"][0]
+    assert w["floor_hit"] and w["cases_prevented"] == w["cases_prevented_low"] == w["cases_prevented_high"] == 0

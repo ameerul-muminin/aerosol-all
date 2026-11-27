@@ -133,6 +133,8 @@ checks the input, calls the `src/` module unchanged and returns plain JSON.
 | `POST /api/intervention` | `as_of`, `deployment` `{ward_id: crews}`, `total_crews?` | cases, beds, saline before/after at +2/+3/+4 weeks; ROI per ward; low/high effect band |
 | `GET /api/intervention/roi` | `as_of`, `crews_per_ward?` (1–3) | all 60 wards ranked by cases prevented per crew |
 | `GET /api/crew_plan` | `as_of`, `crews?` | the placement that prevents the most cases, next to the allocation rule's |
+| `GET /api/dispatch` | `as_of`, `horizon`, `stock_pct`, `crews?`, `beds_available_pct?`, `lang?` (en/bn), `city?` | one notice per ward: forecast, allocated vs required, deficits, crews, beds routed; its SMS (with segment count) and WhatsApp text |
+| `GET /api/dispatch/brief` | same as `/api/dispatch` | the printable commissioner brief (HTML, critical wards first), to print or save as PDF |
 | `GET /api/selfcheck` | `as_of?`, `horizon?` | the live math checks below, each passed or failed |
 
 - **Errors:** input is checked before the model runs. Bad input gets HTTP 400 `{"error": "<plain English>"}`, and
@@ -147,7 +149,8 @@ checks the input, calls the `src/` module unchanged and returns plain JSON.
 
 ### Determinism and offline checks
 Allocation, overflow, the simulator and the ROI ranking give identical output when repeated or when input rows are
-shuffled (`tests/test_determinism.py`); notices are not yet in that test.
+shuffled (`tests/test_determinism.py`); dispatch notices give identical JSON and briefs on repeat, and the API
+reproduces the committed `exports/` files byte for byte (`tests/test_api_dispatch.py`).
 `GET /api/selfcheck` (`src/selfcheck.py`) re-runs the math live with outbound network blocked: the supply table
 against every data row; stock never over-allocated and priority order respected; patients conserved within cities;
 the simulator's crew limit, floor and direction; SMS limits; a second identical run; and the model loading from disk.

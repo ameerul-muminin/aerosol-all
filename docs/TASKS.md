@@ -57,6 +57,8 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [x] D1 `src/dispatch.py`: template-only (no LLM) notices per ward: SMS (≤160 chars), WhatsApp, printable HTML brief
       with predicted cases, allocated vs required, deficits, assigned crews. EN + বাংলা. (B)
 - [x] D2 `python -m scripts.export_dispatch` → `exports/` sample SMS/WhatsApp/HTML (committed). (B)
+- [x] D4 API for D3: `GET /api/dispatch` (notices as JSON with SMS + WhatsApp text) and `GET /api/dispatch/brief`
+      (printable HTML). Reproduces `exports/` byte for byte (`tests/test_api_dispatch.py`). (B)
 - [ ] D3 UI: "Dispatch" view with copy buttons and print-to-PDF. (C)
 
 ## 5. Offline resilience (15)

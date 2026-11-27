@@ -73,6 +73,7 @@ curl -X POST http://127.0.0.1:8000/api/intervention -H "Content-Type: applicatio
      -d '{"as_of": "2025-07-14", "deployment": {"DSCC_Ward_04": 2, "CCC_Ward_01": 1}}'
 curl "http://127.0.0.1:8000/api/intervention/roi?as_of=2025-07-14"
 curl "http://127.0.0.1:8000/api/crew_plan?as_of=2025-07-14&crews=20"
+curl "http://127.0.0.1:8000/api/dispatch?as_of=2025-09-15&horizon=2&stock_pct=60&crews=20&beds_available_pct=70&lang=bn"
 ```
 Rules, reasons and limits of each module: [ARCHITECTURE.md](ARCHITECTURE.md#phase-2-from-forecast-to-action).
 
@@ -152,7 +153,8 @@ Every number shown in the app is read from `reports/metrics.json` or `reports/ef
 `GET /api/meta` · `/api/forecast?ward_id&as_of&horizon` · `/api/ranking?as_of&horizon[&city]` · `/api/warnings?as_of[&city]` ·
 `/api/metrics` · `/api/history?ward_id&horizon` · `/api/lag_profile[?city]` · `/api/efficiency` · `/api/health` · `POST /api/what_if`.
 Phase 2: `POST /api/allocate` · `/api/overflow?as_of&horizon[&demand_basis&beds_available_pct]` · `POST /api/intervention` ·
-`/api/intervention/roi?as_of[&crews_per_ward]` · `/api/crew_plan?as_of[&crews]` · `/api/selfcheck[?as_of&horizon]`.
+`/api/intervention/roi?as_of[&crews_per_ward]` · `/api/crew_plan?as_of[&crews]` · `/api/selfcheck[?as_of&horizon]` ·
+`/api/dispatch?as_of&horizon&stock_pct[&crews&beds_available_pct&lang&city]` · `/api/dispatch/brief` (same query; printable HTML).
 Bad input returns HTTP 400 with `{"error": "<plain message>"}`.
 
 ## Commit history

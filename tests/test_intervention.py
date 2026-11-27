@@ -1,0 +1,120 @@
+"""Vector-control simulator (src/intervention.py): model-driven before/after and ROI ranking."""
+import json
+
+import pytest
+
+from src.allocation import load_config
+from src.intervention import reduction, roi_ranking, simulate
+
+PEAK, QUIET = "2025-07-14", "2025-02-03"
+
+
+@pytest.fixture(scope="module")
+def feat():
+    from src.predict import build_features
+    return build_features()
+
+
+@pytest.fixture(scope="module")
+def ranking(feat):
+    return roi_ranking(feat, PEAK)
+
+
+def test_reduction_per_crew_and_cap():
+    cfg = load_config()
+    per = cfg["crew_effect"]["reduction_per_crew"]["value"]
+    cap = cfg["crew_effect"]["max_total_reduction"]["value"]
+    assert reduction(0) == 0
+    assert reduction(1) == pytest.approx(per)
+    assert reduction(2) == pytest.approx(2 * per)
+    assert reduction(10) == pytest.approx(cap)
+
+
+def test_crews_change_the_model_input_and_the_forecast_only_goes_down(feat, ranking):
+    plan = {w["ward_id"]: 2 for w in ranking[:3]}
+    s = simulate(feat, PEAK, plan)
+    for w in s["wards"]:
+        assert w["input_after"] == pytest.approx(w["input_before"] * (1 - reduction(2)), abs=1e-4)
+        for h in ("2", "3", "4"):
+            v = w["by_horizon"][h]
+            assert v["cases_after"] <= v["cases_before"]
+        assert w["cases_prevented"] > 0
+    for h in s["horizons"]:
+        assert h["cases_after"] < h["cases_before"]
+        assert h["beds_after"] <= h["beds_before"] and h["saline_after"] <= h["saline_before"]
+        assert h["beds_freed"] == h["beds_before"] - h["beds_after"]
+        # wards without crews are untouched, so the region change is the deployed wards' change
+        ward_sum = sum(w["by_horizon"][str(h["horizon"])]["cases_prevented"] for w in s["wards"])
+        assert h["cases_prevented"] == pytest.approx(ward_sum, abs=0.05)
+
+
+def test_one_wards_crew_does_not_change_another_ward(feat, ranking):
+    """roi_ranking scores all wards in one run; that is only valid if wards are independent."""
+    for w in ranking[:2] + ranking[30:31]:
+        alone = simulate(feat, PEAK, {w["ward_id"]: 1})["wards"][0]
+        assert alone["cases_prevented"] == pytest.approx(w["cases_prevented"], abs=0.02)
+
+
+def test_more_crews_prevent_more_but_each_extra_crew_less(feat, ranking):
+    ward = ranking[0]["ward_id"]
+    runs = [simulate(feat, PEAK, {ward: k})["wards"][0] for k in (1, 2, 3)]
+    prevented = [r["cases_prevented"] for r in runs]
+    assert prevented[0] < prevented[1] < prevented[2]
+    assert runs[0]["roi"] > runs[2]["roi"]
+
+
+def test_zero_effect_assumption_prevents_nothing(feat, ranking):
+    cfg = load_config()
+    cfg["crew_effect"]["reduction_per_crew"]["value"] = 0.0
+    s = simulate(feat, PEAK, {ranking[0]["ward_id"]: 3}, config=cfg)
+    assert all(h["cases_prevented"] == 0 for h in s["horizons"])
+
+
+def test_off_season_crews_prevent_little(feat):
+    r = roi_ranking(feat, QUIET)
+    assert max(w["cases_prevented"] for w in r) < 0.5
+
+
+def test_ranking_covers_every_ward_best_first_and_is_deterministic(feat, ranking):
+    assert len(ranking) == 60
+    assert [w["rank"] for w in ranking] == list(range(1, 61))
+    keys = [(-w["roi"], w["ward_id"]) for w in ranking]
+    assert keys == sorted(keys)
+    assert all(w["crews"] == 1 and w["roi"] == w["cases_prevented"] for w in ranking)
+    assert json.dumps(ranking) == json.dumps(roi_ranking(feat, PEAK))
+
+
+def test_simulate_output_is_json_ready_and_complete(feat, ranking):
+    s = simulate(feat, PEAK, {ranking[0]["ward_id"]: 1, ranking[1]["ward_id"]: 2}, total_crews=5)
+    json.dumps(s)
+    assert s["crews_used"] == 3 and s["total_crews"] == 5
+    assert [h["horizon"] for h in s["horizons"]] == [2, 3, 4]
+    assert [h["forecast_week"] for h in s["horizons"]] == ["2025-07-28", "2025-08-04", "2025-08-11"]
+    assert s["assumption"]["model_input"] == "water_logging_risk_index"
+
+
+@pytest.mark.parametrize("plan, kwargs, msg", [
+    ({}, {}, "at least one ward"),
+    ({"Nowhere_Ward_99": 1}, {}, "Unknown ward"),
+    ({"CCC_Ward_01": 4}, {}, "0 to 3"),
+    ({"CCC_Ward_01": 1.5}, {}, "0 to 3"),
+    ({"CCC_Ward_01": True}, {}, "0 to 3"),
+    ({"CCC_Ward_01": 0}, {}, "at least one crew"),
+    ({"CCC_Ward_01": 3, "CCC_Ward_02": 3}, {"total_crews": 5}, "only 5 are available"),
+])
+def test_bad_plans_give_friendly_errors(feat, plan, kwargs, msg):
+    with pytest.raises(ValueError, match=msg):
+        simulate(feat, PEAK, plan, **kwargs)
+
+
+@pytest.mark.parametrize("date, msg", [("not-a-date", "YYYY-MM-DD"), ("2030-01-07", "Pick a date"),
+                                       ("2025-07-15", "Mondays")])
+def test_bad_dates_give_friendly_errors(feat, date, msg):
+    with pytest.raises(ValueError, match=msg):
+        simulate(feat, date, {"CCC_Ward_01": 1})
+
+
+@pytest.mark.parametrize("k", [0, 4, 1.0])
+def test_bad_crews_per_ward_in_ranking(feat, k):
+    with pytest.raises(ValueError, match="1 to 3"):
+        roi_ranking(feat, PEAK, crews_per_ward=k)

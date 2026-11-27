@@ -41,10 +41,10 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [ ] O4 UI: per-city utilisation bars + transfer list (from → to, patients). (C)
 
 ## 3. Vector-control simulator (10) — must be model-driven, not a toggle
-- [ ] V1 `src/intervention.py`: crews on selected wards change the **model inputs** (e.g. lower lagged
+- [x] V1 `src/intervention.py`: crews on selected wards change the **model inputs** (e.g. lower lagged
       cases / effective water-logging), re-run the Phase 1 model at h = 2, 3, 4, report reduction in
       cases, beds, saline. Effect size is an assumption in S3; say so in the UI. (A)
-- [ ] V2 ROI = cases prevented per crew; rank all wards. (A)
+- [x] V2 ROI = cases prevented per crew; rank all wards. (A)
 - [ ] V3 Tests + API `POST /api/intervention`. (B)
 - [ ] V4 UI: pick wards + crews, before/after per horizon, ROI ranking. (C)
 

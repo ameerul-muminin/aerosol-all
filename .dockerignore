@@ -1,0 +1,15 @@
+# keep the image small: only what the app needs at runtime
+.git
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.ipynb_checkpoints
+.DS_Store
+.env
+.claude
+data/dataset_cache.csv
+docs/screenshots
+web/proto
+*.pdf

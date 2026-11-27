@@ -43,6 +43,8 @@ GET_QUERIES = {   # every GET route needs a known valid request; a new route wit
     "/api/intervention/roi": f"?as_of={AS_OF}",
     "/api/selfcheck": f"?as_of={AS_OF}&horizon=3",
     "/api/crew_plan": f"?as_of={AS_OF}&crews=20",
+    "/api/dispatch": f"?as_of={PEAK}&horizon=2&stock_pct=60&crews=20&beds_available_pct=70",
+    "/api/dispatch/brief": f"?as_of={PEAK}&horizon=2&stock_pct=60&crews=20&beds_available_pct=70&lang=bn",
 }
 POST_BODIES = {
     "/api/what_if": {"ward_id": "DSCC_Ward_04", "as_of": AS_OF, "horizon": 3, "rainfall_mm": 200},
@@ -160,6 +162,9 @@ def run() -> tuple[list[dict], list[str], bool]:
             return r
 
         def json_ok(r):
+            if r.mimetype == "text/html":              # the printable dispatch brief is a page, not JSON
+                ok = "<html" in r.get_data(as_text=True)
+                return ok, "" if ok else "not an HTML page"
             try:
                 body = r.get_json()
             except Exception:                      # noqa: BLE001 - any parse error is a failure

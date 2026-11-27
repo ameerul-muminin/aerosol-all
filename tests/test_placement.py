@@ -97,3 +97,13 @@ def test_bad_crews_give_friendly_errors(feat, crews):
 def test_bad_date_gives_friendly_error(feat):
     with pytest.raises(ValueError, match="Mondays"):
         best_placement(feat, "2025-07-15", 5)
+
+
+def test_more_crews_than_can_be_placed_says_so(feat):
+    from src.allocation import load_config
+    placeable = 60 * int(load_config()["crews"]["max_per_ward"]["value"])
+    big = best_placement(feat, PEAK, placeable + 500)
+    assert big["crews_requested"] == placeable + 500 and big["crews_placeable"] == placeable
+    assert big["crews_available"] == placeable and "500" in big["note"]
+    ok = best_placement(feat, PEAK, 20)
+    assert ok["note"] is None and ok["crews_requested"] == ok["crews_available"] == 20

@@ -292,10 +292,18 @@ details.why ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 8px; }
 .stp output { min-width: 2ch; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; }
 .card.sticky { position: sticky; top: 16px; align-self: start; }
 @media (max-width: 900px) { .card.sticky { position: static; } }
-.dep { list-style: none; margin: 0 0 16px; padding: 0; }
+/* the sticky Deployment card lives in its own grid, so it stops at the ranking's end instead of sliding over the results */
+.sim-top + .grid { margin-top: 16px; }
+.dep { list-style: none; margin: 16px 0 0; padding: 0; }
+@media (min-width: 901px) { .sim-top .dep { max-height: min(52vh, 480px); overflow-y: auto; padding: 2px 4px 2px 2px; } }
+@media (pointer: coarse) { .stp button { width: 44px; height: 44px; } }
+.dep-note { font-size: var(--fs-small); color: var(--ink-2); margin: -6px 0 12px; }
+.dep-note.deficit { color: var(--tier-critical); }
+.field-hint { font-size: 12px; font-weight: 400; color: var(--ink-2); max-width: 220px; }
+.field-hint:empty { display: none; }
 .dep li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; border-top: 1px solid var(--line); font-size: 14px; }
 .dep li:first-child { border-top: 0; }
-.dep-empty { color: var(--ink-2); margin-bottom: 16px; }
+.dep-empty { color: var(--ink-2); margin-top: 16px; }
 .dep-used { font-weight: 600; margin-bottom: 12px; }
 .dep-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .dep-msg { margin-top: 12px; font-weight: 500; }

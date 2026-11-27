@@ -244,3 +244,33 @@ def test_crew_plan_matches_the_module_and_defaults_to_config(client):
 def test_crew_plan_bad_input_is_a_400(client, query, msg):
     r = client.get(f"/api/crew_plan?{query}")
     assert r.status_code == 400 and msg in r.get_json()["error"]
+
+
+# ---------------------------------------------------------------- simulator input checks (before the cache)
+def test_intervention_checks_crews_before_the_cache(client):
+    ok = client.post("/api/intervention", json={"as_of": A, "deployment": {"DSCC_Ward_04": 2}})
+    assert ok.status_code == 200
+    # 2.0 == 2 in a cache key: it must still be refused, not served the cached answer for 2
+    r = client.post("/api/intervention", json={"as_of": A, "deployment": {"DSCC_Ward_04": 2.0}})
+    assert r.status_code == 400 and "whole number" in r.get_json()["error"]
+
+
+def test_intervention_ignores_wards_with_zero_crews(client):
+    a = client.post("/api/intervention", json={"as_of": A, "deployment": {"DSCC_Ward_04": 2}}).get_json()
+    b = client.post("/api/intervention", json={"as_of": A, "deployment": {"DSCC_Ward_04": 2, "CCC_Ward_01": 0}}).get_json()
+    assert a == b and [w["ward_id"] for w in b["wards"]] == ["DSCC_Ward_04"]
+
+
+@pytest.mark.parametrize("url, words", [
+    (f"/api/intervention/roi?as_of={A}&crews_per_ward=-1", "from 1 to"),
+    (f"/api/crew_plan?as_of={A}&crews=-1", "0 or more"),
+])
+def test_negative_numbers_get_the_range_message(client, url, words):
+    r = client.get(url)
+    assert r.status_code == 400 and words in r.get_json()["error"]
+
+
+def test_crew_plan_says_when_crews_are_capped(client):
+    d = client.get(f"/api/crew_plan?as_of={A}&crews=100000").get_json()
+    assert d["crews_requested"] == 100000 and d["crews_available"] == d["crews_placeable"] < 100000
+    assert d["note"] and str(d["crews_placeable"]) in d["note"]

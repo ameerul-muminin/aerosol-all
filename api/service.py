@@ -581,8 +581,8 @@ def parse_whole(value, name: str, default=None):
     """Whole number from JSON (int) or a query string (digits); None/"" -> default."""
     if value is None or value == "":
         return default
-    if isinstance(value, str) and value.strip().isdigit():
-        return int(value)
+    if isinstance(value, str) and re.fullmatch(r"-?\d+", value.strip()):
+        return int(value)          # negative numbers pass: each caller's range check names the allowed range
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"{name} must be a whole number.")
     return value
@@ -695,12 +695,14 @@ def intervention(body) -> dict:
     for ward_id in dep:
         _require_ward(ward_id)
     from src.allocation import setting
+    from src.intervention import _check_deployment
+    cfg = _ops_config()
     total = parse_whole(body.get("total_crews"), "total_crews",
-                        default=int(setting(_ops_config(), "crews", "total_default")))
-    # values are checked by src.intervention; only hashable ones can be cached, others fail there anyway
-    if any(isinstance(v, (dict, list)) for v in dep.values()):
-        raise ValueError("Crews per ward must be whole numbers.")
-    res = dict(_simulation(as_of, tuple(sorted(dep.items())), total))
+                        default=int(setting(cfg, "crews", "total_default")))
+    # check before the cache: 2.0 == 2 in a cache key, so an unchecked 2.0 could hit a cached 2;
+    # wards with 0 crews are dropped, so {"A": 2, "B": 0} and {"A": 2} share one answer
+    plan = _check_deployment(dep, set(dep), cfg, total)          # ward IDs were checked just above
+    res = dict(_simulation(as_of, tuple(plan.items()), total))
     res["assumptions"] = assumptions("intervention")
     return res
 

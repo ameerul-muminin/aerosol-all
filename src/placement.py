@@ -79,6 +79,8 @@ def best_placement(feat_df: pd.DataFrame, as_of_date, crews: int | None = None, 
     """The crew plan that prevents the most cases over weeks +2..+4 (JSON-ready):
     plan {ward_id: crews}, crews_used, cases_prevented, per-ward rows, and the same table's
     total for the allocation engine's crew rule at `horizon` (for comparison).
+    At most wards x max_per_ward crews can be placed: a bigger request is capped, and
+    crews_requested, crews_placeable and `note` say so (crews_available is the capped number).
     Bad input raises ValueError with a message fit to show the user."""
     cfg = config or load_config()
     if crews is None:
@@ -88,7 +90,8 @@ def best_placement(feat_df: pd.DataFrame, as_of_date, crews: int | None = None, 
     as_of = _as_of(feat_df, as_of_date)
     table, city = prevented_table(feat_df, as_of, cfg)
     cap = len(next(iter(table.values()))) - 1
-    crews = min(int(crews), cap * len(table))          # more crews than wards x cap cannot be placed
+    requested, placeable = int(crews), cap * len(table)
+    crews = min(requested, placeable)                  # more crews than wards x cap cannot be placed
     plan = optimise(table, crews)
 
     from src.allocation import plan as allocation_plan
@@ -100,7 +103,10 @@ def best_placement(feat_df: pd.DataFrame, as_of_date, crews: int | None = None, 
              if k < cap else None} for w, k in plan.items()]
     rows.sort(key=lambda r: (-r["cases_prevented"], r["ward_id"]))
     best, by_rule = _total(table, plan), _total(table, rule_plan)
-    return {"as_of": str(as_of.date()), "crews_available": crews, "crews_used": sum(plan.values()),
+    note = (f"Only {placeable} crews can be placed ({len(table)} wards x {cap} per ward); "
+            f"the other {requested - placeable} were left out." if requested > placeable else None)
+    return {"as_of": str(as_of.date()), "crews_available": crews, "crews_requested": requested,
+            "crews_placeable": placeable, "note": note, "crews_used": sum(plan.values()),
             "plan": plan, "cases_prevented": best, "wards": rows,
             "compare": {"allocation_rule": {"plan": rule_plan, "cases_prevented": by_rule,
                                             "horizon": horizon},

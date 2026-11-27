@@ -49,9 +49,9 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [ ] V4 UI: pick wards + crews, before/after per horizon, ROI ranking. (C)
 
 ## 4. Dispatch notices + /exports (part of 10)
-- [ ] D1 `src/dispatch.py`: template-only (no LLM) notices per ward: SMS (≤160 chars), WhatsApp, printable HTML brief
+- [x] D1 `src/dispatch.py`: template-only (no LLM) notices per ward: SMS (≤160 chars), WhatsApp, printable HTML brief
       with predicted cases, allocated vs required, deficits, assigned crews. EN + বাংলা. (B)
-- [ ] D2 `python -m scripts.export_dispatch` → `exports/` sample SMS/WhatsApp/HTML (committed). (B)
+- [x] D2 `python -m scripts.export_dispatch` → `exports/` sample SMS/WhatsApp/HTML (committed). (B)
 - [ ] D3 UI: "Dispatch" view with copy buttons and print-to-PDF. (C)
 
 ## 5. Offline resilience (15)

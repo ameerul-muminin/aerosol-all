@@ -1,0 +1,1220 @@
+*DSCC_Ward_04 · Dhaka South*
+*No deficit*
+Week of 2025-09-29: 10.41 cases (80% range 5.52–16.64), High risk
+Supplies (allocated/required)
+Saline bags: 24/24 · deficit 0
+Diagnostic kits: 12/12 · deficit 0
+Beds (stock plan): 3/3 · deficit 0
+Spraying crews: 2
+Hospital beds: 3 needed, 4 available. Patients in 1, out 0, unroutable 0.
+1 patients from DSCC_Ward_10
+
+*DNCC_Ward_12 · Dhaka North*
+*No deficit*
+Week of 2025-09-29: 10.68 cases (80% range 5.74–16.99), High risk
+Supplies (allocated/required)
+Saline bags: 26/26 · deficit 0
+Diagnostic kits: 13/13 · deficit 0
+Beds (stock plan): 3/3 · deficit 0
+Spraying crews: 2
+Hospital beds: 3 needed, 3 available. Patients in 0, out 0, unroutable 0.
+
+*CCC_Ward_03 · Chattogram*
+*No deficit*
+Week of 2025-09-29: 9.94 cases (80% range 5.16–16.04), High risk
+Supplies (allocated/required)
+Saline bags: 24/24 · deficit 0
+Diagnostic kits: 12/12 · deficit 0
+Beds (stock plan): 3/3 · deficit 0
+Spraying crews: 2
+Hospital beds: 3 needed, 4 available. Patients in 0, out 0, unroutable 0.
+
+*CCC_Ward_01 · Chattogram*
+*No deficit*
+Week of 2025-09-29: 9.62 cases (80% range 4.91–15.63), High risk
+Supplies (allocated/required)
+Saline bags: 24/24 · deficit 0
+Diagnostic kits: 12/12 · deficit 0
+Beds (stock plan): 3/3 · deficit 0
+Spraying crews: 2
+Hospital beds: 3 needed, 3 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_06 · Dhaka South*
+*No deficit*
+Week of 2025-09-29: 8.36 cases (80% range 3.94–14.01), High risk
+Supplies (allocated/required)
+Saline bags: 19/19 · deficit 0
+Diagnostic kits: 9/9 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 1
+Hospital beds: 2 needed, 3 available. Patients in 1, out 0, unroutable 0.
+1 patients from DSCC_Ward_12
+
+*GCC_Ward_03 · Gazipur*
+*No deficit*
+Week of 2025-09-29: 10.19 cases (80% range 5.35–16.36), High risk
+Supplies (allocated/required)
+Saline bags: 24/24 · deficit 0
+Diagnostic kits: 12/12 · deficit 0
+Beds (stock plan): 3/3 · deficit 0
+Spraying crews: 1
+Hospital beds: 3 needed, 3 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_10 · Dhaka South*
+*No deficit*
+Week of 2025-09-29: 9.82 cases (80% range 5.06–15.89), High risk
+Supplies (allocated/required)
+Saline bags: 24/24 · deficit 0
+Diagnostic kits: 12/12 · deficit 0
+Beds (stock plan): 3/3 · deficit 0
+Spraying crews: 1
+Hospital beds: 3 needed, 2 available. Patients in 0, out 1, unroutable 0.
+1 patients to DSCC_Ward_04
+
+*DSCC_Ward_19 · Dhaka South*
+*No deficit*
+Week of 2025-09-29: 8.86 cases (80% range 4.32–14.65), High risk
+Supplies (allocated/required)
+Saline bags: 21/21 · deficit 0
+Diagnostic kits: 10/10 · deficit 0
+Beds (stock plan): 3/3 · deficit 0
+Spraying crews: 1
+Hospital beds: 3 needed, 2 available. Patients in 0, out 1, unroutable 0.
+1 patients to DSCC_Ward_09
+
+*DSCC_Ward_12 · Dhaka South*
+*No deficit*
+Week of 2025-09-29: 8.77 cases (80% range 4.25–14.54), High risk
+Supplies (allocated/required)
+Saline bags: 21/21 · deficit 0
+Diagnostic kits: 10/10 · deficit 0
+Beds (stock plan): 3/3 · deficit 0
+Spraying crews: 1
+Hospital beds: 3 needed, 2 available. Patients in 0, out 1, unroutable 0.
+1 patients to DSCC_Ward_06
+
+*GCC_Ward_01 · Gazipur*
+*No deficit*
+Week of 2025-09-29: 6.25 cases (80% range 2.35–11.21), Medium risk
+Supplies (allocated/required)
+Saline bags: 14/14 · deficit 0
+Diagnostic kits: 7/7 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*GCC_Ward_02 · Gazipur*
+*No deficit*
+Week of 2025-09-29: 9.46 cases (80% range 4.79–15.43), High risk
+Supplies (allocated/required)
+Saline bags: 21/21 · deficit 0
+Diagnostic kits: 10/10 · deficit 0
+Beds (stock plan): 3/3 · deficit 0
+Spraying crews: 1
+Hospital beds: 3 needed, 3 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_09 · Dhaka North*
+*No deficit*
+Week of 2025-09-29: 9.21 cases (80% range 4.59–15.1), High risk
+Supplies (allocated/required)
+Saline bags: 21/21 · deficit 0
+Diagnostic kits: 10/10 · deficit 0
+Beds (stock plan): 3/3 · deficit 0
+Spraying crews: 1
+Hospital beds: 3 needed, 2 available. Patients in 0, out 1, unroutable 0.
+1 patients to DNCC_Ward_04
+
+*NCC_Ward_01 · Narayanganj*
+*No deficit*
+Week of 2025-09-29: 6.66 cases (80% range 2.66–11.77), Medium risk
+Supplies (allocated/required)
+Saline bags: 17/17 · deficit 0
+Diagnostic kits: 8/8 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 1
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_05 · Dhaka North*
+*No deficit*
+Week of 2025-09-29: 7.65 cases (80% range 3.4–13.07), Medium risk
+Supplies (allocated/required)
+Saline bags: 19/19 · deficit 0
+Diagnostic kits: 9/9 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 1
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_18 · Dhaka North*
+*No deficit*
+Week of 2025-09-29: 8.04 cases (80% range 3.69–13.59), Medium risk
+Supplies (allocated/required)
+Saline bags: 19/19 · deficit 0
+Diagnostic kits: 9/9 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 1
+Hospital beds: 2 needed, 3 available. Patients in 0, out 0, unroutable 0.
+
+*NCC_Ward_05 · Narayanganj*
+*No deficit*
+Week of 2025-09-29: 9.83 cases (80% range 5.07–15.9), High risk
+Supplies (allocated/required)
+Saline bags: 24/24 · deficit 0
+Diagnostic kits: 12/12 · deficit 0
+Beds (stock plan): 3/3 · deficit 0
+Spraying crews: 1
+Hospital beds: 3 needed, 3 available. Patients in 0, out 0, unroutable 0.
+
+*GCC_Ward_04 · Gazipur*
+*No deficit*
+Week of 2025-09-29: 5.87 cases (80% range 2.08–10.71), Medium risk
+Supplies (allocated/required)
+Saline bags: 14/14 · deficit 0
+Diagnostic kits: 7/7 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_04 · Dhaka North*
+*No deficit*
+Week of 2025-09-29: 4.45 cases (80% range 1.05–9.5), Medium risk
+Supplies (allocated/required)
+Saline bags: 10/10 · deficit 0
+Diagnostic kits: 5/5 · deficit 0
+Beds (stock plan): 1/1 · deficit 0
+Spraying crews: 0
+Hospital beds: 1 needed, 2 available. Patients in 1, out 0, unroutable 0.
+1 patients from DNCC_Ward_09
+
+*DNCC_Ward_16 · Dhaka North*
+*No deficit*
+Week of 2025-09-29: 6.95 cases (80% range 2.87–12.15), Medium risk
+Supplies (allocated/required)
+Saline bags: 17/17 · deficit 0
+Diagnostic kits: 8/8 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*NCC_Ward_04 · Narayanganj*
+*No deficit*
+Week of 2025-09-29: 5.27 cases (80% range 1.65–9.9), Medium risk
+Supplies (allocated/required)
+Saline bags: 12/12 · deficit 0
+Diagnostic kits: 6/6 · deficit 0
+Beds (stock plan): 1/1 · deficit 0
+Spraying crews: 0
+Hospital beds: 1 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*GCC_Ward_05 · Gazipur*
+*No deficit*
+Week of 2025-09-29: 8.08 cases (80% range 3.72–13.64), Medium risk
+Supplies (allocated/required)
+Saline bags: 19/19 · deficit 0
+Diagnostic kits: 9/9 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 1
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_08 · Dhaka South*
+*No deficit*
+Week of 2025-09-29: 7.1 cases (80% range 2.98–12.35), Medium risk
+Supplies (allocated/required)
+Saline bags: 17/17 · deficit 0
+Diagnostic kits: 8/8 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_11 · Dhaka North*
+*No deficit*
+Week of 2025-09-29: 6.23 cases (80% range 2.34–11.19), Medium risk
+Supplies (allocated/required)
+Saline bags: 14/14 · deficit 0
+Diagnostic kits: 7/7 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_02 · Dhaka North*
+*No deficit*
+Week of 2025-09-29: 7.14 cases (80% range 3.02–12.41), Medium risk
+Supplies (allocated/required)
+Saline bags: 17/17 · deficit 0
+Diagnostic kits: 8/8 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_19 · Dhaka North*
+*No deficit*
+Week of 2025-09-29: 7.69 cases (80% range 3.43–13.13), Medium risk
+Supplies (allocated/required)
+Saline bags: 19/19 · deficit 0
+Diagnostic kits: 9/9 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 0
+Hospital beds: 2 needed, 3 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_17 · Dhaka North*
+*No deficit*
+Week of 2025-09-29: 5.43 cases (80% range 1.77–10.11), Medium risk
+Supplies (allocated/required)
+Saline bags: 12/12 · deficit 0
+Diagnostic kits: 6/6 · deficit 0
+Beds (stock plan): 1/1 · deficit 0
+Spraying crews: 0
+Hospital beds: 1 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_13 · Dhaka South*
+*No deficit*
+Week of 2025-09-29: 7.97 cases (80% range 3.64–13.5), Medium risk
+Supplies (allocated/required)
+Saline bags: 19/19 · deficit 0
+Diagnostic kits: 9/9 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_10 · Dhaka North*
+*No deficit*
+Week of 2025-09-29: 7.88 cases (80% range 3.58–13.38), Medium risk
+Supplies (allocated/required)
+Saline bags: 19/19 · deficit 0
+Diagnostic kits: 9/9 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*CCC_Ward_04 · Chattogram*
+*No deficit*
+Week of 2025-09-29: 7.51 cases (80% range 3.3–12.9), Medium risk
+Supplies (allocated/required)
+Saline bags: 19/19 · deficit 0
+Diagnostic kits: 9/9 · deficit 0
+Beds (stock plan): 2/2 · deficit 0
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*CCC_Ward_10 · Chattogram*
+*No deficit*
+Week of 2025-09-29: 4.47 cases (80% range 1.06–9.53), Medium risk
+Supplies (allocated/required)
+Saline bags: 10/10 · deficit 0
+Diagnostic kits: 5/5 · deficit 0
+Beds (stock plan): 1/1 · deficit 0
+Spraying crews: 0
+Hospital beds: 1 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_14 · Dhaka North*
+*No deficit*
+Week of 2025-09-29: 5.16 cases (80% range 1.57–9.74), Medium risk
+Supplies (allocated/required)
+Saline bags: 12/12 · deficit 0
+Diagnostic kits: 6/6 · deficit 0
+Beds (stock plan): 1/1 · deficit 0
+Spraying crews: 0
+Hospital beds: 1 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_07 · Dhaka North*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 5.65 cases (80% range 1.92–10.41), Medium risk
+Supplies (allocated/required)
+Saline bags: 14/14 · deficit 0
+Diagnostic kits: 7/7 · deficit 0
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_01 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 4.88 cases (80% range 1.35–10.13), Medium risk
+Supplies (allocated/required)
+Saline bags: 1/12 · deficit 11
+Diagnostic kits: 1/6 · deficit 5
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 2 available. Patients in 1, out 0, unroutable 0.
+1 patients from DSCC_Ward_03
+
+*DNCC_Ward_01 · Dhaka North*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 7.23 cases (80% range 3.08–12.52), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/17 · deficit 17
+Diagnostic kits: 0/8 · deficit 8
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_03 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 8.88 cases (80% range 4.34–14.69), High risk
+Supplies (allocated/required)
+Saline bags: 0/21 · deficit 21
+Diagnostic kits: 0/10 · deficit 10
+Beds (stock plan): 0/3 · deficit 3
+Spraying crews: 0
+Hospital beds: 3 needed, 2 available. Patients in 0, out 1, unroutable 0.
+1 patients to DSCC_Ward_01
+
+*CCC_Ward_07 · Chattogram*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 7.83 cases (80% range 3.53–13.31), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/19 · deficit 19
+Diagnostic kits: 0/9 · deficit 9
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 3 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_07 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 5.1 cases (80% range 1.53–9.66), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/12 · deficit 12
+Diagnostic kits: 0/6 · deficit 6
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 1 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_02 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 5.85 cases (80% range 2.07–10.68), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/14 · deficit 14
+Diagnostic kits: 0/7 · deficit 7
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*CCC_Ward_06 · Chattogram*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 6.48 cases (80% range 2.53–11.53), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/14 · deficit 14
+Diagnostic kits: 0/7 · deficit 7
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_15 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 5.43 cases (80% range 1.76–10.11), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/12 · deficit 12
+Diagnostic kits: 0/6 · deficit 6
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_09 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 4.88 cases (80% range 1.35–10.13), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/12 · deficit 12
+Diagnostic kits: 0/6 · deficit 6
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 2 available. Patients in 1, out 0, unroutable 0.
+1 patients from DSCC_Ward_19
+
+*DNCC_Ward_13 · Dhaka North*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 4.3 cases (80% range 0.94–9.27), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/10 · deficit 10
+Diagnostic kits: 0/5 · deficit 5
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 1 available. Patients in 0, out 0, unroutable 0.
+
+*CCC_Ward_09 · Chattogram*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 4.37 cases (80% range 0.99–9.38), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/10 · deficit 10
+Diagnostic kits: 0/5 · deficit 5
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 1 available. Patients in 0, out 0, unroutable 0.
+
+*CCC_Ward_08 · Chattogram*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 6.89 cases (80% range 2.83–12.07), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/17 · deficit 17
+Diagnostic kits: 0/8 · deficit 8
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_16 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 6.08 cases (80% range 2.23–10.99), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/14 · deficit 14
+Diagnostic kits: 0/7 · deficit 7
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_17 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 3.77 cases (80% range 0.59–8.49), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/10 · deficit 10
+Diagnostic kits: 0/5 · deficit 5
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 1 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_20 · Dhaka North*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 4.27 cases (80% range 0.93–9.24), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/10 · deficit 10
+Diagnostic kits: 0/5 · deficit 5
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 1 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_20 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 8.01 cases (80% range 3.67–13.54), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/19 · deficit 19
+Diagnostic kits: 0/9 · deficit 9
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_06 · Dhaka North*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 5.86 cases (80% range 2.07–10.69), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/14 · deficit 14
+Diagnostic kits: 0/7 · deficit 7
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_18 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 7.4 cases (80% range 3.21–12.74), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/17 · deficit 17
+Diagnostic kits: 0/8 · deficit 8
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_08 · Dhaka North*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 5.12 cases (80% range 1.55–9.69), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/12 · deficit 12
+Diagnostic kits: 0/6 · deficit 6
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*CCC_Ward_05 · Chattogram*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 5.49 cases (80% range 1.81–10.19), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/12 · deficit 12
+Diagnostic kits: 0/6 · deficit 6
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_11 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 6.37 cases (80% range 2.44–11.38), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/14 · deficit 14
+Diagnostic kits: 0/7 · deficit 7
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*CCC_Ward_02 · Chattogram*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 4.7 cases (80% range 1.22–9.86), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/12 · deficit 12
+Diagnostic kits: 0/6 · deficit 6
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_14 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 3.75 cases (80% range 0.58–8.46), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/10 · deficit 10
+Diagnostic kits: 0/5 · deficit 5
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 1 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_03 · Dhaka North*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 7.23 cases (80% range 3.08–12.52), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/17 · deficit 17
+Diagnostic kits: 0/8 · deficit 8
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*NCC_Ward_02 · Narayanganj*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 4.55 cases (80% range 1.12–9.64), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/12 · deficit 12
+Diagnostic kits: 0/6 · deficit 6
+Beds (stock plan): 0/1 · deficit 1
+Spraying crews: 0
+Hospital beds: 1 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DNCC_Ward_15 · Dhaka North*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 8.23 cases (80% range 3.84–13.84), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/19 · deficit 19
+Diagnostic kits: 0/9 · deficit 9
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*NCC_Ward_03 · Narayanganj*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 5.95 cases (80% range 2.14–10.82), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/14 · deficit 14
+Diagnostic kits: 0/7 · deficit 7
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+*DSCC_Ward_05 · Dhaka South*
+*CRITICAL DEFICIT*
+Week of 2025-09-29: 7.16 cases (80% range 3.03–12.44), Medium risk
+Supplies (allocated/required)
+Saline bags: 0/17 · deficit 17
+Diagnostic kits: 0/8 · deficit 8
+Beds (stock plan): 0/2 · deficit 2
+Spraying crews: 0
+Hospital beds: 2 needed, 2 available. Patients in 0, out 0, unroutable 0.
+
+
+*DSCC_Ward_04 · ঢাকা দক্ষিণ*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 10.41 জন (৮০% সীমা 5.52–16.64), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 24/24 · ঘাটতি 0
+পরীক্ষার কিট: 12/12 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 3/3 · ঘাটতি 0
+স্প্রে দল: 2
+হাসপাতালের শয্যা: প্রয়োজন 3, উপলব্ধ 4। রোগী আসবে 1, যাবে 0, শয্যা পাবে না 0 জন।
+1 জন রোগী আসবেন DSCC_Ward_10 ওয়ার্ড থেকে
+
+*DNCC_Ward_12 · ঢাকা উত্তর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 10.68 জন (৮০% সীমা 5.74–16.99), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 26/26 · ঘাটতি 0
+পরীক্ষার কিট: 13/13 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 3/3 · ঘাটতি 0
+স্প্রে দল: 2
+হাসপাতালের শয্যা: প্রয়োজন 3, উপলব্ধ 3। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*CCC_Ward_03 · চট্টগ্রাম*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 9.94 জন (৮০% সীমা 5.16–16.04), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 24/24 · ঘাটতি 0
+পরীক্ষার কিট: 12/12 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 3/3 · ঘাটতি 0
+স্প্রে দল: 2
+হাসপাতালের শয্যা: প্রয়োজন 3, উপলব্ধ 4। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*CCC_Ward_01 · চট্টগ্রাম*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 9.62 জন (৮০% সীমা 4.91–15.63), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 24/24 · ঘাটতি 0
+পরীক্ষার কিট: 12/12 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 3/3 · ঘাটতি 0
+স্প্রে দল: 2
+হাসপাতালের শয্যা: প্রয়োজন 3, উপলব্ধ 3। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_06 · ঢাকা দক্ষিণ*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 8.36 জন (৮০% সীমা 3.94–14.01), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 19/19 · ঘাটতি 0
+পরীক্ষার কিট: 9/9 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 1
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 3। রোগী আসবে 1, যাবে 0, শয্যা পাবে না 0 জন।
+1 জন রোগী আসবেন DSCC_Ward_12 ওয়ার্ড থেকে
+
+*GCC_Ward_03 · গাজীপুর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 10.19 জন (৮০% সীমা 5.35–16.36), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 24/24 · ঘাটতি 0
+পরীক্ষার কিট: 12/12 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 3/3 · ঘাটতি 0
+স্প্রে দল: 1
+হাসপাতালের শয্যা: প্রয়োজন 3, উপলব্ধ 3। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_10 · ঢাকা দক্ষিণ*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 9.82 জন (৮০% সীমা 5.06–15.89), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 24/24 · ঘাটতি 0
+পরীক্ষার কিট: 12/12 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 3/3 · ঘাটতি 0
+স্প্রে দল: 1
+হাসপাতালের শয্যা: প্রয়োজন 3, উপলব্ধ 2। রোগী আসবে 0, যাবে 1, শয্যা পাবে না 0 জন।
+1 জন রোগী যাবেন DSCC_Ward_04 ওয়ার্ডে
+
+*DSCC_Ward_19 · ঢাকা দক্ষিণ*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 8.86 জন (৮০% সীমা 4.32–14.65), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 21/21 · ঘাটতি 0
+পরীক্ষার কিট: 10/10 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 3/3 · ঘাটতি 0
+স্প্রে দল: 1
+হাসপাতালের শয্যা: প্রয়োজন 3, উপলব্ধ 2। রোগী আসবে 0, যাবে 1, শয্যা পাবে না 0 জন।
+1 জন রোগী যাবেন DSCC_Ward_09 ওয়ার্ডে
+
+*DSCC_Ward_12 · ঢাকা দক্ষিণ*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 8.77 জন (৮০% সীমা 4.25–14.54), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 21/21 · ঘাটতি 0
+পরীক্ষার কিট: 10/10 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 3/3 · ঘাটতি 0
+স্প্রে দল: 1
+হাসপাতালের শয্যা: প্রয়োজন 3, উপলব্ধ 2। রোগী আসবে 0, যাবে 1, শয্যা পাবে না 0 জন।
+1 জন রোগী যাবেন DSCC_Ward_06 ওয়ার্ডে
+
+*GCC_Ward_01 · গাজীপুর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 6.25 জন (৮০% সীমা 2.35–11.21), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 14/14 · ঘাটতি 0
+পরীক্ষার কিট: 7/7 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*GCC_Ward_02 · গাজীপুর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 9.46 জন (৮০% সীমা 4.79–15.43), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 21/21 · ঘাটতি 0
+পরীক্ষার কিট: 10/10 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 3/3 · ঘাটতি 0
+স্প্রে দল: 1
+হাসপাতালের শয্যা: প্রয়োজন 3, উপলব্ধ 3। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_09 · ঢাকা উত্তর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 9.21 জন (৮০% সীমা 4.59–15.1), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 21/21 · ঘাটতি 0
+পরীক্ষার কিট: 10/10 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 3/3 · ঘাটতি 0
+স্প্রে দল: 1
+হাসপাতালের শয্যা: প্রয়োজন 3, উপলব্ধ 2। রোগী আসবে 0, যাবে 1, শয্যা পাবে না 0 জন।
+1 জন রোগী যাবেন DNCC_Ward_04 ওয়ার্ডে
+
+*NCC_Ward_01 · নারায়ণগঞ্জ*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 6.66 জন (৮০% সীমা 2.66–11.77), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 17/17 · ঘাটতি 0
+পরীক্ষার কিট: 8/8 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 1
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_05 · ঢাকা উত্তর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 7.65 জন (৮০% সীমা 3.4–13.07), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 19/19 · ঘাটতি 0
+পরীক্ষার কিট: 9/9 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 1
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_18 · ঢাকা উত্তর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 8.04 জন (৮০% সীমা 3.69–13.59), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 19/19 · ঘাটতি 0
+পরীক্ষার কিট: 9/9 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 1
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 3। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*NCC_Ward_05 · নারায়ণগঞ্জ*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 9.83 জন (৮০% সীমা 5.07–15.9), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 24/24 · ঘাটতি 0
+পরীক্ষার কিট: 12/12 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 3/3 · ঘাটতি 0
+স্প্রে দল: 1
+হাসপাতালের শয্যা: প্রয়োজন 3, উপলব্ধ 3। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*GCC_Ward_04 · গাজীপুর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 5.87 জন (৮০% সীমা 2.08–10.71), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 14/14 · ঘাটতি 0
+পরীক্ষার কিট: 7/7 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_04 · ঢাকা উত্তর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 4.45 জন (৮০% সীমা 1.05–9.5), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 10/10 · ঘাটতি 0
+পরীক্ষার কিট: 5/5 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 1/1 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 2। রোগী আসবে 1, যাবে 0, শয্যা পাবে না 0 জন।
+1 জন রোগী আসবেন DNCC_Ward_09 ওয়ার্ড থেকে
+
+*DNCC_Ward_16 · ঢাকা উত্তর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 6.95 জন (৮০% সীমা 2.87–12.15), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 17/17 · ঘাটতি 0
+পরীক্ষার কিট: 8/8 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*NCC_Ward_04 · নারায়ণগঞ্জ*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 5.27 জন (৮০% সীমা 1.65–9.9), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 12/12 · ঘাটতি 0
+পরীক্ষার কিট: 6/6 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 1/1 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*GCC_Ward_05 · গাজীপুর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 8.08 জন (৮০% সীমা 3.72–13.64), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 19/19 · ঘাটতি 0
+পরীক্ষার কিট: 9/9 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 1
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_08 · ঢাকা দক্ষিণ*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 7.1 জন (৮০% সীমা 2.98–12.35), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 17/17 · ঘাটতি 0
+পরীক্ষার কিট: 8/8 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_11 · ঢাকা উত্তর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 6.23 জন (৮০% সীমা 2.34–11.19), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 14/14 · ঘাটতি 0
+পরীক্ষার কিট: 7/7 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_02 · ঢাকা উত্তর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 7.14 জন (৮০% সীমা 3.02–12.41), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 17/17 · ঘাটতি 0
+পরীক্ষার কিট: 8/8 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_19 · ঢাকা উত্তর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 7.69 জন (৮০% সীমা 3.43–13.13), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 19/19 · ঘাটতি 0
+পরীক্ষার কিট: 9/9 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 3। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_17 · ঢাকা উত্তর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 5.43 জন (৮০% সীমা 1.77–10.11), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 12/12 · ঘাটতি 0
+পরীক্ষার কিট: 6/6 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 1/1 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_13 · ঢাকা দক্ষিণ*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 7.97 জন (৮০% সীমা 3.64–13.5), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 19/19 · ঘাটতি 0
+পরীক্ষার কিট: 9/9 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_10 · ঢাকা উত্তর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 7.88 জন (৮০% সীমা 3.58–13.38), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 19/19 · ঘাটতি 0
+পরীক্ষার কিট: 9/9 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*CCC_Ward_04 · চট্টগ্রাম*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 7.51 জন (৮০% সীমা 3.3–12.9), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 19/19 · ঘাটতি 0
+পরীক্ষার কিট: 9/9 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 2/2 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*CCC_Ward_10 · চট্টগ্রাম*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 4.47 জন (৮০% সীমা 1.06–9.53), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 10/10 · ঘাটতি 0
+পরীক্ষার কিট: 5/5 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 1/1 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_14 · ঢাকা উত্তর*
+*কোনো ঘাটতি নেই*
+2025-09-29 সপ্তাহে 5.16 জন (৮০% সীমা 1.57–9.74), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 12/12 · ঘাটতি 0
+পরীক্ষার কিট: 6/6 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 1/1 · ঘাটতি 0
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_07 · ঢাকা উত্তর*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 5.65 জন (৮০% সীমা 1.92–10.41), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 14/14 · ঘাটতি 0
+পরীক্ষার কিট: 7/7 · ঘাটতি 0
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_01 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 4.88 জন (৮০% সীমা 1.35–10.13), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 1/12 · ঘাটতি 11
+পরীক্ষার কিট: 1/6 · ঘাটতি 5
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 2। রোগী আসবে 1, যাবে 0, শয্যা পাবে না 0 জন।
+1 জন রোগী আসবেন DSCC_Ward_03 ওয়ার্ড থেকে
+
+*DNCC_Ward_01 · ঢাকা উত্তর*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 7.23 জন (৮০% সীমা 3.08–12.52), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/17 · ঘাটতি 17
+পরীক্ষার কিট: 0/8 · ঘাটতি 8
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_03 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 8.88 জন (৮০% সীমা 4.34–14.69), ঝুঁকি: বেশি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/21 · ঘাটতি 21
+পরীক্ষার কিট: 0/10 · ঘাটতি 10
+শয্যা (মজুত পরিকল্পনা): 0/3 · ঘাটতি 3
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 3, উপলব্ধ 2। রোগী আসবে 0, যাবে 1, শয্যা পাবে না 0 জন।
+1 জন রোগী যাবেন DSCC_Ward_01 ওয়ার্ডে
+
+*CCC_Ward_07 · চট্টগ্রাম*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 7.83 জন (৮০% সীমা 3.53–13.31), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/19 · ঘাটতি 19
+পরীক্ষার কিট: 0/9 · ঘাটতি 9
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 3। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_07 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 5.1 জন (৮০% সীমা 1.53–9.66), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/12 · ঘাটতি 12
+পরীক্ষার কিট: 0/6 · ঘাটতি 6
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 1। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_02 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 5.85 জন (৮০% সীমা 2.07–10.68), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/14 · ঘাটতি 14
+পরীক্ষার কিট: 0/7 · ঘাটতি 7
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*CCC_Ward_06 · চট্টগ্রাম*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 6.48 জন (৮০% সীমা 2.53–11.53), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/14 · ঘাটতি 14
+পরীক্ষার কিট: 0/7 · ঘাটতি 7
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_15 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 5.43 জন (৮০% সীমা 1.76–10.11), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/12 · ঘাটতি 12
+পরীক্ষার কিট: 0/6 · ঘাটতি 6
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_09 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 4.88 জন (৮০% সীমা 1.35–10.13), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/12 · ঘাটতি 12
+পরীক্ষার কিট: 0/6 · ঘাটতি 6
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 2। রোগী আসবে 1, যাবে 0, শয্যা পাবে না 0 জন।
+1 জন রোগী আসবেন DSCC_Ward_19 ওয়ার্ড থেকে
+
+*DNCC_Ward_13 · ঢাকা উত্তর*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 4.3 জন (৮০% সীমা 0.94–9.27), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/10 · ঘাটতি 10
+পরীক্ষার কিট: 0/5 · ঘাটতি 5
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 1। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*CCC_Ward_09 · চট্টগ্রাম*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 4.37 জন (৮০% সীমা 0.99–9.38), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/10 · ঘাটতি 10
+পরীক্ষার কিট: 0/5 · ঘাটতি 5
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 1। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*CCC_Ward_08 · চট্টগ্রাম*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 6.89 জন (৮০% সীমা 2.83–12.07), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/17 · ঘাটতি 17
+পরীক্ষার কিট: 0/8 · ঘাটতি 8
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_16 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 6.08 জন (৮০% সীমা 2.23–10.99), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/14 · ঘাটতি 14
+পরীক্ষার কিট: 0/7 · ঘাটতি 7
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_17 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 3.77 জন (৮০% সীমা 0.59–8.49), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/10 · ঘাটতি 10
+পরীক্ষার কিট: 0/5 · ঘাটতি 5
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 1। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_20 · ঢাকা উত্তর*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 4.27 জন (৮০% সীমা 0.93–9.24), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/10 · ঘাটতি 10
+পরীক্ষার কিট: 0/5 · ঘাটতি 5
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 1। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_20 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 8.01 জন (৮০% সীমা 3.67–13.54), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/19 · ঘাটতি 19
+পরীক্ষার কিট: 0/9 · ঘাটতি 9
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_06 · ঢাকা উত্তর*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 5.86 জন (৮০% সীমা 2.07–10.69), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/14 · ঘাটতি 14
+পরীক্ষার কিট: 0/7 · ঘাটতি 7
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_18 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 7.4 জন (৮০% সীমা 3.21–12.74), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/17 · ঘাটতি 17
+পরীক্ষার কিট: 0/8 · ঘাটতি 8
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_08 · ঢাকা উত্তর*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 5.12 জন (৮০% সীমা 1.55–9.69), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/12 · ঘাটতি 12
+পরীক্ষার কিট: 0/6 · ঘাটতি 6
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*CCC_Ward_05 · চট্টগ্রাম*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 5.49 জন (৮০% সীমা 1.81–10.19), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/12 · ঘাটতি 12
+পরীক্ষার কিট: 0/6 · ঘাটতি 6
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_11 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 6.37 জন (৮০% সীমা 2.44–11.38), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/14 · ঘাটতি 14
+পরীক্ষার কিট: 0/7 · ঘাটতি 7
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*CCC_Ward_02 · চট্টগ্রাম*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 4.7 জন (৮০% সীমা 1.22–9.86), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/12 · ঘাটতি 12
+পরীক্ষার কিট: 0/6 · ঘাটতি 6
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_14 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 3.75 জন (৮০% সীমা 0.58–8.46), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/10 · ঘাটতি 10
+পরীক্ষার কিট: 0/5 · ঘাটতি 5
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 1। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_03 · ঢাকা উত্তর*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 7.23 জন (৮০% সীমা 3.08–12.52), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/17 · ঘাটতি 17
+পরীক্ষার কিট: 0/8 · ঘাটতি 8
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*NCC_Ward_02 · নারায়ণগঞ্জ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 4.55 জন (৮০% সীমা 1.12–9.64), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/12 · ঘাটতি 12
+পরীক্ষার কিট: 0/6 · ঘাটতি 6
+শয্যা (মজুত পরিকল্পনা): 0/1 · ঘাটতি 1
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 1, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DNCC_Ward_15 · ঢাকা উত্তর*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 8.23 জন (৮০% সীমা 3.84–13.84), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/19 · ঘাটতি 19
+পরীক্ষার কিট: 0/9 · ঘাটতি 9
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*NCC_Ward_03 · নারায়ণগঞ্জ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 5.95 জন (৮০% সীমা 2.14–10.82), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/14 · ঘাটতি 14
+পরীক্ষার কিট: 0/7 · ঘাটতি 7
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।
+
+*DSCC_Ward_05 · ঢাকা দক্ষিণ*
+*জরুরি ঘাটতি*
+2025-09-29 সপ্তাহে 7.16 জন (৮০% সীমা 3.03–12.44), ঝুঁকি: মাঝারি
+সরঞ্জাম (বরাদ্দ/প্রয়োজন)
+স্যালাইনের ব্যাগ: 0/17 · ঘাটতি 17
+পরীক্ষার কিট: 0/8 · ঘাটতি 8
+শয্যা (মজুত পরিকল্পনা): 0/2 · ঘাটতি 2
+স্প্রে দল: 0
+হাসপাতালের শয্যা: প্রয়োজন 2, উপলব্ধ 2। রোগী আসবে 0, যাবে 0, শয্যা পাবে না 0 জন।

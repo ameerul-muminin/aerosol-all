@@ -846,6 +846,39 @@ def supply_plan(as_of: str, city: str | None = None) -> dict:
 _ANSWER_CACHES["supply_plan"] = "supply_plan"
 
 
+# ---------------------------------------------------------------- GET /api/version  (judges: "deployed where?")
+_STARTED = pd.Timestamp.now(tz="UTC").floor("s").isoformat()
+
+
+@lru_cache(maxsize=1)
+def version() -> dict:
+    """Where the ML model runs and which build is live. The model is not a separate service: the trained file is
+    part of the app (and of the Docker image), this API process loads it once at startup, and every forecast is
+    computed here, on this server's CPU. Render sets RENDER and RENDER_GIT_COMMIT for the deployed build."""
+    import hashlib
+    import os
+    import platform
+    import sys
+
+    import sklearn
+    from src.train import BUNDLE
+    data = BUNDLE.read_bytes()
+    on_render = bool(os.environ.get("RENDER"))
+    return {
+        "model": {"file": BUNDLE.relative_to(ROOT).as_posix(), "bytes": len(data),
+                  "sha256": hashlib.sha256(data).hexdigest(), "scikit_learn": sklearn.__version__,
+                  "by_horizon": {str(h): _model_type(h) for h in HORIZONS}},
+        "runs_in": "this API process: loaded once at startup, every forecast computed in-process "
+                   "(no separate model server, no external ML API)",
+        "host": "render" if on_render else "local",
+        "commit": os.environ.get("RENDER_GIT_COMMIT") or None,
+        "branch": os.environ.get("RENDER_GIT_BRANCH") or None,
+        "server": "gunicorn" if "gunicorn" in sys.modules else "python -m api (Flask)",
+        "workers": int(os.environ.get("WEB_CONCURRENCY") or 0) or None,
+        "python": platform.python_version(), "started_at": _STARTED,
+    }
+
+
 # ---------------------------------------------------------------- GET /api/selfcheck
 def selfcheck(as_of: str | None = None, horizon: int = 2) -> dict:
     """Re-run every Phase 2 math check live, with outbound network blocked (src/selfcheck.py).

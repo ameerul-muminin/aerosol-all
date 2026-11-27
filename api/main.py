@@ -21,7 +21,7 @@ from api.ratelimit import RateLimiter
 
 WEB_DIR = Path(__file__).resolve().parents[1] / "web"
 CACHE_SECONDS = 3600  # forecasts for a given (ward, week, horizon) never change
-LIVE_PATHS = {"/api/health", "/api/efficiency", "/api/selfcheck"}   # live answers: never cached by browsers
+LIVE_PATHS = {"/api/health", "/api/efficiency", "/api/selfcheck", "/api/version"}   # never cached by browsers
 POST_EXAMPLES = {   # POST-only routes: a GET gets a 405 with an example body, not the web fallback
     "api/what_if": '{"ward_id": "DSCC_Ward_04", "rainfall_mm": 200}',
     "api/allocate": '{"as_of": "2025-07-14", "horizon": 3, "stock_pct": 60}',
@@ -189,6 +189,13 @@ def create_app() -> Flask:
     def dispatch_brief():
         """The printable commissioner brief (HTML, open it and print to PDF), same query as /api/dispatch."""
         return Response(service.dispatch_brief(*_dispatch_args()), mimetype="text/html")
+
+    @app.get("/api/version")
+    def version():
+        """Where the ML model runs and which build is live: model file + SHA-256, versions, host, git commit."""
+        resp = jsonify(service.version())
+        resp.headers["Cache-Control"] = "no-store"     # a new deploy must show at once
+        return resp
 
     @app.get("/api/supply_plan")
     def supply_plan():

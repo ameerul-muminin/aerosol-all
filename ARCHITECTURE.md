@@ -1,6 +1,6 @@
 # Architecture
 
-> ML and Phase 2 module sections by A; data flow, serving and cost by B/C.
+> ML and Phase 2 module sections by A; data flow, serving, cost, Phase 2 API and offline design by B/C.
 
 ![aerosol-all architecture: offline training pipeline and online serving path](docs/architecture.svg)
 
@@ -122,6 +122,29 @@ deficits, crews assigned and bed routing in/out. `sms()`, `whatsapp()` and `brie
 wards come first in the brief. Samples in `exports/` come from
 `python -m scripts.export_dispatch --as-of 2025-09-15 --horizon 2 --stock-pct 60 --crews 20 --beds-pct 70`.
 
+### Phase 2 API (`api/main.py`, `api/service.py`, by B)
+The UI reaches every module through JSON routes. Routes are thin; `api/service.py` (plain Python, unit-tested)
+checks the input, calls the `src/` module unchanged and returns plain JSON.
+
+| Route | Input | Returns |
+|---|---|---|
+| `POST /api/allocate` | `as_of`, `horizon`, `stock_pct` (30–100), `crews?`, `demand_basis?`, `city?` | per-ward fill, deficits, `critical`, crews; region totals (`city` filters the rows only) |
+| `GET /api/overflow` | `as_of`, `horizon`, `demand_basis?`, `beds_available_pct?` | transfers (same city only), per-ward net deficit, per-city use, headroom, unroutable |
+| `POST /api/intervention` | `as_of`, `deployment` `{ward_id: crews}`, `total_crews?` | cases, beds, saline before/after at +2/+3/+4 weeks; ROI per ward; low/high effect band |
+| `GET /api/intervention/roi` | `as_of`, `crews_per_ward?` (1–3) | all 60 wards ranked by cases prevented per crew |
+| `GET /api/crew_plan` | `as_of`, `crews?` | the placement that prevents the most cases, next to the allocation rule's |
+| `GET /api/selfcheck` | `as_of?`, `horizon?` | the live math checks below, each passed or failed |
+
+- **Errors:** input is checked before the model runs. Bad input gets HTTP 400 `{"error": "<plain English>"}`, and
+  unknown fields in a JSON body are rejected, not ignored. An unexpected bug still answers in JSON (500, no internal detail), so the
+  UI can always show a message. `tests/test_api_phase2.py` covers each route (`selfcheck` in `tests/test_selfcheck.py`), including inputs a fuzz test found.
+- **Assumptions travel with the numbers:** every planning response (all but `selfcheck`) includes the `config/operations.json` entries it used
+  (value, unit, kind, reason), so the UI can show them next to the result.
+- **Cost:** each answer is memoised per exact input (bounded LRU) and counted in `/api/efficiency`. GET answers are
+  browser-cacheable for 1 h; POST scenarios and live routes (`health`, `efficiency`, `selfcheck`) are never cached.
+  The same request gives identical JSON, also after the caches are cleared (tested for allocate, overflow,
+  intervention and ROI).
+
 ### Determinism and offline checks
 Allocation, overflow, the simulator and the ROI ranking give identical output when repeated or when input rows are
 shuffled (`tests/test_determinism.py`); notices are not yet in that test.
@@ -130,6 +153,12 @@ against every data row; stock never over-allocated and priority order respected;
 the simulator's crew limit, floor and direction; SMS limits; a second identical run; and the model loading from disk.
 `python -m scripts.offline_check` blocks the network, starts the app, calls every `/api` route and every file the two
 pages load, and fails on any remote URL a browser would fetch.
+
+**Offline by design**, not only by test: the model (`models/dengue_model.joblib`) and both data files are committed,
+and the CSV cache is rebuilt locally from the xlsx. Fonts, images, CSS and JS live in `web/assets/`; charts are
+hand-built HTML/CSS/SVG (no CDN, no chart library); notices are fixed templates (no LLM); no Python module imports
+an HTTP client. The Docker image (`docs/DEPLOY.md`) builds the CSV cache in, so a cold start needs no network
+either. Manual check for the video: Wi-Fi off, `python -m api`, use every view.
 
 ### Assumptions (`config/operations.json`, condensed; the file holds the full reason for each)
 | Setting | Value | Kind | Why |

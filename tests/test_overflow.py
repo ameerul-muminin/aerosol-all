@@ -101,3 +101,57 @@ def test_largest_overflow_is_helped_first_when_the_city_runs_out():
 def test_bad_input_gives_friendly_errors(wards, message):
     with pytest.raises(ValueError, match=message):
         route_overflow(wards)
+
+
+# ---------------------------------------------------------------- with the real data and model
+
+@pytest.fixture(scope="module")
+def feat():
+    from src.predict import build_features
+    return build_features()
+
+
+def test_bed_capacity_follows_the_config_rule():
+    import numpy as np
+    import pandas as pd
+    from src.allocation import load_config
+    from src.overflow import bed_capacity
+    from src.supplies import ONSITE_XLSX
+
+    cap = bed_capacity()
+    assert len(cap) == 60 and all(isinstance(c, int) and c >= 2 for c in cap.values())
+    # recompute straight from the data's own hospital_beds_required column
+    rule = load_config()["bed_capacity"]["rule"]["value"]
+    d = pd.read_excel(ONSITE_XLSX, usecols=["date", "ward_id", "hospital_beds_required"])
+    q = d[d["date"] <= rule["period_end"]].groupby("ward_id")["hospital_beds_required"].quantile(rule["quantile"])
+    assert cap == {w: max(int(np.ceil(v - 1e-9)), rule["minimum_beds"]) for w, v in q.items()}
+
+
+def test_lower_quantile_never_gives_more_beds():
+    from src.allocation import load_config
+    from src.overflow import bed_capacity
+    cfg = load_config()
+    cfg["bed_capacity"]["rule"]["value"]["quantile"] = 0.8
+    low, high = bed_capacity(cfg), bed_capacity()
+    assert all(low[w] <= high[w] for w in high)
+
+
+@pytest.mark.parametrize("basis", ["predicted_cases", "range_high"])
+def test_overflow_plan_on_real_forecasts(feat, basis):
+    from src.overflow import overflow_plan
+    r = overflow_plan(feat, "2025-08-04", 2, basis)
+    assert len(r["wards"]) == 60 and r["forecast_week"] == "2025-08-18"
+    city_of = feat.drop_duplicates("ward_id").set_index("ward_id")["city"]
+    for t in r["transfers"]:
+        assert city_of[t["from_ward"]] == city_of[t["to_ward"]] == t["city"]
+    for city, c in r["cities"].items():
+        wards = [w for w, city_w in city_of.items() if city_w == city]
+        assert c["demand"] == sum(r["wards"][w]["beds_required"] for w in wards)
+        assert c["unroutable"] == sum(r["wards"][w]["net_deficit"] for w in wards)
+    assert json.dumps(r) == json.dumps(overflow_plan(feat, "2025-08-04", 2, basis))   # deterministic
+
+
+def test_overflow_plan_bad_basis(feat):
+    from src.overflow import overflow_plan
+    with pytest.raises(ValueError, match="Demand basis"):
+        overflow_plan(feat, "2025-08-04", 2, "range_mid")

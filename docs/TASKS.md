@@ -33,7 +33,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [ ] R5 UI: sliders, live table, red deficit alerts. (C)
 
 ## 2. Hospital overflow routing (10)
-- [ ] O1 `src/overflow.py`: per ward beds needed vs capacity; overflow sent to wards with headroom
+- [x] O1 `src/overflow.py`: per ward beds needed vs capacity; overflow sent to wards with headroom
       **in the same city only**, lowest burden first; output transfers list, net deficit per ward,
       city utilisation %, city headroom. (A)
 - [ ] O2 Tests: no cross-city transfer; patients conserved; unroutable overflow reported. (B)

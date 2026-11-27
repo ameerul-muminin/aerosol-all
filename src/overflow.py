@@ -1,5 +1,20 @@
-"""Route hospital bed overflow within cities."""
+"""Route hospital bed overflow within cities.
+
+    from src.predict import build_features
+    from src.overflow import overflow_plan
+    plan = overflow_plan(build_features(), "2025-08-04", horizon=2)
+    plan["transfers"], plan["wards"], plan["cities"]
+
+Beds needed per ward = hospital_beds_required for the forecast case count
+(src/supplies.py, learned from the data). Bed capacity per ward is not in the
+data: it comes from the rule in config/operations.json ("bed_capacity").
+"""
+from __future__ import annotations
+
+from functools import lru_cache
 from numbers import Integral
+
+import numpy as np
 
 WARD_KEYS = ("ward_id", "city", "beds_required", "bed_capacity")
 
@@ -97,3 +112,53 @@ def route_overflow(wards: list[dict]) -> dict:
         }
 
     return {"transfers": transfers, "wards": ward_results, "cities": city_results}
+
+
+@lru_cache(maxsize=1)
+def _historic_beds():
+    """Weekly beds needed per ward, all years (beds = a fixed function of cases, src/supplies.py)."""
+    from src.features import load_raw
+    from src.supplies import supplies_for
+    raw = load_raw()
+    beds = supplies_for(raw["dengue_cases"].to_numpy())["hospital_beds_required"].to_numpy()
+    return raw[["date", "ward_id"]].assign(beds=beds)
+
+
+def bed_capacity(config: dict | None = None) -> dict[str, int]:
+    """Beds per ward from the config rule: the chosen quantile of each ward's weekly beds
+    needed up to period_end, rounded up, never below minimum_beds."""
+    from src.allocation import load_config, setting
+    rule = setting(config or load_config(), "bed_capacity", "rule")
+    if rule["method"] != "per_ward_quantile":
+        raise ValueError(f"Unknown bed capacity method: {rule['method']!r}")
+    hist = _historic_beds()
+    hist = hist[hist["date"] <= rule["period_end"]]
+    q = hist.groupby("ward_id")["beds"].quantile(rule["quantile"])
+    cap = np.ceil(q.to_numpy() - 1e-9) if rule["round"] == "up" else np.round(q.to_numpy())
+    cap = np.maximum(cap, rule["minimum_beds"]).astype(int)
+    return {ward_id: int(c) for ward_id, c in zip(q.index, cap)}
+
+
+def overflow_plan(feat_df, as_of_date, horizon: int, demand_basis: str | None = None,
+                  config: dict | None = None) -> dict:
+    """Forecast every ward (predict_all), turn cases into beds needed, route the overflow.
+    Returns route_overflow()'s result plus as_of, horizon, forecast_week, demand_basis."""
+    from src.allocation import load_config, setting
+    from src.predict import predict_all
+    from src.supplies import case_count, supplies_for
+    cfg = config or load_config()
+    basis = demand_basis or setting(cfg, "demand", "basis")
+    if basis not in cfg["demand"]["basis"]["allowed"]:
+        raise ValueError(f"Demand basis must be one of {cfg['demand']['basis']['allowed']}; got {basis!r}.")
+    pred = predict_all(feat_df, as_of_date, horizon, with_drivers=False)
+    beds = supplies_for(case_count(pred[basis].to_numpy()))["hospital_beds_required"].to_numpy()
+    capacity = bed_capacity(cfg)
+    unknown = sorted(set(pred["ward_id"]) - set(capacity))
+    if unknown:
+        raise ValueError(f"No bed capacity for wards: {unknown}")
+    wards = [{"ward_id": w, "city": c, "beds_required": int(b), "bed_capacity": capacity[w]}
+             for w, c, b in zip(pred["ward_id"], pred["city"], beds)]
+    result = route_overflow(wards)
+    result.update(as_of=str(as_of_date)[:10], horizon=int(horizon), demand_basis=basis,
+                  forecast_week=str(pred["forecast_week"].iloc[0]))
+    return result

@@ -67,6 +67,8 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 ## 6. Repo, live URL, docs (10)
 - [ ] G1 Deploy a live URL (free host that runs Flask); app must still run fully locally. (B)
 - [ ] G2 ARCHITECTURE.md: add Phase 2 modules, diagram, every assumption from S3 and why. (A + B)
+  - [x] A's half: Phase 2 diagram, one subsection per module, assumptions table from the config, limits, in-progress list.
+  - [ ] B's half: API routes, dispatch and offline sections once R4/O3/V3, D1 and F2 land.
 - [ ] G3 README: new run steps, exports, AI disclosure table updated with every tool each member used. (B)
 - [ ] G4 Small commits from each person's account, commit convention from S4. (all)
 

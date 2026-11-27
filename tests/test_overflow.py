@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from src.overflow import route_overflow
 
 
@@ -78,3 +80,24 @@ def test_zero_demand_with_and_without_capacity():
             "capacity": capacity, "demand": 0, "utilisation_pct": 0.0,
             "headroom": capacity, "unroutable": 0,
         }
+
+
+def test_largest_overflow_is_helped_first_when_the_city_runs_out():
+    # A is short 1, Z is short 9, only 3 free beds in M: Z must not be the one left behind by name order
+    result = route_overflow([ward("A", 4, 3), ward("Z", 12, 3), ward("M", 0, 3)])
+
+    assert result["transfers"][0] == {"from_ward": "Z", "to_ward": "M", "city": "Dhaka North", "patients": 3}
+    assert {k: v["net_deficit"] for k, v in result["wards"].items()} == {"A": 1, "M": 0, "Z": 6}
+    assert result["cities"]["Dhaka North"]["unroutable"] == 7
+
+
+@pytest.mark.parametrize("wards, message", [
+    ([ward("a", 5, 2), ward("a", 5, 2)], "more than once"),
+    ([ward("a", -3, 2)], "whole number"),
+    ([ward("a", 2.5, 1)], "whole number"),
+    ([ward("a", 2, True)], "whole number"),
+    ([{"ward_id": "a", "city": "Gazipur", "beds_required": 1}], "missing"),
+])
+def test_bad_input_gives_friendly_errors(wards, message):
+    with pytest.raises(ValueError, match=message):
+        route_overflow(wards)

@@ -99,5 +99,23 @@
       "kind": "data_rule",
       "why": "No bed capacity in the data. Each ward's capacity = the 95th percentile of its weekly hospital_beds_required in the training years (2016-2021), rounded up, at least 2. A ward is then over capacity only in its worst ~5% of weeks, which is when overflow routing should trigger. Training years only, so the validation and test years do not leak into the rule."
     }
+  },
+
+  "overflow": {
+    "same_city_only": {
+      "value": true,
+      "kind": "assumption",
+      "why": "Required by the Phase 2 brief: patients are only moved between wards of the same city (Dhaka North, Dhaka South, Chattogram, Gazipur, Narayanganj), never across cities."
+    },
+    "sender_order": {
+      "value": "largest_overflow_first",
+      "kind": "assumption",
+      "why": "When a city does not have enough free beds for everyone, the wards with the biggest overflow are helped first, ties by ward_id. Any patients left without a bed are then in the wards with the smallest overflow, where a few extra beds or a nearby hospital are easiest to find."
+    },
+    "receiver_order": {
+      "value": "most_free_beds_first",
+      "kind": "assumption",
+      "why": "'Lower burden' is read as 'most free beds left', ties by ward_id: it fills the wards with the most spare room first and keeps the number of transfers small. A ward at 18 of 20 beds therefore receives before an empty 1-bed ward."
+    }
   }
 }

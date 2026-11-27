@@ -1,14 +1,38 @@
 """Route hospital bed overflow within cities."""
+from numbers import Integral
+
+WARD_KEYS = ("ward_id", "city", "beds_required", "bed_capacity")
+
+
+def _check_wards(wards) -> None:
+    """Friendly ValueError for input the routing cannot trust."""
+    seen = set()
+    for ward in wards:
+        missing = [k for k in WARD_KEYS if k not in ward]
+        if missing:
+            raise ValueError(f"Ward entry is missing {missing}.")
+        if ward["ward_id"] in seen:
+            raise ValueError(f"Ward {ward['ward_id']} appears more than once.")
+        seen.add(ward["ward_id"])
+        for k in ("beds_required", "bed_capacity"):
+            v = ward[k]
+            if isinstance(v, bool) or not isinstance(v, Integral) or v < 0:
+                raise ValueError(f"{k} for ward {ward['ward_id']} must be a whole number, 0 or more; got {v!r}.")
 
 
 def route_overflow(wards: list[dict]) -> dict:
     """Return transfers and summaries keyed by ward ID and city.
 
-    Ward IDs are unique and bed counts are nonnegative integers. Process
-    sending wards in ID order and favor the receiver with the most remaining
-    free beds, breaking ties by ID. City utilisation measures original demand
-    as a percentage of capacity and is zero when capacity is zero.
+    Each ward: ward_id (unique), city, beds_required and bed_capacity (whole
+    numbers >= 0); anything else raises ValueError. Patients only move within
+    their own city. Within a city, the ward with the largest overflow sends
+    first (ties by ID), so if the city runs out of free beds the patients left
+    without a bed are in the wards with the smallest overflow. Each patient
+    goes to the receiver with the most free beds left, ties by ID (rules and
+    reasons: config/operations.json, "overflow"). City utilisation measures
+    original demand as a percentage of capacity and is zero when capacity is zero.
     """
+    _check_wards(wards)
     transfers = []
     ward_results = {}
     city_results = {}
@@ -38,7 +62,8 @@ def route_overflow(wards: list[dict]) -> dict:
             if free_beds > 0:
                 headroom[ward_id] = free_beds
 
-        for sender_id in ward_ids:
+        senders = sorted(ward_ids, key=lambda ward_id: (-ward_results[ward_id]["net_deficit"], ward_id))
+        for sender_id in senders:
             sender = ward_results[sender_id]
             if sender["net_deficit"] == 0:
                 continue

@@ -1,9 +1,10 @@
 from html.parser import HTMLParser
+from pathlib import Path
 
 import pytest
 
 from src import allocation, overflow
-from src.dispatch import brief_html, build_notices, sms, whatsapp
+from src.dispatch import brief_html, build_notices, sms, sms_segments, whatsapp
 from src.predict import build_features
 
 AS_OF = "2025-09-15"
@@ -24,10 +25,54 @@ def test_sms_lengths_and_critical_alerts(english):
     assert any(notice["critical"] for notice in english)
     for notice in english:
         message = sms(notice)
+        assert message.isascii()
         assert len(message) <= 160
+        assert sms_segments(message) == 1
+        assert notice["ward_id"] in message
+        assert f'{notice["predicted_cases"]} cases' in message
+        assert f'Spraying crews: {notice["crews_assigned"]}' in message
+        assert f'Saline {notice["saline_allocated"]}/{notice["saline_required"]}' in message
+        assert f'Kits {notice["kits_allocated"]}/{notice["kits_required"]}' in message
+        assert f'Beds {notice["beds_allocated"]}/{notice["beds_required"]}' in message
         if notice["critical"]:
             assert "CRITICAL DEFICIT" in message
             assert "*CRITICAL DEFICIT*" in whatsapp(notice)
+
+
+@pytest.mark.parametrize(("text", "parts"), [
+    ("", 0),
+    ("A" * 160, 1),
+    ("A" * 161, 2),
+    ("A" * 306, 2),
+    ("A" * 307, 3),
+    ("|" * 80, 1),
+    ("|" * 81, 2),
+    ("|" * 153, 3),
+    ("é" * 160, 1),
+    ("ক" * 70, 1),
+    ("ক" * 71, 2),
+    ("ক" * 134, 2),
+    ("ক" * 135, 3),
+    ("ক" * 201, 3),
+    ("ক" * 202, 4),
+])
+def test_sms_segment_boundaries(text, parts):
+    assert sms_segments(text) == parts
+
+
+def test_exported_sms_segment_limits_and_readme(features, english):
+    bangla = build_notices(features, *ARGS, "bn")
+    exports = Path(__file__).resolve().parents[1] / "exports"
+    en_block, bn_block = (exports / f"sms_{AS_OF}.txt").read_text(encoding="utf-8").strip().split("\n\n\n")
+    assert en_block.split("\n\n") == list(map(sms, english))
+    assert bn_block.split("\n\n") == list(map(sms, bangla))
+    assert all(not line.isascii() for line in bn_block.splitlines() if line)
+    en_max = max(map(sms_segments, en_block.splitlines()))
+    bn_max = max(map(sms_segments, bn_block.splitlines()))
+    assert en_max == 1
+    assert 1 <= bn_max <= 3
+    readme = (exports / "README.md").read_text(encoding="utf-8")
+    assert f"English **{en_max}**, Bangla **{bn_max}**" in readme
 
 
 def test_numbers_match_planners(features, english):

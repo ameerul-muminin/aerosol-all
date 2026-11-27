@@ -135,6 +135,7 @@ checks the input, calls the `src/` module unchanged and returns plain JSON.
 | `GET /api/crew_plan` | `as_of`, `crews?` | the placement that prevents the most cases, next to the allocation rule's |
 | `GET /api/dispatch` | `as_of`, `horizon`, `stock_pct`, `crews?`, `beds_available_pct?`, `lang?` (en/bn), `city?` | one notice per ward: forecast, allocated vs required, deficits, crews, beds routed; its SMS (with segment count) and WhatsApp text |
 | `GET /api/dispatch/brief` | same as `/api/dispatch` | the printable commissioner brief (HTML, critical wards first), to print or save as PDF |
+| `GET /api/supply_plan` | `as_of`, `city?` | order plan for weeks +2, +3, +4 per ward, city and region (bonus B1, below) |
 | `GET /api/selfcheck` | `as_of?`, `horizon?` | the live math checks below, each passed or failed |
 
 - **Errors:** input is checked before the model runs. Bad input gets HTTP 400 `{"error": "<plain English>"}`, and
@@ -146,6 +147,14 @@ checks the input, calls the `src/` module unchanged and returns plain JSON.
   browser-cacheable for 1 h; POST scenarios and live routes (`health`, `efficiency`, `selfcheck`) are never cached.
   The same request gives identical JSON, also after the caches are cleared (tested for allocate, overflow,
   intervention and ROI).
+
+### Order plan (bonus B1, `GET /api/supply_plan`, by B)
+Supplies have to be ordered before the week they are used. For weeks +2, +3 and +4 the plan takes each horizon's
+forecast for every ward and the same case → supplies table as allocation, for the central forecast (*expected*) and
+the top of the 80% range (*cautious*). Saline and kits are used up, so the order is their 3-week sum; beds are
+reused, so the plan gives the peak week. It reads the cached all-ward forecasts, so it adds no model runs, and it
+matches allocation's and overflow's needs for the same weeks exactly (`tests/test_api_supply_plan.py`). It is the
+need, not an order net of stock: stock on hand is not in the data.
 
 ### Determinism and offline checks
 Allocation, overflow, the simulator and the ROI ranking give identical output when repeated or when input rows are

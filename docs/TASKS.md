@@ -84,5 +84,6 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       what happens offline, limits of the supply formula. Each member must explain their own module. (all)
 
 ## Bonus (+10) — only after 1–6 work
-- [ ] B1 Multi-week supply plan (order now for weeks +2..+4).
+- [x] B1 Multi-week supply plan (order now for weeks +2..+4). `GET /api/supply_plan`: per ward, city and region,
+      expected and cautious; matches allocation and overflow (`tests/test_api_supply_plan.py`). (B)
 - [x] B2 Optimal crew placement (choose wards to maximise cases prevented). `src/placement.py`: exact knapsack, `GET /api/crew_plan`. (A)

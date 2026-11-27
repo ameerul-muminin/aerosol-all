@@ -119,12 +119,30 @@ def test_intervention_roi_happy_path(client):
     ("get", "/api/intervention/roi?as_of=2025-7-14", None),                          # bad date
     ("get", "/api/intervention/roi?as_of=2025-07-14&crews_per_ward=9", None),
     ("get", "/api/intervention/roi?as_of=2025-07-14&crews_per_ward=two", None),
+    # found by the offline API fuzz: these used to crash with HTTP 500
+    ("post", "/api/allocate", {"as_of": A, "stock_pct": ""}),
+    ("post", "/api/allocate", {"as_of": A, "stock_pct": 60, "city": []}),
+    ("post", "/api/allocate", {"as_of": A, "stock_pct": 60, "city": {"a": 1}}),
+    ("post", "/api/allocate", {"as_of": A, "stock_pct": 60, "demand_basis": ["range_high"]}),
+    ("post", "/api/allocate", {"as_of": A, "stock_pct": 60, "demand_basis": {}}),
 ])
 def test_bad_input_is_friendly_400(client, method, url, body):
     r = client.post(url, json=body) if method == "post" else client.get(url)
     assert r.status_code == 400
     d = r.get_json()
     assert set(d) == {"error"} and d["error"] and "Traceback" not in d["error"]
+
+
+def test_an_unexpected_bug_still_answers_in_json():
+    app = create_app()
+
+    @app.get("/api/boom")
+    def boom():
+        raise RuntimeError("internal detail that must not leak")
+
+    r = app.test_client().get("/api/boom")
+    assert r.status_code == 500 and r.is_json
+    assert "internal detail" not in r.get_json()["error"]
 
 
 def test_specific_messages(client):

@@ -71,7 +71,8 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       Done for allocation, overflow, simulator and ROI ranking (`tests/test_determinism.py`); add notices when D1 lands.
 
 ## 6. Repo, live URL, docs (10)
-- [ ] G1 Deploy a live URL (free host that runs Flask); app must still run fully locally. (B)
+- [x] G1 Deploy a live URL (free host that runs Flask); app must still run fully locally. (B)
+      https://aerosol-all-1.onrender.com (Render free plan, Docker, `WEB_CONCURRENCY=1`; `docs/DEPLOY.md`).
 - [x] G2 ARCHITECTURE.md: add Phase 2 modules, diagram, every assumption from S3 and why. (A + B)
   - [x] A's half: Phase 2 diagram, one subsection per module, assumptions table from the config, limits, in-progress list.
   - [x] B's half: API routes, dispatch and offline sections once R4/O3/V3, D1 and F2 land.

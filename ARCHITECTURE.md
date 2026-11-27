@@ -77,7 +77,7 @@ Everything below runs in the same Python process, offline, with no network or LL
  dispatch notices       src/dispatch.py  SMS, WhatsApp, printable brief (EN + বাংলা) -> exports/
         |
         v
- /api/*  (api/main.py, api/service.py)  ->  web UI (Phase 2 views in progress)
+ /api/*  (api/main.py, api/service.py)  ->  web UI: allocation, overflow, simulator, dispatch views
  all settings: config/operations.json            no network, no LLM, deterministic
 ```
 
@@ -208,11 +208,11 @@ either. Manual check for the video: Wi-Fi off, `python -m api`, use every view.
   weeks are under-predicted by 6–8 cases, so surges are understated (`range_high` is the cautious option).
 - **Bed capacity and stock are rules, not counts.** Real hospital and warehouse numbers would replace them in the config.
 
-### In progress (not on `main` yet)
-| Item | Owner |
-|---|---|
-| Live URL (G1) | B |
-| Allocation, overflow, simulator and dispatch views (R5, O4, V4, D3) | C |
+### Deployment
+Live at **https://aerosol-all-1.onrender.com**: the repository's own `Dockerfile` on Render's free plan (512 MB,
+0.1 CPU), with `WEB_CONCURRENCY=1` so it fits in memory, and the case → supplies table read at startup so no
+visitor waits for it (`docs/DEPLOY.md`). The free plan sleeps after 15 idle minutes. Every web file it serves was
+checked byte for byte against `main`.
 
 ### Reproducing the Phase 2 numbers
 Every Phase 2 number above is printed by `python -m scripts.phase2_numbers` (read-only, about a minute). Timings

@@ -31,7 +31,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [x] R3 Tests: 100% stock → no deficits; 30% → deficits only in lowest-priority wards; totals never exceed stock. (B)
       Covered in `tests/test_allocation.py`: `test_full_stock_means_no_deficit_and_nothing_critical`,
       `test_scarcity_hits_only_the_lowest_priority_wards`, `test_totals_never_exceed_stock` (+ `test_plan_on_real_forecasts`).
-- [ ] R4 API `POST /api/allocate` (as_of, horizon, stock_pct, crews, city?). (B)
+- [x] R4 API `POST /api/allocate` (as_of, horizon, stock_pct, crews, city?). (B)
 - [ ] R5 UI: sliders, live table, red deficit alerts. (C)
 
 ## 2. Hospital overflow routing (10)
@@ -41,7 +41,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 - [x] O2 Tests: no cross-city transfer; patients conserved; unroutable overflow reported. (B)
       Covered in `tests/test_overflow.py`: `test_transfers_stay_within_city`, `test_fewer_beds_produces_intra_city_transfers`,
       `test_patients_are_conserved_*` (2), `test_unroutable_overflow_is_reported_per_ward_and_city`.
-- [ ] O3 API `GET /api/overflow?as_of&horizon`. (B)
+- [x] O3 API `GET /api/overflow?as_of&horizon`. (B)
 - [ ] O4 UI: per-city utilisation bars + transfer list (from → to, patients). (C)
 
 ## 3. Vector-control simulator (10) — must be model-driven, not a toggle
@@ -49,7 +49,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       cases / effective water-logging), re-run the Phase 1 model at h = 2, 3, 4, report reduction in
       cases, beds, saline. Effect size is an assumption in S3; say so in the UI. (A)
 - [x] V2 ROI = cases prevented per crew; rank all wards. (A)
-- [ ] V3 Tests + API `POST /api/intervention`. (B)
+- [x] V3 Tests + API `POST /api/intervention`. (B)
 - [ ] V4 UI: pick wards + crews, before/after per horizon, ROI ranking. (C)
 
 ## 4. Dispatch notices + /exports (part of 10)

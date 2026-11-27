@@ -104,9 +104,9 @@ beds, 13 at 70%, 4 at 50%. Demo week: 2025-09-15 at 70%, 5 patients moved, none 
 minimum (0.22, read from the data; `floor_hit` is reported); the deployed models are re-run at 2, 3 and 4 weeks.
 **ROI** = cases prevented over weeks +2 to +4 per crew; beds and saline follow from the supply lookup.
 **Why water-logging:** the 2- and 3-week models use no case history, so lowering past cases would change nothing;
-all three models use water-logging, which larvicide crews remove; on the 2025 peak weeks checked, lowering it never raised a ward's forecast.
+all three models use water-logging, which larvicide crews remove; on two 2025 peak weeks (14 July, 1 September), cutting it by 15/30/50% lowered or kept 1,077 of 1,080 ward forecasts; 3 rose by 0.01 cases, one rounding step.
 **Why the floor:** below values the models saw, trees repeat their edge value. Crews change only their own ward,
-so `roi_ranking()` scores all 60 wards in one run per horizon (0.19 s). Example (2025-07-14): best ward DSCC_Ward_12 saves 5.6 cases per crew (3.5 with 2
+so `roi_ranking()` scores all 60 wards in one run per horizon (under 0.2 s). Example (2025-07-14): best ward DSCC_Ward_12 saves 5.6 cases per crew (3.5 with 2
 crews: diminishing returns); 2 crews in each of the top 5 wards cut the 2-week forecast from 564.3 to 552.4 cases,
 5 beds and 30 saline bags. Off-season (2025-02-03) no ward saves more than 0.01 cases.
 
@@ -157,7 +157,5 @@ Every entry point gives identical output when repeated or when input rows are sh
 | Allocation, overflow, simulator and dispatch views (R5, O4, V4, D3) | C |
 
 ### Reproducing the Phase 2 numbers
-Each comes from a call on `build_features()` output: `supplies.load_model()`, `overflow.bed_capacity()`,
-`allocation.plan(feat, "2025-07-14", 3, 50, crews=20)` + `totals()`, `overflow.overflow_plan(feat, week, 2,
-beds_available_pct=…)` over every Monday 2024-06-03 to 2025-11-24, `intervention.roi_ranking(feat, "2025-07-14")`
-and `simulate(...)` with 2 crews on its top 5 wards.
+Every Phase 2 number above is printed by `python -m scripts.phase2_numbers` (read-only, about a minute). Timings
+vary by machine; Phase 1 numbers come from the `reports/*.json` files named next to them.

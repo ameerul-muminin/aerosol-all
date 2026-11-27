@@ -1,47 +1,75 @@
-# Remaining tasks (as of 22 Nov, 1:00 AM). Submit by 12:30 PM (hard limit 2:00 PM)
+# Phase 2 tasks: 10-hour onsite final
 
-Owner, check. Tick `[x]` in the commit that finishes a task.
+Source: `Hackathon_Phase2_Problemset.pdf` + `bangladesh_dengue_large_dataset_onsite.xlsx`.
+Owner, check. Tick `[x]` in the commit that finishes a task. Phase 1 tasks are in git history.
 
-## Done (backend)
-- [x] ML pipeline, 12-model comparison, ensembles, season-aware ranges, test lock, ablation (Nazifa, PRs #4–#19)
-- [x] API incl. `POST /api/what_if`, efficiency script with tests (Alif + Nazifa)
-- [x] PR #13 closed (duplicate of #12)
+## What the new data tells us (checked by code, 27 Nov)
+- Same 31,320 rows, 60 wards, 2016-01-04 → 2025-12-29. Every Phase 1 column is **identical** to
+  `hackathon_preli_dataset.xlsx`, so the Phase 1 model and metrics stay valid.
+- 3 new columns: `saline_bags_needed`, `diagnostic_kits_needed`, `hospital_beds_required`.
+  Each is a **fixed function of `dengue_cases`** (one value per case count, 0 when cases = 0),
+  about saline ≈ 2.4×, kits ≈ 1.15×, beds ≈ 0.3× cases. So: forecast cases → look up supplies.
+- **Not in the data:** bed capacity per ward, stock levels, number of crews, intervention effect.
+  These must be stated, documented assumptions (configurable), never presented as data.
 
-## Critical path: frontend (warm paper "Jute" direction, `build-ui` skill, prototypes in `web/proto/`)
-Nothing in `web/` is real yet. UI = 10 points + 5 bonus, and the video (20) shows it.
-Order matters; each step is demo-able on its own.
-- [x] **F1 Shell (Alif):** `web/app/index.html`, `assets/css/base.css` + `components.css`, `assets/js/api.js`,
-      `format.js`, `app.js` (hash router `#outlook #wards #accuracy`, URL state, inputs from `/api/meta`).
-- [x] **F2 Ward outlook (Alif):** verdict card (cases, tier glyph+colour+word, likely range), rain-to-risk bars,
-      2/3/4 segmented control, drivers with "average week X → this ward Y", model inputs.
-- [x] **F3 What-if panel (Alif, on the outlook view):** spec from Nazifa:
-      three number inputs (rainfall "mm per week", average temperature °C, humidity %), weeks selector (1–8,
-      default 4), "Run what-if" button → `POST /api/what_if`. Baseline vs scenario side by side: tier badge
-      (colour AND text), predicted cases, range, change (`change.cases`, `tier_changed`). Show `warnings[]`
-      and any `error` message from the API inline. No new packages. Demo line: 0 → 250 mm.
-- [x] **F4 All wards (Alif):** tier counts, ranking with +2/+3/+4 heat strip (bonus: heatmap), by-city bars, CSV.
-- [x] **F5 Model accuracy (Nazifa; built by Alif with her OK):** MAE/RMSE per horizon vs seasonal baseline, by city, `/api/history`
-      chart with 80% band (bonus: confidence intervals + validation dashboard).
-- [x] **F6 Marketing page (Srijita):** `web/index.html` + `landing.css` + `landing.js` from `web/proto/hero-a.html`.
-      Live card from `/api/forecast`, accuracy from `/api/metrics`. No login/register pages: the app has no
-      accounts, and a page that doesn't work reads as mock UI.
-- [x] **F7 Screenshots (Srijita):** fonts are vendored (Anton + Hind Siliguri); screenshots of
-      each view into `docs/screenshots/` (index: `docs/screenshots/README.md`). Linking from the main README: Alif.
-- [x] **F8 Polish (Alif):** widths 360/768/1440, keyboard, error states (stop the server and reload),
-      no console errors, `verify` skill.
+## Scoring (100 + up to 10 bonus)
+Allocation 15 · Overflow routing 10 · Vector-control simulator 10 · Offline 15 ·
+Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
 
-## Docs (morning)
-- [ ] ARCHITECTURE.md to 1–2 pages: 1,240 words now, target about 900. Nazifa trims ML sections; the diagram,
-      split and model rationale stay.
-- [x] `/api/metrics`: add the deployed model type next to `selected_model` (ensemble / blend / hgb) (Nazifa; done by Alif with her OK).
-- [ ] Deep-learning study: commit it under `experiments/deep_learning/` with its own requirements file (not
-      the main one), so the documentation's claims can be checked. Or drop the claims (Nazifa).
-- [ ] README: screenshots, confirm AI table per member (Nazifa: Claude Code; Srijita: Antigravity + model).
-- [ ] Re-run `python -m scripts.measure_efficiency --train` after the last model change; sync the cost table.
+## 0. Setup (first 30 min)
+- [ ] S1 Load new xlsx in `src/features.py` (keep Phase 1 file working); supply columns kept as targets, not features. (A)
+- [ ] S2 `src/supplies.py`: case → supply lookup learned from data, with tests that it reproduces the table exactly. (A)
+- [ ] S3 `config/operations.json`: bed capacity rule, stock per item, crew count, crew effect — every assumption in one place,
+      with the reason written next to it. (A + B agree)
+- [ ] S4 Ask organisers: what does "follow version-onsite-final for each commit" mean (tag? branch? message prefix?). (B)
 
-## Submission (Alif)
-- [x] Git check: Srijita has 0 commits. F6/F7 must land from her own account, as her own work. (Done: F6/F7 are her commits, PR #22.)
-- [ ] Clean-clone test on Windows: new folder + venv, README only, under 3 minutes.
-- [ ] Video: script (Nazifa drafts the ML part), two rehearsals, one uncut take of 3:00 or less, on localhost,
-      voiceover, no slides.
-- [ ] 11:30 AM: repo back to **public**; open every link in incognito; submit the form by 12:30 PM.
+## 1. Constrained allocation engine (15)
+- [ ] R1 `src/allocation.py`: demand per ward = supplies(predicted cases, upper range optional);
+      stock slider 30–100%, crews total; priority score = risk tier × population density;
+      greedy fill in priority order, `fulfilled_pct` and `deficit` per item, `critical` flag when < 100%. (A)
+- [ ] R2 Crew assignment derived from priority + cases; never more crews than available. (A)
+- [ ] R3 Tests: 100% stock → no deficits; 30% → deficits only in lowest-priority wards; totals never exceed stock. (B)
+- [ ] R4 API `POST /api/allocate` (as_of, horizon, stock_pct, crews, city?). (B)
+- [ ] R5 UI: sliders, live table, red deficit alerts. (C)
+
+## 2. Hospital overflow routing (10)
+- [ ] O1 `src/overflow.py`: per ward beds needed vs capacity; overflow sent to wards with headroom
+      **in the same city only**, lowest burden first; output transfers list, net deficit per ward,
+      city utilisation %, city headroom. (A)
+- [ ] O2 Tests: no cross-city transfer; patients conserved; unroutable overflow reported. (B)
+- [ ] O3 API `GET /api/overflow?as_of&horizon`. (B)
+- [ ] O4 UI: per-city utilisation bars + transfer list (from → to, patients). (C)
+
+## 3. Vector-control simulator (10) — must be model-driven, not a toggle
+- [ ] V1 `src/intervention.py`: crews on selected wards change the **model inputs** (e.g. lower lagged
+      cases / effective water-logging), re-run the Phase 1 model at h = 2, 3, 4, report reduction in
+      cases, beds, saline. Effect size is an assumption in S3; say so in the UI. (A)
+- [ ] V2 ROI = cases prevented per crew; rank all wards. (A)
+- [ ] V3 Tests + API `POST /api/intervention`. (B)
+- [ ] V4 UI: pick wards + crews, before/after per horizon, ROI ranking. (C)
+
+## 4. Dispatch notices + /exports (part of 10)
+- [ ] D1 `src/dispatch.py`: template-only (no LLM) notices per ward: SMS (≤160 chars), WhatsApp, printable HTML brief
+      with predicted cases, allocated vs required, deficits, assigned crews. EN + বাংলা. (B)
+- [ ] D2 `python -m scripts.export_dispatch` → `exports/` sample SMS/WhatsApp/HTML (committed). (B)
+- [ ] D3 UI: "Dispatch" view with copy buttons and print-to-PDF. (C)
+
+## 5. Offline resilience (15)
+- [ ] F1 Audit: no network calls anywhere (grep for http/requests/CDN); fonts vendored. (B)
+- [ ] F2 Kill-switch test: Wi-Fi off → run every endpoint + UI, zero crashes. Script it: `scripts/offline_check.py`. (B)
+- [ ] F3 Deterministic: same inputs → same allocation/routing/notices (seeded, stable sort ties by ward_id). Test it. (A)
+
+## 6. Repo, live URL, docs (10)
+- [ ] G1 Deploy a live URL (free host that runs Flask); app must still run fully locally. (B)
+- [ ] G2 ARCHITECTURE.md: add Phase 2 modules, diagram, every assumption from S3 and why. (A + B)
+- [ ] G3 README: new run steps, exports, AI disclosure table updated with every tool each member used. (B)
+- [ ] G4 Small commits from each person's account, commit convention from S4. (all)
+
+## 7. Video (10) + Q&A (30)
+- [ ] Q1 7-min script covering all 5 modules in order; rehearse twice; one uncut take on the committed hash. (all)
+- [ ] Q2 Q&A prep: why greedy priority, why density, how capacity was set, how the simulator changes model inputs,
+      what happens offline, limits of the supply formula. Each member must explain their own module. (all)
+
+## Bonus (+10) — only after 1–6 work
+- [ ] B1 Multi-week supply plan (order now for weeks +2..+4).
+- [ ] B2 Optimal crew placement (choose wards to maximise cases prevented).

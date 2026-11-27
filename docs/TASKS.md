@@ -29,7 +29,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       greedy fill in priority order, `fulfilled_pct` and `deficit` per item, `critical` flag when < 100%. (A)
 - [x] R2 Crew assignment derived from priority + cases; never more crews than available. (A)
 - [ ] R3 Tests: 100% stock → no deficits; 30% → deficits only in lowest-priority wards; totals never exceed stock. (B)
-- [ ] R4 API `POST /api/allocate` (as_of, horizon, stock_pct, crews, city?). (B)
+- [x] R4 API `POST /api/allocate` (as_of, horizon, stock_pct, crews, city?). (B)
 - [ ] R5 UI: sliders, live table, red deficit alerts. (C)
 
 ## 2. Hospital overflow routing (10)
@@ -37,7 +37,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       **in the same city only**, lowest burden first; output transfers list, net deficit per ward,
       city utilisation %, city headroom. (A)
 - [ ] O2 Tests: no cross-city transfer; patients conserved; unroutable overflow reported. (B)
-- [ ] O3 API `GET /api/overflow?as_of&horizon`. (B)
+- [x] O3 API `GET /api/overflow?as_of&horizon`. (B)
 - [ ] O4 UI: per-city utilisation bars + transfer list (from → to, patients). (C)
 
 ## 3. Vector-control simulator (10) — must be model-driven, not a toggle
@@ -45,7 +45,7 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       cases / effective water-logging), re-run the Phase 1 model at h = 2, 3, 4, report reduction in
       cases, beds, saline. Effect size is an assumption in S3; say so in the UI. (A)
 - [x] V2 ROI = cases prevented per crew; rank all wards. (A)
-- [ ] V3 Tests + API `POST /api/intervention`. (B)
+- [x] V3 Tests + API `POST /api/intervention`. (B)
 - [ ] V4 UI: pick wards + crews, before/after per horizon, ROI ranking. (C)
 
 ## 4. Dispatch notices + /exports (part of 10)

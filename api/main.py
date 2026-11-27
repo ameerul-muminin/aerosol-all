@@ -14,7 +14,7 @@ import gzip
 import time
 from pathlib import Path
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, request, send_from_directory
 
 from api import service
 
@@ -151,6 +151,24 @@ def create_app() -> Flask:
     def crew_plan():
         """Bonus B2: best placement of ?crews (default: config) at ?as_of, vs the allocation crew rule."""
         return jsonify(service.crew_plan(_as_of(), service.parse_whole(request.args.get("crews"), "crews")))
+
+    def _dispatch_args() -> tuple:
+        a = request.args
+        return (_as_of(), service.parse_horizon(a.get("horizon", "3")),
+                service.parse_number(a.get("stock_pct"), "stock_pct"),
+                service.parse_whole(a.get("crews"), "crews"),
+                service.parse_number(a.get("beds_available_pct"), "beds_available_pct"),
+                a.get("lang") or None, a.get("city") or None)
+
+    @app.get("/api/dispatch")
+    def dispatch():
+        """Ward notices (SMS, WhatsApp) for ?as_of&horizon&stock_pct (required) [&crews&beds_available_pct&lang&city]."""
+        return jsonify(service.dispatch(*_dispatch_args()))
+
+    @app.get("/api/dispatch/brief")
+    def dispatch_brief():
+        """The printable commissioner brief (HTML, open it and print to PDF), same query as /api/dispatch."""
+        return Response(service.dispatch_brief(*_dispatch_args()), mimetype="text/html")
 
     # ---- static frontend (web/) ----------------------------------------------------
     @app.get("/")

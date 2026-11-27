@@ -531,6 +531,9 @@ _ASSUMPTIONS_USED = {
     "crew_plan": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction"],
                   "crews": ["total_default", "max_per_ward", "assignment_rule"]},
 }
+# a notice combines the allocation plan and the overflow routing, so it relies on both sets of assumptions
+_ASSUMPTIONS_USED["dispatch"] = {**_ASSUMPTIONS_USED["allocate"], **{k: v for k, v in _ASSUMPTIONS_USED["overflow"].items()
+                                                                     if k != "demand"}}
 
 
 def _ops_config() -> dict:
@@ -704,6 +707,73 @@ _ANSWER_CACHES.update({"allocate": "_allocation", "overflow": "overflow",
                        "intervention": "_simulation", "intervention_roi": "intervention_roi",
                        "crew_plan": "crew_plan"})
 _MODEL_CACHES = (*_MODEL_CACHES, "_allocation", "overflow", "_simulation", "intervention_roi", "crew_plan")
+
+
+# ---------------------------------------------------------------- GET /api/dispatch (+ /brief)
+DISPATCH_LANGS = ("en", "bn")
+
+
+def _check_lang(lang) -> str:
+    lang = lang or "en"
+    if lang not in DISPATCH_LANGS:
+        raise ValueError("lang must be 'en' (English) or 'bn' (Bangla).")
+    return lang
+
+
+@lru_cache(maxsize=64)    # key = every input; city filtering happens after, on the cached notices
+def _notices(as_of: str, horizon: int, stock_pct: float, crews: int | None, beds_available_pct: float | None,
+             lang: str) -> tuple[list, list]:
+    """(raw notices for brief_html, JSON-ready notices with SMS and WhatsApp text), all 60 wards in
+    allocation priority order. Same templates as scripts/export_dispatch.py, so the API and exports/ agree."""
+    from src.dispatch import build_notices, sms, sms_segments, whatsapp
+    raw = build_notices(features(), as_of, horizon, stock_pct, crews, beds_available_pct, lang)
+    rows = []
+    for n in raw:
+        text = sms(n)
+        row = {k: v for k, v in n.items() if k not in ("intervention", "lang")}
+        row.update(sms=text, sms_chars=len(text), sms_segments=sms_segments(text), whatsapp=whatsapp(n))
+        rows.append(_plain(row))
+    return raw, rows
+
+
+def _dispatch_inputs(stock_pct, crews, beds_available_pct, lang, city) -> tuple:
+    if stock_pct is None:
+        raise ValueError("stock_pct is required: the share of full stock available, from 30 to 100 (percent).")
+    return float(stock_pct), crews, beds_available_pct, _check_lang(lang), _check_city(city)
+
+
+def dispatch(as_of: str, horizon: int, stock_pct, crews: int | None = None, beds_available_pct=None,
+             lang: str | None = None, city: str | None = None) -> dict:
+    """Ward-specific dispatch notices (SMS, WhatsApp) built from the allocation and overflow plans for these
+    settings. `city` filters the notices; the plans themselves always cover all 60 wards."""
+    stock_pct, crews, beds_pct, lang, city = _dispatch_inputs(stock_pct, crews, beds_available_pct, lang, city)
+    _, rows = _notices(as_of, horizon, stock_pct, crews, beds_pct, lang)
+    rows = [r for r in rows if city is None or r["city"] == city]
+    from src.allocation import setting
+    cfg = _ops_config()
+    return {"as_of": as_of, "horizon": horizon, "forecast_week": rows[0]["forecast_week"] if rows else None,
+            "lang": lang, "stock_pct": _plain(stock_pct),
+            "crews": int(setting(cfg, "crews", "total_default")) if crews is None else crews,
+            "beds_available_pct": _plain(float(setting(cfg, "bed_capacity", "beds_available_pct")
+                                               if beds_pct is None else beds_pct)),
+            "city": city,
+            "summary": {"wards": len(rows), "critical": sum(r["critical"] for r in rows),
+                        "unroutable_patients": sum(r["unroutable"] for r in rows),
+                        "max_sms_segments": max((r["sms_segments"] for r in rows), default=0)},
+            "notices": rows, "assumptions": assumptions("dispatch")}
+
+
+def dispatch_brief(as_of: str, horizon: int, stock_pct, crews: int | None = None, beds_available_pct=None,
+                   lang: str | None = None, city: str | None = None) -> str:
+    """The printable commissioner brief (HTML, critical wards first) for the same settings as dispatch()."""
+    from src.dispatch import brief_html
+    stock_pct, crews, beds_pct, lang, city = _dispatch_inputs(stock_pct, crews, beds_available_pct, lang, city)
+    raw, _ = _notices(as_of, horizon, stock_pct, crews, beds_pct, lang)
+    return brief_html([n for n in raw if city is None or n["city"] == city])
+
+
+_ANSWER_CACHES["dispatch"] = "_notices"
+_MODEL_CACHES = (*_MODEL_CACHES, "_notices")
 
 
 # ---------------------------------------------------------------- GET /api/selfcheck

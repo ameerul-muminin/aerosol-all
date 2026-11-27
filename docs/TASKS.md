@@ -93,7 +93,9 @@ Repo + live URL + /exports 10 · 7-min uncut video 10 · Technical Q&A 30.
       HTTP 429 + `Retry-After`, health/static/local never limited (`api/ratelimit.py`, `tests/test_rate_limit.py`). (B)
 - [x] J2 "ML model: deployed where?" In the API process (no separate ML service); shown live by `GET /api/version`:
       model file + SHA-256, scikit-learn version, model per horizon, host, git commit (`tests/test_api_version.py`). (B)
-- [ ] J3 "Hospital: what if the patient is sent and it's full?" A backup ward per transfer, same city. (B)
+- [x] J3 "Hospital: what if the patient is sent and it's full?" Arrivals are planned within free beds; each transfer
+      names a backup ward (same city, most free beds left), a city with none is `full` (escalate: temporary beds).
+      API + overflow screen line (`tests/test_overflow_backup.py`). (B; screen line needs C's OK)
 
 ## 8. Phase 2 screens: full spec for C (R5, O4, V4, D3)
 **For Srijita's agent.** Tell it: *"Implement section 8 of docs/TASKS.md in web/, in the order C0, R5, O4, V4, D3.

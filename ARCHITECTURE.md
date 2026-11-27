@@ -103,7 +103,10 @@ wards; the divisor spreads crews. 100% stock = this week's total forecast need. 
 **Rule:** beds needed come from the supply lookup. Capacity = each ward's 95th-percentile weekly beds in
 2016–2021, rounded up, at least 2 (2–6 beds per ward, 223 in total). Patients move only within their city; the
 largest overflow is helped first, each patient goes to the ward with the most free beds, and what cannot be placed
-is reported as unroutable. `beds_available_pct` (30–100%) sets the share of beds free for dengue (beds are shared
+is reported as unroutable. **If a ward is full on arrival anyway** (forecasts have error), each
+transfer names a backup ward: the one in the same city with the most free beds left after routing; a city with no
+free bed left is marked `full`, and its unroutable patients need temporary beds or outside help (the API and the
+overflow screen say so; `tests/test_overflow_backup.py`). `beds_available_pct` (30–100%) sets the share of beds free for dengue (beds are shared
 with other patients). **Why:** the brief requires intra-city routing; training years only avoid leakage. Over 78 weeks (2024-06-03 to 2025-11-24, 2 weeks ahead) a transfer happens in 1 week at 100%
 beds, 13 at 70%, 4 at 50%. Demo week: 2025-09-15 at 70%, 5 patients moved, none stranded.
 
@@ -134,7 +137,7 @@ checks the input, calls the `src/` module unchanged and returns plain JSON.
 | Route | Input | Returns |
 |---|---|---|
 | `POST /api/allocate` | `as_of`, `horizon`, `stock_pct` (30–100), `crews?`, `demand_basis?`, `city?` | per-ward fill, deficits, `critical`, crews; region totals (`city` filters the rows only) |
-| `GET /api/overflow` | `as_of`, `horizon`, `demand_basis?`, `beds_available_pct?` | transfers (same city only), per-ward net deficit, per-city use, headroom, unroutable |
+| `GET /api/overflow` | `as_of`, `horizon`, `demand_basis?`, `beds_available_pct?` | transfers (same city only) each with a backup ward, per-ward net deficit and free beds after routing, per-city use, headroom, unroutable, `full` |
 | `POST /api/intervention` | `as_of`, `deployment` `{ward_id: crews}`, `total_crews?` | cases, beds, saline before/after at +2/+3/+4 weeks; ROI per ward; low/high effect band |
 | `GET /api/intervention/roi` | `as_of`, `crews_per_ward?` (1–3) | all 60 wards ranked by cases prevented per crew |
 | `GET /api/crew_plan` | `as_of`, `crews?` | the placement that prevents the most cases, next to the allocation rule's |

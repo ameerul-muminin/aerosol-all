@@ -60,7 +60,7 @@ reason next to it, and every Phase 2 planning answer from the API includes the a
 | Module | Question it answers |
 |---|---|
 | **Allocation** (`src/allocation.py`) | Stock is only 30–100% of what is needed and crews are limited: who gets what? Highest risk × population density first; any ward left short is flagged `critical`. |
-| **Overflow routing** (`src/overflow.py`) | Which wards will need more beds than they have, and where can those patients go? Only to wards with free beds **in the same city**; patients who cannot be placed are reported, not hidden. |
+| **Overflow routing** (`src/overflow.py`) | Which wards will need more beds than they have, and where can those patients go? Only to wards with free beds **in the same city**; every transfer also names a backup ward in case the receiver is full on arrival; patients who cannot be placed are reported, not hidden. |
 | **Crew simulator** (`src/intervention.py`, `src/placement.py`) | If crews go to these wards, how much do cases, beds and saline drop 2–4 weeks later? The real models are re-run on the changed inputs. Wards are ranked by cases prevented per crew, and the best placement is found for a given number of crews. |
 | **Dispatch** (`src/dispatch.py`) | Ready-to-send SMS, WhatsApp text and a printable brief per ward, in English and বাংলা, from fixed templates (no LLM). |
 | **Order plan** (bonus) | What to order now for weeks +2, +3 and +4: saline, kits and beds per ward, city and region, for the expected forecast and the cautious top of its range. |

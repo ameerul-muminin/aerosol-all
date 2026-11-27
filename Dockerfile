@@ -12,6 +12,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Hugging Face Spaces runs containers as user 1000; the app must own its folder (CSV cache, retrain fallback)
 RUN useradd -m -u 1000 app
 WORKDIR /home/app/aerosol
+RUN chown app:app /home/app/aerosol   # WORKDIR creates it as root; the app writes data/ here
 
 # dependencies first, so code changes don't reinstall them
 COPY --chown=app:app requirements.txt .

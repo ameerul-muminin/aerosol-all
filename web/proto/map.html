@@ -135,8 +135,12 @@ const SVGNS = "http://www.w3.org/2000/svg";
 const TIERS = ["Low", "Medium", "High", "Critical"];
 
 const q = new URLSearchParams(location.search);
-const state = { as_of: q.get("as_of"), h: Number(q.get("h")) || 2, mode: q.get("mode") || "risk",
-                beds: Number(q.get("beds")) || 100, ward: q.get("ward") };
+// Link values are checked here; anything unknown falls back to the default instead of reaching the API.
+// as_of is checked against the real week list once /api/meta has loaded (see boot).
+const pickOne = (v, allowed, fallback) => (allowed.includes(v) ? v : fallback);
+const bedsPct = (v) => { const n = Number(v); return Number.isFinite(n) && v !== null ? Math.min(100, Math.max(30, Math.round(n / 5) * 5)) : 100; };
+const state = { as_of: q.get("as_of"), h: Number(pickOne(q.get("h"), ["2", "3", "4"], "2")),
+                mode: pickOne(q.get("mode"), ["risk", "cases", "beds"], "risk"), beds: bedsPct(q.get("beds")), ward: q.get("ward") };
 const $ = (id) => document.getElementById(id);
 const el = (tag, attrs = {}, parent) => {
   const n = document.createElementNS(SVGNS, tag);
@@ -333,13 +337,17 @@ function addZoom(panel, svg, P) {
   let drag = null;
   svg.addEventListener("pointerdown", (e) => { if (vb.w < full.w) drag = { x: e.clientX, y: e.clientY, vb: { ...vb }, moved: false }; });
   svg.addEventListener("pointermove", (e) => {
+    if (drag && !(e.buttons & 1)) drag = null;   // button released outside the map: stop dragging
     if (!drag) return;
     const r = svg.getBoundingClientRect(), dx = (e.clientX - drag.x) / r.width * vb.w, dy = (e.clientY - drag.y) / r.height * vb.h;
     if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 4) drag.moved = true;
     vb = { ...vb, x: clamp(drag.vb.x - dx, 0, full.w - vb.w), y: clamp(drag.vb.y - dy, 0, full.h - vb.h) }; apply();
   });
   svg.addEventListener("click", (e) => { if (drag && drag.moved) e.stopPropagation(); drag = null; }, true);
-  window.addEventListener("pointerup", () => setTimeout(() => (drag = null), 0));
+  // Listeners sit on this svg only, so they go away with it on the next redraw (no pile-up on window).
+  const endDrag = () => setTimeout(() => (drag = null), 0);   // after the click handler has read drag.moved
+  svg.addEventListener("pointerup", endDrag);
+  svg.addEventListener("pointercancel", endDrag);
   const zb = document.createElement("div"); zb.className = "zoom";
   zb.innerHTML = `<button type="button" aria-label="${esc(L("zin", "Zoom in"))}">+</button><button type="button" aria-label="${esc(L("zout", "Zoom out"))}">−</button><button type="button" aria-label="${esc(L("zreset", "Reset zoom"))}">⤢</button>`;
   const [bi, bo, br] = zb.querySelectorAll("button");
@@ -414,10 +422,11 @@ async function boot() {
     document.title = `${L("title", "Risk map")} · aerosol-all`;
     labels(); fillWeeks(); if (data) render();
   }));
-  const [meta, shapes] = await Promise.all([api.meta(), fetch("/assets/data/ward_map.json").then((r) => r.json())]);
+  const [meta, shapes] = await Promise.all([api.meta(), loadShapes()]);
   geo = shapes;
-  state.as_of = state.as_of || meta.as_of.default;
   weeks = meta.as_of; fillWeeks();
+  if ($("asof").value !== state.as_of) state.as_of = meta.as_of.default;   // missing, not a Monday or out of range
+  $("asof").value = state.as_of;
   document.title = `${L("title", "Risk map")} · aerosol-all`;
   $("asof").onchange = () => { state.as_of = $("asof").value; run(); };
   segment($("hz"), state.h, (v) => { state.h = Number(v); run(); });
@@ -436,8 +445,15 @@ function fillWeeks() {   // week list in the active language
   }
   $("asof").innerHTML = opts.join(""); $("asof").value = state.as_of;
 }
+async function loadShapes() {
+  let res;
+  try { res = await fetch("/assets/data/ward_map.json"); } catch { throw new Error(t("state.offline")); }
+  if (!res.ok) throw new Error(L("geo_fail", "The ward map file could not be loaded."));
+  return res.json();
+}
 async function run() { try { await load(); } catch (e) { showError($("p-dhaka"), e, run); } }
-boot();
+// A failed first load (API or map file) shows the error and a retry instead of a blank page.
+boot().catch((e) => showError($("p-dhaka"), e, () => location.reload()));
 </script>
 </body>
 </html>

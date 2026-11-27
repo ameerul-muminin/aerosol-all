@@ -484,6 +484,7 @@
     "open": "Open ward outlook",
     "cities_beds": "Bed use by city",
     "cities_risk": "Risk mix by city",
-    "hc": "high or critical"
+    "hc": "high or critical",
+    "geo_fail": "The ward map file could not be loaded."
   }
 }

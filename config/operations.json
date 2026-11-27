@@ -1,0 +1,121 @@
+{
+  "_about": "Operational settings for Phase 2 (allocation, overflow routing, vector-control simulator). The dataset has supply NEEDS per case count, but it has NO bed capacity, stock levels, crew numbers or crew effect. Every entry marked kind=assumption is a planning assumption chosen by the team, not data, and can be changed here without touching code. kind=data_rule means the value is computed from the dataset by the stated rule.",
+
+  "demand": {
+    "basis": {
+      "value": "predicted_cases",
+      "allowed": ["predicted_cases", "range_high"],
+      "kind": "assumption",
+      "why": "Plan supplies for the model's central forecast by default. 'range_high' (top of the 80% range) is the cautious option for officers who prefer to over-stock; it is a choice, not a different model."
+    },
+    "rounding": {
+      "value": "half_up",
+      "kind": "assumption",
+      "why": "Forecasts are expected values (e.g. 3.4 cases); supplies are bought for whole patients, so the forecast is rounded half up to a case count before the case -> supplies lookup (src/supplies.py)."
+    }
+  },
+
+  "stock": {
+    "full_stock_basis": {
+      "value": "forecast_total_demand",
+      "kind": "assumption",
+      "why": "The dataset has no warehouse stock numbers. So 100% stock means 'exactly enough for every ward's forecast demand this week', and the 30-100% slider scales that down to simulate shortage. Available units per item = floor(stock_pct / 100 x total required)."
+    },
+    "full_stock_units": {
+      "value": {"saline_bags_needed": null, "diagnostic_kits_needed": null, "hospital_beds_required": null},
+      "kind": "assumption",
+      "why": "Optional fixed regional stock per item (units at 100%). null = use full_stock_basis. Fill these in when a real warehouse count is known."
+    },
+    "stock_pct_range": {
+      "value": [30, 100],
+      "unit": "percent",
+      "kind": "assumption",
+      "why": "Range of the scarcity slider required by the Phase 2 brief."
+    }
+  },
+
+  "priority": {
+    "tier_weight": {
+      "value": {"Low": 1, "Medium": 2, "High": 3, "Critical": 4},
+      "kind": "assumption",
+      "why": "The brief asks to prioritise high-risk, high-density wards. Priority score = tier weight x population_density_sqkm. Equal steps keep it simple to explain: a Critical ward counts 4x a Low ward of the same density."
+    },
+    "tie_break": {
+      "value": "ward_id ascending",
+      "kind": "assumption",
+      "why": "Same inputs must give the same allocation (offline determinism), so equal scores are ordered by ward_id."
+    },
+    "fill_rule": {
+      "value": "greedy_by_priority",
+      "kind": "assumption",
+      "why": "Wards are filled in priority order, each to 100% of its need, until an item runs out; the next ward may get a partial fill and the rest get none. Shortage therefore lands only on the lowest-priority wards, and any ward under 100% is flagged critical."
+    }
+  },
+
+  "crews": {
+    "total_default": {
+      "value": 20,
+      "unit": "spraying crews",
+      "kind": "assumption",
+      "why": "No crew numbers in the data. 20 crews (about one per three wards) is a starting value for the 'Total spraying crews' control; officers set the real number."
+    },
+    "max_per_ward": {
+      "value": 3,
+      "unit": "crews",
+      "kind": "assumption",
+      "why": "Stops all crews piling onto one ward; beyond a few crews per ward, extra teams mostly overlap the same streets."
+    },
+    "min_predicted_cases": {
+      "value": 1.0,
+      "unit": "cases",
+      "kind": "assumption",
+      "why": "A ward forecast below one case gets no crew; crews go where the model expects transmission."
+    },
+    "assignment_rule": {
+      "value": "highest_share",
+      "kind": "assumption",
+      "why": "Crews are handed out one at a time. Each goes to the ward with the highest (priority score x predicted cases) / (crews already there + 1), ties by ward_id. A second crew in the same ward counts half as much as the first, so crews spread across busy wards instead of stacking."
+    }
+  },
+
+  "crew_effect": {
+    "case_input_reduction_per_crew": {
+      "value": 0.15,
+      "unit": "fraction",
+      "kind": "assumption",
+      "why": "Used by the vector-control simulator: each crew lowers the ward's recent-case model inputs by 15% before the Phase 1 model is re-run at 2, 3 and 4 weeks. No intervention data exists, so this effect size is a stated assumption and the UI must say so."
+    },
+    "max_total_reduction": {
+      "value": 0.5,
+      "unit": "fraction",
+      "kind": "assumption",
+      "why": "Caps the combined effect at 50% so stacked crews cannot remove all transmission in the simulation."
+    }
+  },
+
+  "bed_capacity": {
+    "rule": {
+      "value": {"method": "per_ward_quantile", "quantile": 0.95, "period_end": "2021-12-31", "round": "up", "minimum_beds": 2},
+      "kind": "data_rule",
+      "why": "No bed capacity in the data. Each ward's capacity = the 95th percentile of its weekly hospital_beds_required in the training years (2016-2021), rounded up, at least 2. A ward is then over capacity only in its worst ~5% of weeks, which is when overflow routing should trigger. Training years only, so the validation and test years do not leak into the rule."
+    }
+  },
+
+  "overflow": {
+    "same_city_only": {
+      "value": true,
+      "kind": "assumption",
+      "why": "Required by the Phase 2 brief: patients are only moved between wards of the same city (Dhaka North, Dhaka South, Chattogram, Gazipur, Narayanganj), never across cities."
+    },
+    "sender_order": {
+      "value": "largest_overflow_first",
+      "kind": "assumption",
+      "why": "When a city does not have enough free beds for everyone, the wards with the biggest overflow are helped first, ties by ward_id. Any patients left without a bed are then in the wards with the smallest overflow, where a few extra beds or a nearby hospital are easiest to find."
+    },
+    "receiver_order": {
+      "value": "most_free_beds_first",
+      "kind": "assumption",
+      "why": "'Lower burden' is read as 'most free beds left', ties by ward_id: it fills the wards with the most spare room first and keeps the number of transfers small. A ward at 18 of 20 beds therefore receives before an empty 1-bed ward."
+    }
+  }
+}

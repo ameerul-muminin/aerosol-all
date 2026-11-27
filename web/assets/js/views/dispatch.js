@@ -38,7 +38,7 @@ export async function render(root, { state, meta, save, retry }) {
       <option value="">${esc(t("ctl.city_all"))}</option>
       ${meta.cities.map((c) => `<option value="${esc(c.city)}"${c.city === s.city ? " selected" : ""}>${esc(cityName(c.city))}</option>`).join("")}
     </select></label>
-    <label class="check"><input type="checkbox" id="d-crit"${criticalOnly ? " checked" : ""}>${esc(t("disp.critical_only"))}</label>
+    <label class="chk"><input type="checkbox" id="d-crit"${criticalOnly ? " checked" : ""}>${esc(t("disp.critical_only"))}</label>
   </div>
   <p class="inline-error" role="alert" id="d-err" hidden></p>
   <p class="sr-only" aria-live="polite" id="d-live"></p>
@@ -89,7 +89,7 @@ function paint(root, out, r, s, live, err) {
     return `<section class="card span-12 notice">
       <div class="notice-head"><h2>${esc(wardName(n.ward_id))}</h2><span class="city">${esc(cityName(n.city))} · #${num0(n.priority_rank)}</span>
         ${tierHTML(n.risk_tier)}${n.critical ? critBadge(t("alloc.critical")) : ""}</div>
-      <div class="facts">
+      <div class="nfacts">
         <span>${esc(t("disp.forecast"))} <b>${esc(t("warn.cases", { n: num1(n.predicted_cases) }))}</b> (${num1(n.range_low)}–${num1(n.range_high)})</span>
         ${sup}
         <span>${esc(t("alloc.col_crews"))} <b>${num0(n.crews_assigned)}</b></span>

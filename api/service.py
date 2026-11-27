@@ -484,3 +484,205 @@ def efficiency() -> dict:
                      "model_results_needed": _ranking_df.cache_info().hits + _ranking_df.cache_info().misses,
                      "by_endpoint": per}}
 
+
+
+# ================================================================ Phase 2 (operations)
+# Allocation, overflow routing and the vector-control simulator live in src/ (allocation.py,
+# overflow.py, intervention.py). These wrappers only check the request, call them, attach the
+# config/operations.json assumptions each one used (so the UI can show them), and convert the
+# result to plain JSON (numpy/pandas -> Python, floats rounded to 2 decimals).
+def _plain(x):
+    """numpy/pandas/date values -> plain JSON types, floats rounded to 2 decimals, NaN -> None."""
+    if isinstance(x, dict):
+        return {str(k): _plain(v) for k, v in x.items()}
+    if isinstance(x, (list, tuple, np.ndarray, pd.Series)):
+        return [_plain(v) for v in (x.tolist() if isinstance(x, (np.ndarray, pd.Series)) else x)]
+    if isinstance(x, (bool, np.bool_)):
+        return bool(x)
+    if isinstance(x, (int, np.integer)):
+        return int(x)
+    if isinstance(x, (float, np.floating)):
+        return None if not math.isfinite(float(x)) else round(float(x), 2)
+    if isinstance(x, (pd.Timestamp,)) or hasattr(x, "isoformat"):
+        return _date(x)
+    return x
+
+
+def _records(df: pd.DataFrame) -> list[dict]:
+    return [_plain(r) for r in df.to_dict(orient="records")]
+
+
+# which config/operations.json entries each route uses: {section: [keys]}
+_ASSUMPTIONS_USED = {
+    "allocate": {"demand": ["basis", "rounding"],
+                 "stock": ["full_stock_basis", "full_stock_units", "stock_pct_range"],
+                 "priority": ["tier_weight", "tie_break", "fill_rule"],
+                 "crews": ["total_default", "max_per_ward", "min_predicted_cases", "assignment_rule"]},
+    "overflow": {"demand": ["basis", "rounding"],
+                 "bed_capacity": ["rule", "beds_available_pct"],
+                 "overflow": ["same_city_only", "sender_order", "receiver_order"]},
+    "intervention": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction"],
+                     "crews": ["total_default", "max_per_ward"],
+                     "demand": ["rounding"]},
+    "intervention_roi": {"crew_effect": ["model_input", "reduction_per_crew", "max_total_reduction"],
+                         "crews": ["max_per_ward"]},
+}
+
+
+def _ops_config() -> dict:
+    from src.allocation import load_config
+    return load_config()
+
+
+def assumptions(route: str) -> dict:
+    """The config/operations.json entries (value, unit, kind, why) a Phase 2 route relies on."""
+    cfg = _ops_config()
+    return {section: {k: _plain(cfg[section][k]) for k in keys} for section, keys in _ASSUMPTIONS_USED[route].items()}
+
+
+def _check_fields(body, allowed: tuple, example: str) -> dict:
+    if not isinstance(body, dict):
+        raise ValueError(f"Send a JSON body, e.g. {example}.")
+    unknown = sorted(set(body) - set(allowed))
+    if unknown:                                   # typos must not be silently ignored
+        raise ValueError(f"Unknown field(s): {', '.join(unknown)}. Allowed: {', '.join(allowed)}.")
+    return body
+
+
+def _check_city(city) -> str | None:
+    if city in (None, ""):
+        return None
+    if city not in {c["city"] for c in meta()["cities"]}:
+        raise ValueError(f"Unknown city: {city}")
+    return city
+
+
+def _check_basis(basis) -> str | None:
+    if basis in (None, ""):
+        return None
+    allowed = _ops_config()["demand"]["basis"]["allowed"]
+    if basis not in allowed:
+        raise ValueError(f"demand_basis must be one of: {', '.join(allowed)}.")
+    return basis
+
+
+def parse_whole(value, name: str, default=None):
+    """Whole number from JSON (int) or a query string (digits); None/"" -> default."""
+    if value is None or value == "":
+        return default
+    if isinstance(value, str) and value.strip().isdigit():
+        return int(value)
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"{name} must be a whole number.")
+    return value
+
+
+def parse_number(value, name: str, default=None):
+    """Finite number from JSON or a query string; None/"" -> default."""
+    if value is None or value == "":
+        return default
+    if isinstance(value, str):
+        try:
+            value = float(value)
+        except ValueError:
+            raise ValueError(f"{name} must be a number.") from None
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        raise ValueError(f"{name} must be a number.")
+    return value
+
+
+# ---------------------------------------------------------------- POST /api/allocate
+ALLOCATE_KEYS = ("as_of", "horizon", "stock_pct", "crews", "demand_basis", "city")
+
+
+@lru_cache(maxsize=256)    # key = every input; city filtering happens after, on the cached plan
+def _allocation(as_of: str, horizon: int, stock_pct: float, crews: int | None, basis: str | None) -> dict:
+    from src.allocation import plan, totals
+    wards = plan(features(), as_of, horizon, stock_pct, crews, basis)
+    return {"rows": _records(wards), "totals": _plain(totals(wards, stock_pct, crews))}
+
+
+def allocate(body) -> dict:
+    """Supplies and crews per ward under a stock level. `city` filters the rows; totals stay region-wide."""
+    body = _check_fields(body, ALLOCATE_KEYS, '{"as_of": "2025-07-14", "horizon": 3, "stock_pct": 60}')
+    as_of = parse_as_of(body.get("as_of") or meta()["as_of"]["default"])
+    horizon = parse_horizon(body.get("horizon", 3))
+    if body.get("stock_pct") is None:
+        raise ValueError("stock_pct is required: the share of full stock available, from 30 to 100 (percent).")
+    stock_pct = parse_number(body["stock_pct"], "stock_pct")
+    crews = parse_whole(body.get("crews"), "crews")
+    basis = _check_basis(body.get("demand_basis"))
+    city = _check_city(body.get("city"))
+    res = _allocation(as_of, horizon, float(stock_pct), crews, basis)
+    rows = [r for r in res["rows"] if city is None or r["city"] == city]
+    cfg = _ops_config()
+    return {"as_of": as_of, "horizon": horizon,
+            "forecast_week": res["rows"][0].get("forecast_week") if res["rows"] else None,
+            "stock_pct": _plain(float(stock_pct)),
+            "crews": res["totals"]["crews"]["available"],
+            "demand_basis": basis or cfg["demand"]["basis"]["value"],
+            "city": city, "totals": res["totals"], "wards": rows,
+            "assumptions": assumptions("allocate")}
+
+
+# ---------------------------------------------------------------- GET /api/overflow
+@lru_cache(maxsize=256)
+def overflow(as_of: str, horizon: int, demand_basis: str | None = None, beds_available_pct: float | None = None) -> dict:
+    """Bed overflow routed between wards of the same city. Wards and cities as lists (sorted by ID/name)."""
+    from src.overflow import overflow_plan
+    basis = _check_basis(demand_basis)
+    res = overflow_plan(features(), as_of, horizon, basis, beds_available_pct=beds_available_pct)
+    city_of = dict(zip(features()["ward_id"], features()["city"]))
+    wards = [{"ward_id": w, "city": city_of.get(w), **v} for w, v in sorted(res["wards"].items())]
+    cities = [{"city": c, **v} for c, v in sorted(res["cities"].items())]
+    return _plain({"as_of": res["as_of"], "horizon": res["horizon"], "forecast_week": res["forecast_week"],
+                   "demand_basis": res["demand_basis"], "beds_available_pct": res["beds_available_pct"],
+                   "transfers": res["transfers"], "wards": wards, "cities": cities,
+                   "assumptions": assumptions("overflow")})
+
+
+# ---------------------------------------------------------------- POST /api/intervention
+INTERVENTION_KEYS = ("as_of", "deployment", "total_crews")
+
+
+@lru_cache(maxsize=256)    # key = (week, sorted deployment, total crews)
+def _simulation(as_of: str, deployment: tuple, total_crews: int) -> dict:
+    from src.intervention import simulate
+    return _plain(simulate(features(), as_of, dict(deployment), total_crews))
+
+
+def intervention(body) -> dict:
+    """Send crews to wards ({ward_id: crews}); the Phase 1 models are re-run at 2, 3, 4 weeks.
+    total_crews defaults to the config's crews.total_default, so a plan cannot use more crews than exist."""
+    body = _check_fields(body, INTERVENTION_KEYS, '{"as_of": "2025-07-14", "deployment": {"DSCC_Ward_04": 2}}')
+    as_of = parse_as_of(body.get("as_of") or meta()["as_of"]["default"])
+    dep = body.get("deployment")
+    if not isinstance(dep, dict) or not dep:
+        raise ValueError('deployment must map ward IDs to crews, e.g. {"DSCC_Ward_04": 2}.')
+    for ward_id in dep:
+        _require_ward(ward_id)
+    from src.allocation import setting
+    total = parse_whole(body.get("total_crews"), "total_crews",
+                        default=int(setting(_ops_config(), "crews", "total_default")))
+    # values are checked by src.intervention; only hashable ones can be cached, others fail there anyway
+    if any(isinstance(v, (dict, list)) for v in dep.values()):
+        raise ValueError("Crews per ward must be whole numbers.")
+    res = dict(_simulation(as_of, tuple(sorted(dep.items())), total))
+    res["assumptions"] = assumptions("intervention")
+    return res
+
+
+# ---------------------------------------------------------------- GET /api/intervention/roi
+@lru_cache(maxsize=64)
+def intervention_roi(as_of: str, crews_per_ward: int = 1) -> dict:
+    """Every ward's cases prevented (weeks +2..+4) per crew if it got `crews_per_ward` crews, best first."""
+    from src.intervention import roi_ranking
+    rows = roi_ranking(features(), as_of, crews_per_ward)
+    return _plain({"as_of": as_of, "crews_per_ward": crews_per_ward, "wards": rows,
+                   "assumptions": assumptions("intervention_roi")})
+
+
+# live /api/efficiency counters also cover the Phase 2 answers (each miss runs the model)
+_ANSWER_CACHES.update({"allocate": "_allocation", "overflow": "overflow",
+                       "intervention": "_simulation", "intervention_roi": "intervention_roi"})
+_MODEL_CACHES = (*_MODEL_CACHES, "_allocation", "overflow", "_simulation", "intervention_roi")

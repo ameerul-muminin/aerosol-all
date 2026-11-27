@@ -14,7 +14,8 @@ TEMPLATES = {
         "title": "Dengue dispatch brief for the city commissioner",
         "ward": "{ward_id} · {city}",
         "forecast": "Week of {forecast_week}: {predicted_cases} cases (80% range {range_low}–{range_high}), {tier} risk",
-        "short_forecast": "{forecast_week} {predicted_cases} cases ({range_low}–{range_high}, 80%) {tier}",
+        "sms_forecast": "{predicted_cases} cases",
+        "sms_range": "80% {range_low}-{range_high}",
         "supply_heading": "Supplies (allocated/required)",
         "supply": "{label}: {allocated}/{required} · deficit {deficit}",
         "items": {"saline": "Saline bags", "kits": "Diagnostic kits", "beds": "Beds (stock plan)"},
@@ -24,8 +25,8 @@ TEMPLATES = {
         "from": "{patients} patients from {from_ward}",
         "alert": "CRITICAL DEFICIT",
         "ok": "No deficit",
-        "sms_supply": "S {saline_allocated}/{saline_required} K {kits_allocated}/{kits_required} B {beds_allocated}/{beds_required}",
-        "sms_routing": "crews {crews_assigned} in/out {routed_in}/{routed_out} unroutable {unroutable}",
+        "sms_supply": "Saline {saline_allocated}/{saline_required} Kits {kits_allocated}/{kits_required} Beds {beds_allocated}/{beds_required}",
+        "sms_routing": "in/out {routed_in}/{routed_out} unroutable {unroutable}",
         "intervention": "Spraying simulation (assumed effect, {crews} crews): {cases_before} → {cases_after} cases.",
         "tiers": {"Low": "Low", "Medium": "Medium", "High": "High", "Critical": "Critical"},
         "cities": {},
@@ -34,7 +35,8 @@ TEMPLATES = {
         "title": "সিটি কমিশনারের জন্য ডেঙ্গু কার্যক্রমের প্রতিবেদন",
         "ward": "{ward_id} · {city}",
         "forecast": "{forecast_week} সপ্তাহে {predicted_cases} জন (৮০% সীমা {range_low}–{range_high}), ঝুঁকি: {tier}",
-        "short_forecast": "{forecast_week}: {predicted_cases} জন ({range_low}–{range_high}, ৮০%) · ঝুঁকি {tier}",
+        "sms_forecast": "{predicted_cases} জন · ঝুঁকি {tier}",
+        "sms_range": "৮০% সীমা {range_low}–{range_high}",
         "supply_heading": "সরঞ্জাম (বরাদ্দ/প্রয়োজন)",
         "supply": "{label}: {allocated}/{required} · ঘাটতি {deficit}",
         "items": {"saline": "স্যালাইনের ব্যাগ", "kits": "পরীক্ষার কিট", "beds": "শয্যা (মজুত পরিকল্পনা)"},
@@ -45,7 +47,7 @@ TEMPLATES = {
         "alert": "জরুরি ঘাটতি",
         "ok": "কোনো ঘাটতি নেই",
         "sms_supply": "স্যালাইন {saline_allocated}/{saline_required} কিট {kits_allocated}/{kits_required} শয্যা {beds_allocated}/{beds_required}",
-        "sms_routing": "দল {crews_assigned} আসবে/যাবে {routed_in}/{routed_out} শয্যা পাবে না {unroutable} জন",
+        "sms_routing": "আসবে/যাবে {routed_in}/{routed_out} শয্যা পাবে না {unroutable} জন",
         "intervention": "স্প্রে কার্যক্রমের সিমুলেশন (অনুমিত প্রভাব, {crews} দল): রোগী {cases_before} → {cases_after} জন।",
         "tiers": {"Low": "কম", "Medium": "মাঝারি", "High": "বেশি", "Critical": "সংকটজনক"},
         "cities": {
@@ -55,7 +57,6 @@ TEMPLATES = {
     },
     "format": {
         "sms_join": " | ",
-        "ellipsis": "…",
         "bold": "*{}*",
         "section": '<section class="{status}"><h2>{heading}</h2><p><strong>{alert}</strong></p>{details}</section>',
         "paragraph": "<p>{}</p>",
@@ -85,6 +86,37 @@ p {{ margin: .15rem 0; }}
 """,
     },
 }
+
+# GSM 03.38 default and extension alphabets. An extension consumes two septets.
+_GSM_BASIC = frozenset(
+    "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ"
+    " !\"#¤%&'()*+,-./0123456789:;<=>?¡"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà"
+)
+_GSM_EXTENDED = frozenset("\f^{}\\[~]|€")
+_SMS_ASCII = str.maketrans({"·": "|", "–": "-", "—": "-", "→": "->"})
+
+
+def sms_segments(text: str) -> int:
+    """Count SMS parts, including GSM escapes and UTF-16 surrogate pairs."""
+    if not text:
+        return 0
+    if all(char in _GSM_BASIC or char in _GSM_EXTENDED for char in text):
+        widths = [2 if char in _GSM_EXTENDED else 1 for char in text]
+        single, split = 160, 153
+    else:
+        widths = [2 if ord(char) > 0xFFFF else 1 for char in text]
+        single, split = 70, 67
+    if sum(widths) <= single:
+        return 1
+
+    parts, used = 1, 0
+    for width in widths:
+        if used + width > split:
+            parts += 1
+            used = 0
+        used += width
+    return parts
 
 
 def build_notices(feat_df, as_of_date, horizon, stock_pct, crews, beds_available_pct=100,
@@ -183,23 +215,43 @@ def _details(notice, template, values):
 
 
 def sms(notice):
-    """Render plain text, preserving the critical deficit alert when shortened."""
+    """Keep the core notice intact and include additional details as space permits."""
     template, values = _wording(notice)
     parts = [
         template["alert"] if notice["critical"] else template["ok"],
-        template["ward"].format(**values),
-        template["short_forecast"].format(**values),
+        notice["ward_id"],
+        template["sms_forecast"].format(**values),
+        template["crews"].format(**values),
         template["sms_supply"].format(**values),
+    ]
+    extras = [
         template["sms_routing"].format(**values, routed_in=notice["overflow"]["routed_in"],
                                        routed_out=notice["overflow"]["routed_out"]),
+        values["forecast_week"],
+        values["city"],
+        template["sms_range"].format(**values),
     ]
+    if notice["lang"] == "en":
+        extras.append(values["tier"])
     if notice["intervention"] is not None:
-        parts.append(template["intervention"].format(**notice["intervention"]))
-    fmt = TEMPLATES["format"]
-    message = fmt["sms_join"].join(parts)
-    if notice["lang"] == "en" and len(message) > 160:
-        suffix = fmt["ellipsis"]
-        return message[:160 - len(suffix)].rstrip() + suffix
+        extras.append(template["intervention"].format(**notice["intervention"]))
+
+    english = notice["lang"] == "en"
+    if english:
+        # The SMS shares dynamic fields with the richer renderers.
+        parts, extras = [
+            ["".join(char for char in part.translate(_SMS_ASCII)
+                     if char.isascii() and (char in _GSM_BASIC or char in _GSM_EXTENDED))
+             for part in fields]
+            for fields in (parts, extras)
+        ]
+    limit = 1 if english else 3
+    separator = TEMPLATES["format"]["sms_join"]
+    message = separator.join(parts)
+    for extra in filter(None, extras):
+        candidate = separator.join((message, extra))
+        if sms_segments(candidate) <= limit:
+            message = candidate
     return message
 
 

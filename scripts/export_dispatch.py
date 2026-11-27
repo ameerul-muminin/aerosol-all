@@ -6,7 +6,7 @@ import shlex
 import sys
 from pathlib import Path
 
-from src.dispatch import brief_html, build_notices, sms, whatsapp
+from src.dispatch import brief_html, build_notices, sms, sms_segments, whatsapp
 from src.predict import build_features
 
 EXPORTS = Path(__file__).resolve().parent.parent / "exports"
@@ -39,11 +39,17 @@ def main(argv=None):
     en_name = f"brief_{stamp}_en.html"
     bn_name = f"brief_{stamp}_bn.html"
     command = shlex.join(["python", "-m", "scripts.export_dispatch", *argv])
+    english_sms = list(map(sms, english))
+    bangla_sms = list(map(sms, bangla))
+    en_max = max(map(sms_segments, english_sms))
+    bn_max = max(map(sms_segments, bangla_sms))
     readme = f"""# Dispatch exports
 
 - `{sms_name}` contains English and Bangla SMS notices in separate language blocks.
 - `{whatsapp_name}` contains English and Bangla multiline WhatsApp notices in separate language blocks.
 - `{en_name}` and `{bn_name}` are the English and Bangla printable briefs, with critical wards first.
+
+Maximum SMS segments per notice: English **{en_max}**, Bangla **{bn_max}**.
 
 The date in each filename is the as-of date. Run from the repository root to reproduce these files.
 
@@ -52,7 +58,7 @@ The date in each filename is the as-of date. Run from the repository root to rep
 ```
 """
     files = {
-        sms_name: "\n\n\n".join("\n\n".join(map(sms, group)) for group in (english, bangla)) + "\n",
+        sms_name: "\n\n\n".join("\n\n".join(group) for group in (english_sms, bangla_sms)) + "\n",
         whatsapp_name: "\n\n\n".join("\n\n".join(map(whatsapp, group)) for group in (english, bangla)) + "\n",
         en_name: brief_html(english),
         bn_name: brief_html(bangla),

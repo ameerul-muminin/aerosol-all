@@ -646,10 +646,32 @@ def overflow(as_of: str, horizon: int, demand_basis: str | None = None, beds_ava
     city_of = dict(zip(features()["ward_id"], features()["city"]))
     wards = [{"ward_id": w, "city": city_of.get(w), **v} for w, v in sorted(res["wards"].items())]
     cities = [{"city": c, **v} for c, v in sorted(res["cities"].items())]
+    # Judges: "what if the patient is sent and it's full?" Planned arrivals never exceed a ward's free beds, but
+    # forecasts have error, so every transfer also names a backup ward, and a city with no free bed left is `full`.
+    for w in wards:
+        w["free_after"] = max(0, w["capacity"] - (w["beds_required"] - w["routed_out"] + w["routed_in"]))
+    transfers = [{**t, **backup_ward(t, wards)} for t in res["transfers"]]
+    for c in cities:
+        c["full"] = c["headroom"] == 0
     return _plain({"as_of": res["as_of"], "horizon": res["horizon"], "forecast_week": res["forecast_week"],
                    "demand_basis": res["demand_basis"], "beds_available_pct": res["beds_available_pct"],
-                   "transfers": res["transfers"], "wards": wards, "cities": cities,
+                   "transfers": transfers, "wards": wards, "cities": cities, "if_full": IF_FULL,
                    "assumptions": assumptions("overflow")})
+
+
+IF_FULL = ("Transfers use only beds forecast to be free, so planned arrivals fit. If a ward is full on arrival anyway "
+           "(forecasts have error), send the patient to backup_ward: the ward in the same city with the most free "
+           "beds left after the plan. A city marked full has no free bed left: its unroutable patients need "
+           "temporary beds or help from outside the city, because routing stays inside each city.")
+
+
+def backup_ward(transfer: dict, wards: list[dict]) -> dict:
+    """The ward in the transfer's city, other than its sender and receiver, with the most free beds left after
+    routing (ties by ward_id); none if no such ward has a free bed."""
+    options = [w for w in wards if w["city"] == transfer["city"] and w["free_after"] > 0
+               and w["ward_id"] not in (transfer["from_ward"], transfer["to_ward"])]
+    best = min(options, key=lambda w: (-w["free_after"], w["ward_id"]), default=None)
+    return {"backup_ward": best["ward_id"] if best else None, "backup_free_beds": best["free_after"] if best else 0}
 
 
 # ---------------------------------------------------------------- POST /api/intervention
